@@ -2274,7 +2274,7 @@ export type ParamField<N> =
       display?: 'select' | 'segmented'
       visibleIf?: (n: N) => boolean
     }
-  | { key: keyof N; kind: 'vec3'; visibleIf?: (n: N) => boolean }
+  | { key: keyof N; kind: 'vec3'; unit?: 'm' | 'deg' | 'rad'; axisLabels?: [string, string, string]; visibleIf?: (n: N) => boolean }
   | { key: keyof N; kind: 'color'; visibleIf?: (n: N) => boolean }
   | { key: keyof N; kind: 'material'; visibleIf?: (n: N) => boolean }
   | { key: keyof N; kind: 'ref'; refKind: string; visibleIf?: (n: N) => boolean }

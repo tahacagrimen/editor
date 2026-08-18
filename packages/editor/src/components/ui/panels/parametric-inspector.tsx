@@ -412,33 +412,37 @@ function FieldRenderer({ field, nodeId, onUpdate }: FieldRendererProps) {
       const v = Array.isArray(value) && value.length >= 3
         ? (value as [number, number, number])
         : [0, 0, 0]
+      const unit = field.unit ?? 'm'
+      const isDeg = unit === 'deg'
+      const step = isDeg ? 1 : 0.05
+      const precision = isDeg ? 0 : 2
+      const boundWindow = isDeg ? 180 : 5
+      
       const axes: Array<{ label: string; index: 0 | 1 | 2 }> = [
-        { label: 'X', index: 0 },
-        { label: 'Y', index: 1 },
-        { label: 'Z', index: 2 },
+        { label: field.axisLabels?.[0] ?? 'X', index: 0 },
+        { label: field.axisLabels?.[1] ?? 'Y', index: 1 },
+        { label: field.axisLabels?.[2] ?? 'Z', index: 2 },
       ]
       return (
         <>
           {axes.map(({ label, index }) => {
-            // v is a [number, number, number] tuple; the explicit local
-            // resolves TS's noUncheckedIndexedAccess concern that v[index]
-            // could be undefined.
             const axisValue = v[index] ?? 0
+            const displayValue = isDeg ? axisValue * (180 / Math.PI) : axisValue
             return (
               <SliderControl
                 key={`${key}-${label}`}
                 label={label}
-                max={axisValue + 5}
-                min={axisValue - 5}
+                max={displayValue + boundWindow}
+                min={displayValue - boundWindow}
                 onChange={(next) => {
                   const updated = [...v] as [number, number, number]
-                  updated[index] = next
+                  updated[index] = isDeg ? next * (Math.PI / 180) : next
                   onUpdate({ [key]: updated } as Partial<AnyNode>)
                 }}
-                precision={2}
-                step={0.05}
-                unit="m"
-                value={Math.round(axisValue * 100) / 100}
+                precision={precision}
+                step={step}
+                unit={isDeg ? '°' : unit}
+                value={isDeg ? Math.round(displayValue) : Math.round(displayValue * 100) / 100}
               />
             )
           })}

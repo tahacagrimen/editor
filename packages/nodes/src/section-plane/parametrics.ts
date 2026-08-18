@@ -11,12 +11,11 @@ export const sectionPlaneParametrics: ParametricDescriptor<SectionPlaneNode> = {
       ],
     },
     {
-      // Position only. `rotation` is deliberately absent: the generic `vec3`
-      // field hardcodes a metre unit, so an euler would render as "0.00m".
-      // Rotating is done with the in-scene rotate gizmo until that field grows
-      // a unit override.
-      label: 'Position',
-      fields: [{ key: 'position', kind: 'vec3' }],
+      label: 'Transform',
+      fields: [
+        { key: 'position', kind: 'vec3', axisLabels: ['X', 'Y', 'Z'] },
+        { key: 'rotation', kind: 'vec3', unit: 'deg', axisLabels: ['Rot X', 'Rot Y', 'Rot Z'] },
+      ],
     },
     {
       label: 'Display',

@@ -104,7 +104,7 @@ export const pipeFittingParametrics: ParametricDescriptor<PipeFittingNode> = {
       label: 'Placement',
       fields: [
         { key: 'position', kind: 'vec3' },
-        { key: 'rotation', kind: 'vec3' },
+        { key: 'rotation', kind: 'vec3', unit: 'deg', axisLabels: ['Rot X', 'Rot Y', 'Rot Z'] },
       ],
     },
   ],
