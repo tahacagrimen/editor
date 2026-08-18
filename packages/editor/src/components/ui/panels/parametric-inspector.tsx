@@ -18,6 +18,7 @@ import { resolveMoveActionNode } from '../../../lib/direct-manipulation'
 import { sfxEmitter } from '../../../lib/sfx-bus'
 import { collectZoneContentIds } from '../../../lib/zone-content'
 import useEditor from '../../../store/use-editor'
+import useInteractionScope from '../../../store/use-interaction-scope'
 import { ActionButton, ActionGroup } from '../controls/action-button'
 import { PanelSection } from '../controls/panel-section'
 import { SegmentedControl } from '../controls/segmented-control'
@@ -180,6 +181,20 @@ export function ParametricInspector({
           <ActionGroup className={isZone ? 'flex-col' : undefined}>
             {canMove && (
               <ActionButton icon={<Move className="h-4 w-4" />} label="Move" onClick={handleMove} />
+            )}
+            {canMove && (
+              <ActionButton
+                icon={<Icon icon="lucide:refresh-cw" className="h-4 w-4" />}
+                label="Polar Array"
+                onClick={() => useInteractionScope.getState().begin({ kind: 'polar-array', nodeIds: [selectedId] })}
+              />
+            )}
+            {canMove && (
+              <ActionButton
+                icon={<Icon icon="lucide:spline" className="h-4 w-4" />}
+                label="Path Array"
+                onClick={() => useInteractionScope.getState().begin({ kind: 'path-array', nodeIds: [selectedId] })}
+              />
             )}
             {parametrics.actions?.map((action, i) => (
               <ParamActionButton action={action} key={`paramaction-${i}`} nodeId={selectedId} />

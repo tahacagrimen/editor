@@ -739,7 +739,9 @@ export const useKeyboard = ({
       const drafting = isDimensionEntryArmed()
       // After a move lands, `*n` / `/n` array it. That window has no drafting
       // gesture, so it arms the buffer on its own.
-      const arrayArmed = isArrayCommandArmed()
+      const activeScope = useInteractionScope.getState().scope
+      const isArrayScope = activeScope.kind === 'polar-array' || activeScope.kind === 'path-array'
+      const arrayArmed = isArrayCommandArmed() || isArrayScope
       if (!(typing || drafting || arrayArmed)) return
 
       // Consuming a key means no other listener — tool-local or otherwise — may
@@ -768,7 +770,7 @@ export const useKeyboard = ({
         // `*12` is a complete instruction on its own, not a dimension for a
         // gesture in flight, so it runs here instead of reaching `tool:commit`.
         const arrayCommand = parseArrayCommand(input.buffer)
-        if (arrayCommand) {
+        if (arrayCommand && !isArrayScope) {
           input.clear()
           runArrayCommand(arrayCommand)
           return

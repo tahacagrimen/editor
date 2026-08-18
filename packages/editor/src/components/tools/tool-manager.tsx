@@ -38,6 +38,8 @@ import { TerrainSculptTool } from './site/terrain-sculpt-tool'
 import { StairTool } from './stair/stair-tool'
 import { ZoneBoundaryEditor } from './zone/zone-boundary-editor'
 import { ZoneTool } from './zone/zone-tool'
+import { PolarArrayTool } from './array/polar-array-tool'
+import { PathArrayTool } from './array/path-array-tool'
 
 // Cache lazy tool components keyed by their loader so React.lazy isn't
 // re-invoked across renders.
@@ -268,6 +270,8 @@ export const ToolManager: React.FC = () => {
           it places no node — so it gets its own gate here. World-space, because
           the ground is not building-local. */}
       {sculpting && <TerrainSculptTool />}
+      <PolarArrayTool />
+      <PathArrayTool />
       {showMover && movingNode?.type === 'building' && (
         <MoveTool onNodeMoved={handlePlacedNodeSelected} onSpawnMoved={handlePlacedNodeSelected} />
       )}

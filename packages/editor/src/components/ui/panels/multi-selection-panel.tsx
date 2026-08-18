@@ -2,8 +2,10 @@
 
 import { type AnyNodeId, useScene } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
+import { Icon as IconifyIcon } from '@iconify/react'
 import { Copy, Group, Trash2, Ungroup } from 'lucide-react'
 import { useMemo } from 'react'
+import useInteractionScope from '../../../store/use-interaction-scope'
 import { deleteSelection, duplicateSelectionAndPickUp } from '../../editor/group-actions'
 import {
   canCreateSessionGroup,
@@ -84,6 +86,16 @@ export function MultiSelectionPanel({ footer }: { footer?: React.ReactNode }) {
             icon={<Copy className="h-4 w-4" />}
             label="Duplicate"
             onClick={() => duplicateSelectionAndPickUp()}
+          />
+          <ActionButton
+            icon={<IconifyIcon icon="lucide:refresh-cw" className="h-4 w-4" />}
+            label="Polar Array"
+            onClick={() => useInteractionScope.getState().begin({ kind: 'polar-array', nodeIds: selectedIds as AnyNodeId[] })}
+          />
+          <ActionButton
+            icon={<IconifyIcon icon="lucide:spline" className="h-4 w-4" />}
+            label="Path Array"
+            onClick={() => useInteractionScope.getState().begin({ kind: 'path-array', nodeIds: selectedIds as AnyNodeId[] })}
           />
           <ActionButton
             className="border-red-500/40 text-red-700 dark:text-red-200 hover:bg-red-500/15"

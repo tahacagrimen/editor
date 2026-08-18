@@ -11,9 +11,9 @@ import type { AnyNode, AnyNodeId } from '@pascal-app/core'
 
 export type ArrayCommand =
   /** `*n` — repeat the last translation n more times. */
-  | { kind: 'repeat'; count: number }
+  | { kind: 'repeat'; count: number; value?: number }
   /** `/n` — divide the last translation into n equal steps and fill them in. */
-  | { kind: 'divide'; count: number }
+  | { kind: 'divide'; count: number; value?: number }
 
 export type Vector3 = readonly [number, number, number]
 
@@ -49,22 +49,26 @@ export function parseArrayCommand(buffer: string): ArrayCommand | null {
   const trimmed = buffer.trim()
   if (!trimmed) return null
 
-  const match = /^(?:([*/])\s*(\d+)|(\d+)\s*([*/]))$/.exec(trimmed)
+  const match = /^(?:([*/])\s*(\d+)|(\d+)\s*([*/]))(?:\s+([\d.]+))?$/.exec(trimmed)
   if (!match) return null
 
   const operator = match[1] ?? match[4]
   const digits = match[2] ?? match[3]
+  const valueStr = match[5]
   if (!(operator && digits)) return null
 
   const count = Number.parseInt(digits, 10)
   if (!Number.isSafeInteger(count) || count < 1 || count > MAX_ARRAY_COUNT) return null
+  
+  const value = valueStr ? Number.parseFloat(valueStr) : undefined
+  if (valueStr && (!Number.isFinite(value) || value! <= 0)) return null
 
-  return operator === '*' ? { kind: 'repeat', count } : { kind: 'divide', count }
+  return operator === '*' ? { kind: 'repeat', count, value } : { kind: 'divide', count, value }
 }
 
 /** True when the buffer looks like the start of an array command. */
 export function isArrayCommandPrefix(buffer: string): boolean {
-  return /^(?:[*/]\s*\d*|\d+\s*[*/]?)$/.test(buffer.trim()) && /[*/]/.test(buffer)
+  return /^(?:[*/]\s*\d*|\d+\s*[*/]?)(?:\s+[\d.]*)?$/.test(buffer.trim()) && /[*/]/.test(buffer)
 }
 
 /**

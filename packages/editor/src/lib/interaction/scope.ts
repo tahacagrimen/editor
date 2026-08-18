@@ -75,6 +75,10 @@ export type InteractionScope =
   // (`resolveOverlayPolicy`). A brush that only claimed the scope between
   // pointer-down and -up would flicker all of that back on between dabs.
   | { kind: 'sculpting' }
+  // Polar Array (Radial Array) interaction.
+  | { kind: 'polar-array'; nodeIds: AnyNodeId[]; center?: [number, number, number] }
+  // Path Array (Distribute along path) interaction.
+  | { kind: 'path-array'; nodeIds: AnyNodeId[] }
 
 export type InteractionKind = InteractionScope['kind']
 
