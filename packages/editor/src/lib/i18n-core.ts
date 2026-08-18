@@ -6,6 +6,7 @@ const tr: Record<string, string> = {
   About: 'Hakkında',
   Access: 'Erişim',
   Actions: 'Eylemler',
+  Activity: 'Etkinlik',
   Add: 'Ekle',
   'Add collection': 'Koleksiyon ekle',
   'Add level': 'Kat ekle',

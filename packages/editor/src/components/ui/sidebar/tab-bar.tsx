@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { editorHostPanelRegistry } from '../../../lib/plugin-panels'
 import { triggerSFX } from './../../../lib/sfx-bus'
 import { cn } from './../../../lib/utils'
@@ -13,6 +13,11 @@ export type SidebarTab = {
   mobileIcon?: ReactNode
   /** Desktop icon shown in the vertical rail (v2 layout). */
   icon?: ReactNode
+  /**
+   * Rail section label. Tabs sharing a `group` render as one cluster; a thin
+   * rule separates one cluster from the next. Unset tabs render ungrouped.
+   */
+  group?: string
 }
 
 interface TabBarProps {
@@ -76,6 +81,16 @@ export function IconRail({ tabs, activeTab, collapsed, onIconClick }: IconRailPr
   const settingsTabs = defaultTabs.filter((tab) => tab.id === 'settings')
   const mainTabs = defaultTabs.filter((tab) => tab.id !== 'settings')
 
+  // Run the main tabs into consecutive runs that share a `group`, so the model /
+  // create / analyze / collaborate clusters are separated by a thin rule.
+  const mainGroups: { key: string; tabs: SidebarTab[] }[] = []
+  for (const tab of mainTabs) {
+    const key = tab.group ?? ''
+    const last = mainGroups[mainGroups.length - 1]
+    if (last && last.key === key) last.tabs.push(tab)
+    else mainGroups.push({ key, tabs: [tab] })
+  }
+
   const renderTab = (tab: SidebarTab) => {
     const showActive = activeTab === tab.id && !collapsed
     return (
@@ -106,7 +121,14 @@ export function IconRail({ tabs, activeTab, collapsed, onIconClick }: IconRailPr
   return (
     <TooltipProvider delayDuration={0} disableHoverableContent>
       <div className="flex h-full w-14 shrink-0 flex-col items-center border-border border-r-2">
-        {mainTabs.map(renderTab)}
+        {mainGroups.map((group, index) => (
+          <Fragment key={group.key || `group-${index}`}>
+            {index > 0 && (
+              <div aria-hidden="true" className="my-1.5 h-px w-8 shrink-0 bg-border/50" />
+            )}
+            {group.tabs.map(renderTab)}
+          </Fragment>
+        ))}
         {pluginTabs.length > 0 && (
           <div className="flex w-14 flex-col items-center border-border border-t-2">
             {pluginTabs.map(renderTab)}

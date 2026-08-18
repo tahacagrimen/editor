@@ -1440,14 +1440,6 @@ function EditorInner({
     const tabMap = new Map<string, SidebarTab & { component: React.ComponentType }>(
       sidebarTabs?.map((t) => [t.id, t]) ?? [],
     )
-    if (!tabMap.has('components')) {
-      tabMap.set('components', {
-        id: 'components',
-        label: translate('Components', locale),
-        icon: <Icon height={22} icon="lucide:boxes" width={22} />,
-        component: ComponentsPanel,
-      })
-    }
     for (const p of hostRailPanels) {
       if (!tabMap.has(p.id)) {
         tabMap.set(p.id, {
@@ -1470,6 +1462,9 @@ function EditorInner({
       if (tabId === 'activity') {
         return <ActivityPanel />
       }
+      if (tabId === 'components') {
+        return <ComponentsPanel />
+      }
       if (tabId === 'settings') {
         return <SettingsPanel {...settingsPanelProps} />
       }
@@ -1481,12 +1476,13 @@ function EditorInner({
     }
 
     const explicitTabs =
-      sidebarTabs?.map(({ id, label, mobileDefaultSnap, mobileIcon, icon }) => ({
+      sidebarTabs?.map(({ id, label, mobileDefaultSnap, mobileIcon, icon, group }) => ({
         id,
         label: translate(label, locale),
         mobileDefaultSnap,
         mobileIcon,
         icon,
+        group,
       })) ?? []
     const settingsTab = explicitTabs.find((tab) => tab.id === 'settings') ?? {
       id: 'settings',
@@ -1497,17 +1493,6 @@ function EditorInner({
     }
     const tabBarTabs = [
       ...explicitTabs.filter((tab) => tab.id !== 'settings'),
-      ...(!sidebarTabs?.some((tab) => tab.id === 'components')
-        ? [
-            {
-              id: 'components',
-              label: translate('Components', locale),
-              mobileDefaultSnap: 0.5,
-              mobileIcon: <Icon height={20} icon="lucide:boxes" width={20} />,
-              icon: <Icon height={22} icon="lucide:boxes" width={22} />,
-            },
-          ]
-        : []),
       // Host panels appear after the explicit tabs in the rail. The icon
       // doubles as the mobile icon; a half-height sheet is a sensible default.
       ...hostRailPanels.map((p) => ({

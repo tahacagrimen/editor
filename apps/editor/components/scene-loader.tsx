@@ -5,16 +5,11 @@
 // import here.
 import {
   Editor,
-  QuantitiesPanel,
   receiveAgentSceneChange,
   type SceneGraph,
-  type SidebarTab,
-  SunStudyPanel,
   useAgentActivity,
   useTranslation,
 } from '@pascal-app/editor'
-import { Hammer, Layers, Sigma, Sun } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -27,7 +22,7 @@ import {
 } from '@/lib/scene-signature'
 import { cn } from '@/lib/utils'
 import { TopBarAuth } from './auth/top-bar-auth'
-import { BuildTab } from './build-tab'
+import { EDITOR_SIDEBAR_TABS } from './editor-sidebar-tabs'
 import { EditorTopBar, TOP_BAR_ACTION } from './editor-top-bar'
 import { ShareLinkButton } from './share-link-button'
 import { useAgentPrompts } from './use-agent-prompts'
@@ -46,57 +41,6 @@ export interface SceneMeta {
   sizeBytes: number
   nodeCount: number
 }
-
-const SIDEBAR_TABS: (SidebarTab & { component: React.ComponentType })[] = [
-  {
-    id: 'site',
-    label: 'Scene',
-    component: () => null, // Built-in SitePanel handles this
-    mobileDefaultSnap: 0.5,
-    mobileIcon: <Layers className="h-5 w-5" />,
-    icon: (
-      <Image
-        alt=""
-        className="h-8 w-8 object-contain"
-        height={32}
-        src="/icons/scene.webp"
-        width={32}
-      />
-    ),
-  },
-  {
-    id: 'build',
-    label: 'Build',
-    component: BuildTab,
-    mobileDefaultSnap: 0.5,
-    mobileIcon: <Hammer className="h-5 w-5" />,
-    icon: (
-      <Image
-        alt=""
-        className="h-8 w-8 object-contain"
-        height={32}
-        src="/icons/build.webp"
-        width={32}
-      />
-    ),
-  },
-  {
-    id: 'sun',
-    label: 'Sun',
-    component: SunStudyPanel,
-    mobileDefaultSnap: 0.5,
-    mobileIcon: <Sun className="h-5 w-5" />,
-    icon: <Sun className="h-5 w-5" />,
-  },
-  {
-    id: 'quantities',
-    label: 'Quantities',
-    component: QuantitiesPanel,
-    mobileDefaultSnap: 0.5,
-    mobileIcon: <Sigma className="h-5 w-5" />,
-    icon: <Sigma className="h-5 w-5" />,
-  },
-]
 
 interface SceneLoaderProps {
   initialScene: SceneGraph
@@ -391,7 +335,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
         onSave={handleSave}
         onThumbnailCapture={handleThumb}
         projectId={meta.projectId ?? 'default'}
-        sidebarTabs={SIDEBAR_TABS}
+        sidebarTabs={EDITOR_SIDEBAR_TABS}
         viewerToolbarLeft={<CommunityViewerToolbarLeft />}
         viewerToolbarRight={<CommunityViewerToolbarRight />}
       />
