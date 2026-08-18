@@ -2,8 +2,8 @@ import { Agentation } from 'agentation'
 import { GeistPixelSquare } from 'geist/font/pixel'
 import { DM_Sans } from 'next/font/google'
 import localFont from 'next/font/local'
-import { ClientBootstrap } from './client-bootstrap'
 import { CookieConsent } from '@/components/cookie-consent'
+import { ClientBootstrap } from './client-bootstrap'
 import './globals.css'
 
 const geistSans = localFont({

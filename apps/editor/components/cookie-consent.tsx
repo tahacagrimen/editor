@@ -31,7 +31,9 @@ export function CookieConsent() {
         <div>
           <h3 className="font-semibold text-sm">{t('We value your privacy')}</h3>
           <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
-            {t('We use cookies to enhance your browsing experience and analyze our traffic. By clicking "Accept", you consent to our use of cookies.')}{' '}
+            {t(
+              'We use cookies to enhance your browsing experience and analyze our traffic. By clicking "Accept", you consent to our use of cookies.',
+            )}{' '}
             <Link href="/privacy" className="underline hover:text-foreground">
               {t('Learn more')}
             </Link>

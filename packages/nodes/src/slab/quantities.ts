@@ -1,8 +1,8 @@
 import {
+  getMaterialLabel,
   type QuantitiesContribution,
   type QuantityRow,
   type SlabNode,
-  getMaterialLabel,
 } from '@pascal-app/core'
 import { planPolygonNetArea, planPolygonPerimeter } from '../shared/plan-polygon-area'
 
@@ -19,7 +19,7 @@ export const slabQuantities: QuantitiesContribution<SlabNode> = (slabs, ctx) => 
   for (const slab of slabs) {
     const area = planPolygonNetArea(slab.polygon, slab.holes)
     if (!Number.isFinite(area) || area <= 0) continue
-    
+
     const surfaceRef = slab.slots?.['surface'] ?? slab.materialPreset
 
     rows.push({

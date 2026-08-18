@@ -28,6 +28,7 @@ import { installTextureNodeNullGuard } from '../../lib/texture-node-guard'
 import useViewer, { type RenderContext } from '../../store/use-viewer'
 import { FloorElevationSystem } from '../../systems/floor-elevation/floor-elevation-system'
 import { GeometrySystem } from '../../systems/geometry/geometry-system'
+import { SolarAnalysisSystem } from '../../systems/solar-analysis-system'
 import { ErrorBoundary } from '../error-boundary'
 import { SceneRenderer } from '../renderers/scene-renderer'
 import FrameLimiter from './frame-limiter'
@@ -597,6 +598,7 @@ const Viewer = forwardRef<ViewerHandle, ViewerProps>(function Viewer(
             kind's `def.system` is loaded via lazy() and rendered here,
             ordered by `system.priority`. */}
         <RegisteredSystems />
+        <SolarAnalysisSystem />
         <GhostedMode />
         <PostProcessing disablePostFx={disablePostFx} hoverStyles={hoverStyles} />
         {selectionManager === 'default' && <SelectionManager />}

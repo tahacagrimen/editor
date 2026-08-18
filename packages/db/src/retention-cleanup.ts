@@ -1,11 +1,11 @@
-import { and, eq, lt, inArray, isNotNull } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, lt } from 'drizzle-orm'
 import { getDatabase } from './client'
-import { users, scenes, sceneVersions, sceneEvents, agentRequests } from './schema'
+import { agentRequests, sceneEvents, scenes, users } from './schema'
 
 async function run() {
   const db = getDatabase()
   const now = new Date()
-  
+
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
@@ -21,7 +21,7 @@ async function run() {
   if (oldAnonUsers.length > 0) {
     const anonUserIds = oldAnonUsers.map((u) => u.id)
     console.log(`Deleting ${anonUserIds.length} expired anonymous users...`)
-    
+
     // Delete scenes owned by anonymous users
     await db.delete(scenes).where(inArray(scenes.ownerId, anonUserIds))
     // Delete users
@@ -36,8 +36,10 @@ async function run() {
 
   if (softDeletedUsers.length > 0) {
     const deletedUserIds = softDeletedUsers.map((u) => u.id)
-    console.log(`Permanently deleting ${deletedUserIds.length} soft-deleted users (past 30 days)...`)
-    
+    console.log(
+      `Permanently deleting ${deletedUserIds.length} soft-deleted users (past 30 days)...`,
+    )
+
     // Delete their scenes
     await db.delete(scenes).where(inArray(scenes.ownerId, deletedUserIds))
     // Delete the users
@@ -61,16 +63,16 @@ async function run() {
     .delete(sceneEvents)
     .where(lt(sceneEvents.createdAt, ninetyDaysAgo))
     .returning({ id: sceneEvents.eventId })
-    
+
   if (deletedEvents.length > 0) {
     console.log(`Deleted ${deletedEvents.length} scene events older than 90 days.`)
   }
-  
+
   const deletedRequests = await db
     .delete(agentRequests)
     .where(lt(agentRequests.createdAt, ninetyDaysAgo))
     .returning({ id: agentRequests.requestId })
-    
+
   if (deletedRequests.length > 0) {
     console.log(`Deleted ${deletedRequests.length} agent requests older than 90 days.`)
   }

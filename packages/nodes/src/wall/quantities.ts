@@ -1,7 +1,7 @@
 import {
+  getMaterialLabel,
   getWallCurveLength,
   getWallThickness,
-  getMaterialLabel,
   type QuantitiesContribution,
   type QuantityRow,
   type WallNode,
@@ -31,9 +31,11 @@ export const wallQuantities: QuantitiesContribution<WallNode> = (walls, ctx) => 
     // and group it by the interior material (as a proxy), or emit interior and exterior separately.
     // The issue says "Duvar, döşeme, tavan katkılarında group'u malzeme adına bağla".
     // We'll emit two face area rows (one for interior, one for exterior) to accurately group them by material.
-    const interiorRef = wall.slots?.['interior'] ?? wall.interiorMaterialPreset ?? wall.materialPreset
-    const exteriorRef = wall.slots?.['exterior'] ?? wall.exteriorMaterialPreset ?? wall.materialPreset
-    
+    const interiorRef =
+      wall.slots?.['interior'] ?? wall.interiorMaterialPreset ?? wall.materialPreset
+    const exteriorRef =
+      wall.slots?.['exterior'] ?? wall.exteriorMaterialPreset ?? wall.materialPreset
+
     rows.push({
       key: 'face-area-interior',
       label: 'Face area (interior, gross)',
@@ -41,7 +43,7 @@ export const wallQuantities: QuantitiesContribution<WallNode> = (walls, ctx) => 
       value: length * height,
       group: getMaterialLabel(interiorRef, ctx),
     })
-    
+
     rows.push({
       key: 'face-area-exterior',
       label: 'Face area (exterior, gross)',

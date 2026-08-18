@@ -998,15 +998,15 @@ describe('initSpaceDetectionSync commits', () => {
       // The sync runs synchronously after setNodes via subscribe
       expect(capturedCommit).not.toBeNull()
       expect(capturedCommit.origin).toBe('local')
-      
+
       // The commit's current snapshot should contain the auto-generated slab and ceiling
       const committedNodes = capturedCommit.current.nodes
       const autoSlabs = Object.values(committedNodes).filter((n) => n.type === 'slab')
       const autoCeilings = Object.values(committedNodes).filter((n) => n.type === 'ceiling')
-      
+
       expect(autoSlabs.length).toBeGreaterThan(0)
       expect(autoCeilings.length).toBeGreaterThan(0)
-      
+
       // The before snapshot should NOT have them
       const beforeNodes = capturedCommit.before.nodes
       expect(Object.values(beforeNodes).filter((n) => n.type === 'slab')).toHaveLength(0)

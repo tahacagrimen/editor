@@ -232,13 +232,19 @@ export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
                 checked={acceptedTerms}
                 onChange={(e) => {
                   setAcceptedTerms(e.target.checked)
-                  if (e.target.checked && error === 'Please agree to the Terms and Privacy Policy to continue') {
+                  if (
+                    e.target.checked &&
+                    error === 'Please agree to the Terms and Privacy Policy to continue'
+                  ) {
                     setError(null)
                   }
                 }}
                 className="mt-0.5 h-4 w-4 rounded border-input bg-background"
               />
-              <label htmlFor="terms-checkbox" className="text-xs text-muted-foreground leading-tight cursor-pointer">
+              <label
+                htmlFor="terms-checkbox"
+                className="text-xs text-muted-foreground leading-tight cursor-pointer"
+              >
                 {t('I have read and agree to the')}{' '}
                 <Link href="/terms" className="underline hover:text-foreground" target="_blank">
                   {t('Terms of Service')}

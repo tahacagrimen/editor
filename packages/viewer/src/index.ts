@@ -166,6 +166,7 @@ export {
 } from './lib/texture-reference'
 export { packNormalToRGB, unpackRGBToNormal } from './lib/tsl-compat'
 export { useItemLightPool } from './store/use-item-light-pool'
+export { type SolarAnalysisResult, useSolarAnalysis } from './store/use-solar-analysis'
 export {
   applyCountryUnitDefault,
   default as useViewer,

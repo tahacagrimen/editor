@@ -1,8 +1,8 @@
 import {
   type CeilingNode,
+  getMaterialLabel,
   type QuantitiesContribution,
   type QuantityRow,
-  getMaterialLabel,
 } from '@pascal-app/core'
 import { planPolygonNetArea, planPolygonPerimeter } from '../shared/plan-polygon-area'
 

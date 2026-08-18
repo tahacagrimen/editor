@@ -1,6 +1,7 @@
 'use client'
 
 import { LocalizedContent } from '../../../../lib/i18n'
+import { SolarAnalysisUI } from '../../panels/sun-study/solar-analysis-ui'
 import { SunStudySection } from '../../panels/sun-study/sun-study-section'
 
 /**
@@ -18,6 +19,7 @@ export function SunStudyPanel() {
     <LocalizedContent>
       <div className="flex h-full flex-col overflow-y-auto">
         <SunStudySection />
+        <SolarAnalysisUI />
         <p className="px-3 py-3 text-[11px] text-sidebar-foreground/50">
           Latitude, longitude and north are saved with the project; the date and time are not —
           they describe the study, not the model.

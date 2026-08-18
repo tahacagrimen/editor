@@ -388,7 +388,9 @@ function extractFromExtrusionItem(
     if (current.ExtrudedDirection?.value) {
       const dir = ifcApi.GetLine(modelID, current.ExtrudedDirection.value)
       if (dir.DirectionRatios) {
-        const ratios = dir.DirectionRatios.map((r: any) => typeof r === 'number' ? r : (r?.value ?? 0))
+        const ratios = dir.DirectionRatios.map((r: any) =>
+          typeof r === 'number' ? r : (r?.value ?? 0),
+        )
         result.extrusionDirection = [ratios[0] ?? 0, ratios[1] ?? 0, ratios[2] ?? 0]
       }
     }

@@ -1,8 +1,8 @@
-import { getAuth } from '@/lib/auth'
 import { getDatabase } from '@pascal-app/db'
-import { users, scenes, sceneVersions } from '@pascal-app/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { NextRequest, NextResponse } from 'next/server'
+import { scenes, sceneVersions, users } from '@pascal-app/db/schema'
+import { and, eq } from 'drizzle-orm'
+import { type NextRequest, NextResponse } from 'next/server'
+import { getAuth } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
   const auth = getAuth()
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         const headVersion = await db.query.sceneVersions.findFirst({
           where: and(
             eq(sceneVersions.sceneId, scene.id),
-            eq(sceneVersions.version, scene.headVersion)
+            eq(sceneVersions.version, scene.headVersion),
           ),
         })
 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
           updatedAt: scene.updatedAt,
           graph: headVersion?.graph || null,
         }
-      })
+      }),
     )
 
     const exportData = {

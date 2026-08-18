@@ -1,8 +1,8 @@
-import { getAuth } from '@/lib/auth'
 import { getDatabase } from '@pascal-app/db'
-import { users, scenes, sessions } from '@pascal-app/db/schema'
+import { scenes, sessions, users } from '@pascal-app/db/schema'
 import { eq } from 'drizzle-orm'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+import { getAuth } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   const auth = getAuth()

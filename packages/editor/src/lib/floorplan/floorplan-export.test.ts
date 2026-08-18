@@ -320,6 +320,7 @@ describe('resolveFloorplanPageLayout', () => {
 
 import { nodeRegistry } from '@pascal-app/core'
 import { collectFloorplanGeometry, collectFloorplanSchedules } from './floorplan-export'
+
 describe('collectFloorplanGeometry scope filtering', () => {
   const defaultArgs = [
     'metric',
@@ -335,9 +336,9 @@ describe('collectFloorplanGeometry scope filtering', () => {
       schema: { type: 'object', properties: {} } as any,
       kind: 'mock-utility',
       category: 'utility',
-      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' } as any),
+      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' }) as any,
     } as any)
-    
+
     const nodes = {
       'level-1': { id: 'level-1', type: 'level', children: ['u1'] },
       u1: { id: 'u1', type: 'mock-utility', visible: true },
@@ -349,7 +350,7 @@ describe('collectFloorplanGeometry scope filtering', () => {
     const route = collectFloorplanGeometry(nodes, 'level-1' as any, 'routing', ...defaultArgs)
     expect(route).toHaveLength(1)
     expect(route[0]?.id).toBe('u1' as any)
-    
+
     nodeRegistry._reset()
   })
 
@@ -359,10 +360,10 @@ describe('collectFloorplanGeometry scope filtering', () => {
       schema: { type: 'object', properties: {} } as any,
       kind: 'mock-zone',
       category: 'site',
-      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' } as any),
-      capabilities: { floorPlaced: true }
+      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' }) as any,
+      capabilities: { floorPlaced: true },
     } as any)
-    
+
     const nodes = {
       'level-1': { id: 'level-1', type: 'level', children: [], elevation: 0 },
       zone: { id: 'zone', type: 'mock-zone', visible: true, elevation: 0 },
@@ -379,7 +380,7 @@ describe('collectFloorplanGeometry scope filtering', () => {
     const full = collectFloorplanGeometry(nodes, 'level-1' as any, 'full', ...defaultArgs)
     // full includes everything
     expect(full.length).toBeGreaterThanOrEqual(0)
-    
+
     nodeRegistry._reset()
   })
 })
@@ -391,25 +392,33 @@ describe('collectFloorplanSchedules scope filtering', () => {
       schema: { type: 'object', properties: {} } as any,
       kind: 'mock-door',
       category: 'structure',
-      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' } as any),
+      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' }) as any,
       extensions: {
         'pascal:editor/floorplan': {
-          schedule: ({ siblings }: any) => ({ title: 'Doors', columns: [], rows: siblings.map((s: any) => ({ id: s.id, cells: [] })) })
-        }
-      } as any
+          schedule: ({ siblings }: any) => ({
+            title: 'Doors',
+            columns: [],
+            rows: siblings.map((s: any) => ({ id: s.id, cells: [] })),
+          }),
+        },
+      } as any,
     } as any)
-    
+
     nodeRegistry._register({
       schemaVersion: 1,
       schema: { type: 'object', properties: {} } as any,
       kind: 'mock-utility-schedule',
       category: 'utility',
-      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' } as any),
+      floorplan: () => ({ kind: 'rect', x: 0, y: 0, width: 1, height: 1, fill: 'black' }) as any,
       extensions: {
         'pascal:editor/floorplan': {
-          schedule: ({ siblings }: any) => ({ title: 'Utilities', columns: [], rows: siblings.map((s: any) => ({ id: s.id, cells: [] })) })
-        }
-      } as any
+          schedule: ({ siblings }: any) => ({
+            title: 'Utilities',
+            columns: [],
+            rows: siblings.map((s: any) => ({ id: s.id, cells: [] })),
+          }),
+        },
+      } as any,
     } as any)
 
     const nodes = {
@@ -424,9 +433,9 @@ describe('collectFloorplanSchedules scope filtering', () => {
 
     const route = collectFloorplanSchedules(nodes, 'level-1' as any, 'metric', 'routing')
     expect(route).toHaveLength(2)
-    expect(route.map(s => s.title)).toContain('Doors')
-    expect(route.map(s => s.title)).toContain('Utilities')
-    
+    expect(route.map((s) => s.title)).toContain('Doors')
+    expect(route.map((s) => s.title)).toContain('Utilities')
+
     nodeRegistry._reset()
   })
 })

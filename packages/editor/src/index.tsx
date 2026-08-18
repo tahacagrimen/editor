@@ -466,6 +466,10 @@ export type {
   FloorplanAnnotationVisibility,
 } from './lib/floorplan/annotation-visibility'
 export {
+  exportFloorplanPdf,
+  type FloorplanExportScope,
+} from './lib/floorplan/floorplan-export'
+export {
   createFloorplanContextExtensions,
   FLOORPLAN_CONTEXT_EXTENSION_KEY,
   FLOORPLAN_GEOMETRY_METADATA_KEY,
@@ -777,7 +781,3 @@ export {
   type WallSnapKind,
   type WallSnapPoint,
 } from './store/use-wall-snap-indicator'
-export {
-  exportFloorplanPdf,
-  type FloorplanExportScope,
-} from './lib/floorplan/floorplan-export'

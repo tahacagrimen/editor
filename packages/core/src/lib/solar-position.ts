@@ -193,3 +193,26 @@ export function sunDirection(
     -horizontal * Math.cos(bearing),
   ]
 }
+
+/**
+ * Generates a representative schedule of sun directions over a year for analysis.
+ * Samples the 21st of each month, hourly during daylight.
+ */
+export function generateAnnualSolarSchedule(
+  location: GeoLocation,
+  northOffsetDeg = 0,
+): Array<[number, number, number]> {
+  const schedule: Array<[number, number, number]> = []
+
+  for (let month = 0; month < 12; month++) {
+    for (let hour = 0; hour < 24; hour++) {
+      const date = new Date(Date.UTC(2024, month, 21, hour, 0))
+      const pos = solarPosition(location, date)
+      if (isDaylight(pos)) {
+        schedule.push(sunDirection(pos, northOffsetDeg))
+      }
+    }
+  }
+
+  return schedule
+}

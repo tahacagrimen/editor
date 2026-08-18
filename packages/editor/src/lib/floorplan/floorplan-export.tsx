@@ -137,7 +137,7 @@ export type FloorplanPageLayout = {
 
 export async function exportFloorplanPdf(
   scope: FloorplanExportScope,
-  options?: { drawingType?: ConstructionDrawingType }
+  options?: { drawingType?: ConstructionDrawingType },
 ): Promise<void> {
   const nodes = useScene.getState().nodes
   const viewer = useViewer.getState()
@@ -158,7 +158,7 @@ export async function exportFloorplanPdf(
   const annotationLayoutOverrides = useDrawingView.getState().annotationLayoutOverrides
   const drawingLabel =
     DRAWING_TYPE_OPTIONS.find((option) => option.id === drawingType)?.label ?? 'Floor plan'
-  
+
   const savedViews = Object.values(useScene.getState().savedViews).sort((a, b) => a.order - b.order)
   const levels = resolveExportLevels(nodes)
   if (scope !== 'views' && levels.length === 0) {
@@ -188,10 +188,10 @@ export async function exportFloorplanPdf(
         // apply view state
         const { applySavedView, readSavedViewPresentation } = await import('../saved-views')
         applySavedView(view.id)
-        
+
         const presentation = readSavedViewPresentation(view)
         const is3d = presentation.viewMode === '3d'
-        
+
         // Let the scene graph and systems settle
         await nextFrames(10)
 
@@ -202,11 +202,11 @@ export async function exportFloorplanPdf(
               transparent: false,
             })
             const buffer = await blob.arrayBuffer()
-            
+
             doc.addPage([A4_LANDSCAPE_WIDTH_PT, A4_LANDSCAPE_HEIGHT_PT], 'landscape')
             pageCount++
             drawFloorplanPageHeader(doc, view.name, drawingLabel)
-            
+
             const layout = resolveFloorplanPageLayout(A4_LANDSCAPE_WIDTH_PT, A4_LANDSCAPE_HEIGHT_PT)
             const targetRatio = layout.planBox.width / layout.planBox.height
             const imgRatio = resolution.w / resolution.h
@@ -219,7 +219,7 @@ export async function exportFloorplanPdf(
             }
             const imgX = layout.planBox.x + (layout.planBox.width - imgW) / 2
             const imgY = layout.planBox.y + (layout.planBox.height - imgH) / 2
-            
+
             doc.image(buffer, imgX, imgY, { width: imgW, height: imgH })
           } catch (e) {
             console.error('[floorplan-export] failed to capture 3d view for PDF', e)
@@ -229,39 +229,76 @@ export async function exportFloorplanPdf(
           const currentLevels = resolveExportLevels(useScene.getState().nodes)
           const levelId = currentLevels[0]?.id
           if (!levelId) continue
-          
+
           const geometries = collectFloorplanGeometry(
-            nodes, levelId, 'full', unit, metricNotation, annotationVisibility, drawingType, wallDimensionReference,
+            nodes,
+            levelId,
+            'full',
+            unit,
+            metricNotation,
+            annotationVisibility,
+            drawingType,
+            wallDimensionReference,
           )
           const schedules = collectFloorplanSchedules(nodes, levelId, unit, 'full')
-          
+
           if (geometries.length > 0) {
             const layout = resolveFloorplanPageLayout(A4_LANDSCAPE_WIDTH_PT, A4_LANDSCAPE_HEIGHT_PT)
             const buildingId = resolveBuildingForLevel(levelId, nodes as Record<AnyNodeId, AnyNode>)
             const building = buildingId ? nodes[buildingId] : undefined
-            const buildingRotationY = building?.type === 'building' ? (building.rotation[1] ?? 0) : 0
-            const rotationDeg = resolveFloorplanExportRotationDeg(buildingRotationY, navigationAzimuth)
+            const buildingRotationY =
+              building?.type === 'building' ? (building.rotation[1] ?? 0) : 0
+            const rotationDeg = resolveFloorplanExportRotationDeg(
+              buildingRotationY,
+              navigationAzimuth,
+            )
 
-            const mounted = await mountFloorplanSvg(host, geometries, rotationDeg, annotationLayoutOverrides)
+            const mounted = await mountFloorplanSvg(
+              host,
+              geometries,
+              rotationDeg,
+              annotationLayoutOverrides,
+            )
             if (mounted) {
               try {
                 doc.addPage([A4_LANDSCAPE_WIDTH_PT, A4_LANDSCAPE_HEIGHT_PT], 'landscape')
                 pageCount++
                 const screenUnitsPerPixel = resolveFloorplanScreenUnitsPerPixel(
-                  mounted.width, mounted.height, layout.planBox.width, layout.planBox.height,
+                  mounted.width,
+                  mounted.height,
+                  layout.planBox.width,
+                  layout.planBox.height,
                 )
                 await mounted.setScreenUnitsPerPixel(screenUnitsPerPixel)
                 const fitted = resolveFloorplanExportPlacement(
-                  mounted.width, mounted.height, layout.planBox.x, layout.planBox.y, layout.planBox.width, layout.planBox.height,
+                  mounted.width,
+                  mounted.height,
+                  layout.planBox.x,
+                  layout.planBox.y,
+                  layout.planBox.width,
+                  layout.planBox.height,
                 )
                 drawFloorplanPageHeader(doc, view.name, drawingLabel)
                 const model = combineGeometryList(geometries.map((geometry) => geometry.model))
                 if (model) {
-                  await renderFloorplanGeometryToPdfKit(doc, model, { annotationLayer: false, placement: fitted, rotationDeg, viewport: mounted.viewport })
+                  await renderFloorplanGeometryToPdfKit(doc, model, {
+                    annotationLayer: false,
+                    placement: fitted,
+                    rotationDeg,
+                    viewport: mounted.viewport,
+                  })
                 }
-                const annotations = combineGeometryList(geometries.map((geometry) => geometry.annotations))
+                const annotations = combineGeometryList(
+                  geometries.map((geometry) => geometry.annotations),
+                )
                 if (annotations) {
-                  await renderFloorplanGeometryToPdfKit(doc, annotations, { annotationLabelShifts: mounted.annotationLabelShifts, annotationLayer: true, placement: fitted, rotationDeg, viewport: mounted.viewport })
+                  await renderFloorplanGeometryToPdfKit(doc, annotations, {
+                    annotationLabelShifts: mounted.annotationLabelShifts,
+                    annotationLayer: true,
+                    placement: fitted,
+                    rotationDeg,
+                    viewport: mounted.viewport,
+                  })
                 }
               } finally {
                 mounted.cleanup()
@@ -294,7 +331,10 @@ export async function exportFloorplanPdf(
           const buildingId = resolveBuildingForLevel(level.id, nodes as Record<AnyNodeId, AnyNode>)
           const building = buildingId ? nodes[buildingId] : undefined
           const buildingRotationY = building?.type === 'building' ? (building.rotation[1] ?? 0) : 0
-          const rotationDeg = resolveFloorplanExportRotationDeg(buildingRotationY, navigationAzimuth)
+          const rotationDeg = resolveFloorplanExportRotationDeg(
+            buildingRotationY,
+            navigationAzimuth,
+          )
 
           const mounted = await mountFloorplanSvg(
             host,
@@ -611,7 +651,7 @@ export function resolveFloorplanExportViewport(
 ): FloorplanExportBounds {
   const paddingX = Math.max(MIN_PLAN_PADDING_M, modelBounds.width * PLAN_PADDING_RATIO)
   const paddingY = Math.max(MIN_PLAN_PADDING_M, modelBounds.height * PLAN_PADDING_RATIO)
-  
+
   return {
     x: modelBounds.x - paddingX,
     y: modelBounds.y - paddingY,
