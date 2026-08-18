@@ -17,6 +17,20 @@ import { Plane, Vector3 } from 'three/webgpu'
  */
 export const sceneClippingPlanes: Plane[] = []
 
+type ClippingPlaneListener = (count: number) => void
+const clippingPlaneListeners = new Set<ClippingPlaneListener>()
+
+export function onClippingPlaneCountChange(listener: ClippingPlaneListener): () => void {
+  clippingPlaneListeners.add(listener)
+  return () => clippingPlaneListeners.delete(listener)
+}
+
+function notifyListeners() {
+  for (const listener of clippingPlaneListeners) {
+    listener(sceneClippingPlanes.length)
+  }
+}
+
 export type SceneClippingPlaneInput = {
   normal: readonly [number, number, number]
   constant: number
@@ -29,6 +43,8 @@ const scratchNormal = new Vector3()
  * the common case (one plane being dragged) allocates nothing.
  */
 export function setSceneClippingPlanes(next: readonly SceneClippingPlaneInput[]): void {
+  const previousLength = sceneClippingPlanes.length
+  
   for (let index = 0; index < next.length; index++) {
     const input = next[index]
     if (!input) continue
@@ -39,10 +55,19 @@ export function setSceneClippingPlanes(next: readonly SceneClippingPlaneInput[])
     else sceneClippingPlanes.push(new Plane(scratchNormal.clone(), constant))
   }
 
-  if (sceneClippingPlanes.length > next.length) sceneClippingPlanes.length = next.length
+  if (sceneClippingPlanes.length > next.length) {
+    sceneClippingPlanes.length = next.length
+  }
+  
+  if (sceneClippingPlanes.length !== previousLength) {
+    notifyListeners()
+  }
 }
 
 /** Leave the scene uncut. */
 export function clearSceneClippingPlanes(): void {
-  sceneClippingPlanes.length = 0
+  if (sceneClippingPlanes.length > 0) {
+    sceneClippingPlanes.length = 0
+    notifyListeners()
+  }
 }

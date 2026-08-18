@@ -1,8 +1,14 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Color, Layers, Matrix4, type Object3D, Scene, UnsignedByteType } from 'three'
+import { Color, DepthTexture, Layers, Matrix4, type Object3D, Scene, UnsignedByteType } from 'three'
 import { ssgi } from 'three/addons/tsl/display/SSGINode.js'
 import { denoise } from 'three/examples/jsm/tsl/display/DenoiseNode.js'
+import {
+  backFaceMaskMat,
+  capScene,
+  frontFaceMaskMat,
+  syncCapScene,
+} from '../../lib/scene-clipping-cap'
 import {
   add,
   diffuseColor,
@@ -19,6 +25,8 @@ import {
   saturation,
   screenUV,
   smoothstep,
+  step,
+  sub,
   time,
   uniform,
   vec3,
@@ -239,8 +247,17 @@ const PostProcessingPasses = ({
   const transparentBackground = useViewer((s) => s.transparentBackground)
   const lastProjectIdRef = useRef(projectId)
 
-  // Bump this to force a pipeline rebuild (used by retry logic)
+  // Bump this to force a pipeline rebuild (used by retry logic and clipping caps)
   const [pipelineVersion, setPipelineVersion] = useState(0)
+  const [clippingPlaneCount, setClippingPlaneCount] = useState(0)
+
+  useEffect(() => {
+    import('../../lib/scene-clipping').then(({ onClippingPlaneCountChange }) => {
+      onClippingPlaneCountChange((count) => {
+        setClippingPlaneCount(count)
+      })
+    })
+  }, [])
 
   const requestPipelineRebuild = useCallback(() => {
     if (rebuildTimeoutRef.current !== null) {
@@ -404,11 +421,36 @@ const PostProcessingPasses = ({
       const hasGeometry = scenePassColor.a
       const contentAlpha = hasGeometry.max(zonePass.a)
 
+      let compositedSceneColor = scenePassColor.rgb
+
+      if (clippingPlaneCount > 0) {
+        syncCapScene()
+        // Stencil mask equivalent using Additive blending
+        // depthTexture is shared with the main scene pass so it's occluded correctly
+        const depthTexture = scenePass.getTexture('depth') as DepthTexture
+        const maskBackPass = pass(scene, camera, { depthBuffer: false, depthTexture })
+        maskBackPass.setLayers(sceneOnlyLayers)
+        maskBackPass.overrideMaterial = backFaceMaskMat
+        
+        const maskFrontPass = pass(scene, camera, { depthBuffer: false, depthTexture })
+        maskFrontPass.setLayers(sceneOnlyLayers)
+        maskFrontPass.overrideMaterial = frontFaceMaskMat
+
+        const capPass = pass(capScene, camera, { depthBuffer: false, depthTexture })
+
+        // The mask value is (backFaceHits - frontFaceHits). If > 0.5, we are inside solid poché.
+        const maskValue = sub(maskBackPass.r, maskFrontPass.r).clamp(0, 1)
+        
+        // Use step to get a crisp boolean mask
+        const isCapped = step(0.5, maskValue)
+        compositedSceneColor = mix(compositedSceneColor, capPass.rgb, isCapped)
+      }
+
       // Composite the zone-pass tint into the base scene so rooms show whether or
       // not SSGI is enabled. When SSGI is on, the branch below overwrites this
       // with its own zone-inclusive composite (no double-add).
       let sceneColor = vec4(
-        add(scenePassColor.rgb, zonePass.rgb),
+        add(compositedSceneColor, zonePass.rgb),
         contentAlpha,
       ) as unknown as ReturnType<typeof vec4>
 
