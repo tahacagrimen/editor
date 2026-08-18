@@ -61,6 +61,12 @@ export const WALL_ENDPOINT_SNAP_RADIUS = 0.7
 // a midpoint / crossing is the next tier down.
 export const WALL_MIDPOINT_SNAP_RADIUS = 0.5
 export const WALL_INTERSECTION_SNAP_RADIUS = 0.5
+// Capture radius for the buildable-area edge snap (issue #59, Seviye 1). Runs
+// *after* the wall special-point snaps, so it can never steal a corner; it only
+// fills the gap where the cursor is near the buildable boundary and nothing
+// stronger is in range. Kept tight so the soft snap never overrides the user's
+// intent to sit just off the line.
+export const WALL_BUILDABLE_SNAP_RADIUS = 0.2
 
 /**
  * Which part of a wall the drafted line represents.

@@ -34,6 +34,7 @@ import {
   findWallSpecialPointSnap,
   offsetWallLineForAlignment,
   projectPointOntoWall,
+  WALL_BUILDABLE_SNAP_RADIUS,
   WALL_CONNECT_SNAP_RADIUS,
   WALL_JOIN_SNAP_RADIUS,
   type WallDraftSnapResult,
@@ -536,7 +537,11 @@ export function snapWallDraftPointDetailed(args: SnapWallDraftArgs): WallDraftSn
         : snapPointToGrid(point, step)
 
   if (shouldSnapToBuildable && buildableRings.length > 0 && magnetic) {
-    const edgeSnap = snapServices.polygon.snapToEdges(point, buildableRings, 0.2)
+    const edgeSnap = snapServices.polygon.snapToEdges(
+      point,
+      buildableRings,
+      WALL_BUILDABLE_SNAP_RADIUS,
+    )
     if (edgeSnap && (!start || !angleSnap)) {
       basePoint = [edgeSnap[0], edgeSnap[1]]
     }
