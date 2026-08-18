@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
-import { type AnyNode, type AnyNodeId, SiteNode as SiteSchema, useScene } from '@pascal-app/core'
+import {
+  type AnyNode,
+  type AnyNodeId,
+  SiteNode as SiteSchema,
+  useScene,
+  type WallNode,
+  WallNode as WallSchema,
+} from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
 import useEditor from '../../../store/use-editor'
 import { snapWallDraftPointDetailed } from './wall-drafting'
@@ -114,5 +121,58 @@ describe('wall draft against the buildable boundary', () => {
   test('levels above the third are not constrained', () => {
     seedSite({ level: 5 })
     expect(snapAt([25, 25]).violation).toBeFalsy()
+  })
+})
+
+describe('buildable snap vs wall corner precedence', () => {
+  beforeEach(() => {
+    useViewer.setState({
+      selection: {
+        buildingId: 'building_test',
+        levelId: LEVEL_ID,
+        zoneId: null,
+        selectedIds: [],
+      },
+    } as never)
+    useEditor.getState().setSnappingMode('wall', 'lines')
+    seedSite({})
+  })
+
+  // Regression: the buildable-edge snap used to run *before* the wall corner
+  // snap at a wider radius, so a cursor sitting on an existing wall corner got
+  // stolen onto the buildable boundary and the corner joint never closed.
+  test('a wall corner beats the buildable-edge snap', () => {
+    // 3 m setback on the 20 m parcel puts the buildable corner at [7, 7]; the
+    // wall ends 10 cm inside it. Both targets sit inside the endpoint radius.
+    const wall = {
+      ...WallSchema.parse({ start: [6.9, 4], end: [6.9, 6.9], name: 'wall_corner' }),
+      id: 'wall_corner' as AnyNodeId,
+      parentId: LEVEL_ID,
+    } as WallNode
+
+    const result = snapWallDraftPointDetailed({
+      point: [6.9, 6.9],
+      walls: [wall],
+      magnetic: true,
+    })
+
+    expect(result.point).toEqual([6.9, 6.9])
+    expect(result.snap).toBe('endpoint')
+    expect(result.targetWallIds).toEqual(['wall_corner'])
+  })
+
+  // Seviye 1 still works: with no wall geometry to grab, a magnetic cursor
+  // pulls onto the buildable edge.
+  test('magnetic snap still pulls onto the buildable edge', () => {
+    // 8 cm outside the 14 m buildable square's right edge (x = 7).
+    const result = snapWallDraftPointDetailed({
+      point: [7.08, 3],
+      walls: [],
+      magnetic: true,
+    })
+
+    expect(result.point[0]).toBeCloseTo(7, 5)
+    expect(result.point[1]).toBeCloseTo(3, 5)
+    expect(result.snap).toBeNull()
   })
 })
