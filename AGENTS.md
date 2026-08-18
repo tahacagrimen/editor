@@ -722,3 +722,13 @@ Invoke the `review-architecture` skill (`.agents/skills/review-architecture/SKIL
 - After two consecutive tool failures, stop and change approach.
 - Don't introduce backwards-compatibility shims, dead code, or speculative abstractions.
 - Don't write new comments unless they explain a non-obvious *why*.
+
+## WebGPU and TSL (Three.js Shading Language)
+
+The viewer is built on the Three.js WebGPU renderer and uses TSL for materials and post-processing.
+When working on `packages/viewer`:
+
+- **Post-processing is TSL-native.** Do not use the legacy WebGL `EffectComposer` or `Pass` classes. Post-processing pipelines are built in `components/viewer/post-processing.tsx` using `pass()` nodes from `three/tsl`.
+- **Avoid hardware stencil buffers in TSL passes.** Passing a shared stencil buffer between multiple `pass()` nodes in TSL is currently unsupported or highly unreliable. For masking (e.g. section poché / clipping caps), use **additive blending** into color channels (`AdditiveBlending`) and combine them using TSL math (`sub`, `step`, `mix`).
+- **TSL graph evaluation is synchronous.** You cannot use `await` or asynchronous `import()` inside the render pipeline definition. Ensure all required materials, scenes, and textures are statically imported or already loaded before the pipeline evaluates.
+- **Dynamic pipeline changes require a rebuild.** The TSL post-processing graph cannot dynamically change its topology (like adding new passes for newly added clipping planes) inside the render loop. Use external observers (e.g., `onClippingPlaneCountChange`) to bump a `pipelineVersion` state in React, which forces the `post-processing.tsx` component to unmount and reconstruct the graph from scratch.
