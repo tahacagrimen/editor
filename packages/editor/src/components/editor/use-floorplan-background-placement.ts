@@ -320,7 +320,6 @@ export function useFloorplanBackgroundPlacement({
           magnetic: isMagneticSnapActive(),
           cadLevelId: levelId ?? null,
         })
-        if (snapResult.violation) return true
 
         const wallSnapped = snapResult.point
         // Locked onto existing geometry (corner / midpoint / crossing / edge) →

@@ -35,7 +35,6 @@ import {
   offsetWallLineForAlignment,
   projectPointOntoWall,
   WALL_CONNECT_SNAP_RADIUS,
-  WALL_ENDPOINT_SNAP_RADIUS,
   WALL_JOIN_SNAP_RADIUS,
   type WallDraftSnapResult,
   type WallPlanPoint,
@@ -489,18 +488,6 @@ export function snapWallDraftPointDetailed(args: SnapWallDraftArgs): WallDraftSn
         snap: null,
         targetWallIds: [],
       })
-    }
-  }
-
-  if (magnetic && shouldSnapToBuildable && buildableRings.length > 0) {
-    const { snapServices } = require('@pascal-app/core')
-    const buildableSnap = snapServices.polygon.snapToEdges(
-      point,
-      buildableRings,
-      snapRadii?.endpoint ?? WALL_ENDPOINT_SNAP_RADIUS,
-    )
-    if (buildableSnap) {
-      return enforceViolation({ point: buildableSnap, snap: null, targetWallIds: [] })
     }
   }
 
