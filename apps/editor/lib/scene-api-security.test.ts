@@ -1,14 +1,17 @@
 import { afterEach, expect, mock, test } from 'bun:test'
 
-mock.module('./auth', () => ({
-  auth: {
-    api: {
-      getSession: async () => null,
-    },
-  },
-}))
+// `scene-api-security` is imported dynamically after `mock.module` so the mock
+// takes effect — a static `import` is hoisted above `mock.module` and runs the
+// real `./auth`, which builds on `getDatabase()` and needs `POSTGRES_URL`.
+function loadSecurity(): Promise<typeof import('./scene-api-security')> {
+  return import('./scene-api-security')
+}
 
-import { guardSceneApiRequest, sceneApiPreflight } from './scene-api-security'
+function stubAuth(getSession: () => Promise<unknown> = async () => null): void {
+  mock.module('./auth', () => ({
+    getAuth: () => ({ api: { getSession } }),
+  }))
+}
 
 const OLD_ENV = { ...process.env }
 
@@ -23,13 +26,33 @@ function restoreEnv(key: keyof NodeJS.ProcessEnv): void {
 }
 
 test('allows loopback scene API requests', async () => {
+  stubAuth()
+  const { guardSceneApiRequest } = await loadSecurity()
   const request = new Request('http://127.0.0.1:3000/api/scenes', {
     headers: { host: '127.0.0.1:3000' },
   })
   expect(await guardSceneApiRequest(request)).toBeNull()
 })
 
+test('fails open to an anonymous actor when auth cannot initialize', async () => {
+  // `getAuth()` builds on `getDatabase()`, which throws without `POSTGRES_URL`
+  // (the SQLite-only local setup). Resolving an actor must not 500 every
+  // guarded route because the session lookup could not run.
+  mock.module('./auth', () => ({
+    getAuth: () => {
+      throw new Error('POSTGRES_URL is not set')
+    },
+  }))
+  const { resolveActor } = await loadSecurity()
+  const request = new Request('http://localhost:3000/api/scenes', {
+    headers: { host: 'localhost:3000' },
+  })
+  expect(await resolveActor(request)).toEqual({ type: 'anon' })
+})
+
 test('applies configured CORS origins for preflight', async () => {
+  stubAuth()
+  const { sceneApiPreflight } = await loadSecurity()
   process.env.PASCAL_SCENE_API_ORIGINS = 'https://app.example'
   const request = new Request('https://editor.example/api/scenes', {
     method: 'OPTIONS',

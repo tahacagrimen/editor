@@ -60,13 +60,20 @@ export async function resolveActor(requestOrHeaders: Request | Headers): Promise
   }
 
   // 2. Fallback to session
-  const session = await getAuth().api.getSession({ headers })
-  if (session?.user?.id) {
-    return {
-      type: 'user',
-      userId: session.user.id,
-      isAnonymous: (session.user as any).isAnonymous ?? false,
+  try {
+    const session = await getAuth().api.getSession({ headers })
+    if (session?.user?.id) {
+      return {
+        type: 'user',
+        userId: session.user.id,
+        isAnonymous: (session.user as any).isAnonymous ?? false,
+      }
     }
+  } catch {
+    // `getAuth()` builds on `getDatabase()`, which throws without `POSTGRES_URL`
+    // (the SQLite-only local setup). Fail open to anonymous — the same posture
+    // the PAT branch above takes — so an auth/db outage does not 500 every
+    // route that resolves an actor.
   }
   return { type: 'anon' }
 }
