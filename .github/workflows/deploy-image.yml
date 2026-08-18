@@ -1,0 +1,69 @@
+# Builds the production image on GitHub's runners and pushes it to GHCR, so the
+# VPS only ever pulls a finished image. `next build` on this monorepo wants
+# 2-4 GB of RAM and several minutes of CPU; on a 1-vCPU box that competes with
+# the running site, which is why the build does not happen there.
+name: Deploy image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-image
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      # NEXT_PUBLIC_* is inlined into the client bundle at build time, so it has
+      # to be known here, not in Coolify. Set it as a repository *variable*
+      # (Settings -> Secrets and variables -> Actions -> Variables).
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_ASSETS_CDN_URL=${{ vars.NEXT_PUBLIC_ASSETS_CDN_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Coolify pulls the new `latest` when its deploy webhook is called. The
+      # step is a no-op until the secret exists, so the workflow is useful
+      # before Coolify is wired up.
+      - name: Trigger Coolify deployment
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK_URL }}
+          TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "COOLIFY_WEBHOOK_URL is not set - image pushed, deployment not triggered."
+            exit 0
+          fi
+          curl -fsS -X GET "$WEBHOOK" -H "Authorization: Bearer $TOKEN"

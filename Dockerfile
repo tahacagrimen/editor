@@ -11,6 +11,16 @@ RUN apk add --no-cache nodejs
 
 COPY . .
 RUN bun install --frozen-lockfile
+
+# Next inlines every `NEXT_PUBLIC_*` into the client bundle at build time, so
+# these have to arrive as build args — set only at runtime, the browser keeps
+# calling the localhost default (better-auth's client baseURL is the one that
+# breaks visibly).
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_ASSETS_CDN_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_ASSETS_CDN_URL=$NEXT_PUBLIC_ASSETS_CDN_URL
+
 RUN ./node_modules/.bin/turbo run build --filter=editor
 
 # Saved scenes live in SQLite under PASCAL_DATA_DIR; owned by the runtime user so
