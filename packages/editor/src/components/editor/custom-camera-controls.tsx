@@ -40,8 +40,9 @@ import {
   collectSceneBounds,
   resolveZoomSelectionIds,
 } from '../../lib/zoom-framing'
-import { publishCameraPose } from '../../store/camera-pose-store'
+import { cameraPoseStore, publishCameraPose } from '../../store/camera-pose-store'
 import useEditor from '../../store/use-editor'
+import { useReducedMotion } from '../../hooks/use-reduced-motion'
 import {
   useActiveHandleDrag,
   useEndpointReshape,
@@ -422,6 +423,7 @@ export const CustomCameraControls = () => {
     isFirstPersonMode,
     cameraMode,
   )
+  const reducedMotion = useReducedMotion()
   const currentLevelId = selection.levelId
   const firstLoad = useRef(true)
   const maxPolarAngle =
@@ -545,6 +547,7 @@ export const CustomCameraControls = () => {
 
       if (useViewer.getState().cameraMode !== plan.pose.projection) {
         freezeActivePoseInterpolation()
+        plan.instant = true
         useViewer.getState().setCameraMode(plan.pose.projection)
         return
       }
@@ -723,8 +726,9 @@ export const CustomCameraControls = () => {
         const step = stepCameraPoseInterpolation(
           [tempPosition.x, tempPosition.y, tempPosition.z],
           [tempTarget.x, tempTarget.y, tempTarget.z],
-          activePose.plan.pose,
+          activePose.plan,
           delta,
+          reducedMotion
         )
         try {
           // Transition-enabled calls retain one rest listener each, so this frame loop owns smoothing.

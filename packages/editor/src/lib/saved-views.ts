@@ -30,6 +30,8 @@ export type SavedViewPresentation = {
   /** Level and building in focus — what `solo` and the 2D plan key off. */
   levelId?: string | null
   buildingId?: string | null
+  /** Optional transition duration in seconds when applying this view */
+  transitionDuration?: number
 }
 
 const VIEW_MODES: readonly ViewMode[] = ['3d', '2d', 'split']
@@ -52,6 +54,9 @@ export function readSavedViewPresentation(view: SavedView): SavedViewPresentatio
   if (raw.levelId === null || typeof raw.levelId === 'string') presentation.levelId = raw.levelId
   if (raw.buildingId === null || typeof raw.buildingId === 'string') {
     presentation.buildingId = raw.buildingId
+  }
+  if (typeof raw.transitionDuration === 'number') {
+    presentation.transitionDuration = raw.transitionDuration
   }
   return presentation
 }
@@ -195,6 +200,9 @@ export function applySavedView(id: SavedViewId): boolean {
     }
   })
 
-  emitter.emit('camera-controls:apply-pose', view.camera)
+  emitter.emit('camera-controls:apply-pose', {
+    ...view.camera,
+    transitionDuration: presentation.transitionDuration ?? 1.5,
+  })
   return true
 }

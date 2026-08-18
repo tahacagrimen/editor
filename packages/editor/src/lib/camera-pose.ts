@@ -9,6 +9,8 @@ const INTERPOLATION_SETTLE_DISTANCE = 0.001
 export type CameraPoseApplicationPlan = {
   pose: CameraPose
   perspectiveFov: number | null
+  transitionDuration?: number
+  instant?: boolean
 }
 
 export type CameraPoseInterpolationStep = {
@@ -94,12 +96,18 @@ export function planCameraPoseApplication(value: unknown): CameraPoseApplication
     return null
   }
 
+  const duration =
+    typeof value === 'object' && value !== null && 'transitionDuration' in value
+      ? (value as any).transitionDuration
+      : undefined
+
   return {
     pose,
     perspectiveFov:
       pose.projection === 'perspective' && pose.fov !== undefined
         ? Math.min(Math.max(pose.fov, MIN_PERSPECTIVE_FOV), MAX_PERSPECTIVE_FOV)
         : null,
+    transitionDuration: typeof duration === 'number' && Number.isFinite(duration) ? duration : undefined,
   }
 }
 
@@ -155,12 +163,29 @@ export function withCameraPoseDistance(pose: CameraPose, distance: number): Came
 export function stepCameraPoseInterpolation(
   currentPosition: [number, number, number],
   currentTarget: [number, number, number],
-  destination: CameraPose,
+  plan: CameraPoseApplicationPlan,
   deltaSeconds: number,
+  reducedMotion: boolean = false,
 ): CameraPoseInterpolationStep {
+  if (reducedMotion || plan.instant) {
+    return {
+      position: [...plan.pose.position],
+      settled: true,
+      target: [...plan.pose.target],
+    }
+  }
+
+  const destination = plan.pose
   const finiteDelta = Number.isFinite(deltaSeconds) ? deltaSeconds : 0
   const elapsed = Math.min(Math.max(finiteDelta, 0), MAX_INTERPOLATION_DELTA_SECONDS)
-  const alpha = 1 - Math.exp(-elapsed / INTERPOLATION_TIME_CONSTANT_SECONDS)
+  
+  let timeConstant = INTERPOLATION_TIME_CONSTANT_SECONDS
+  if (plan.transitionDuration && plan.transitionDuration > 0) {
+    // 5 time constants ~ 99% settled
+    timeConstant = plan.transitionDuration / 5
+  }
+
+  const alpha = 1 - Math.exp(-elapsed / timeConstant)
   const position = interpolateVectorTuple(currentPosition, destination.position, alpha)
   const target = interpolateVectorTuple(currentTarget, destination.target, alpha)
 

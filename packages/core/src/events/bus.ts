@@ -237,7 +237,7 @@ type CameraControlEvents = {
    */
   'camera-controls:zoom-selection': undefined
   'camera-controls:generate-thumbnail': ThumbnailGenerateEvent
-  'camera-controls:apply-pose': CameraPose
+  'camera-controls:apply-pose': CameraPose & { transitionDuration?: number }
   'camera-controls:cancel-pose': undefined
   'camera-controls:interaction-start': undefined
 }
