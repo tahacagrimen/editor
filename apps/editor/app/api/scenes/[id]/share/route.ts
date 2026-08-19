@@ -72,7 +72,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return sceneApiJson(request, { error: 'share_secret_required' }, { status: 503 })
   }
 
-  const url = new URL(`/share/${minted.token}`, request.url)
+  const requestUrl = new URL(request.url)
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host
+  const proto = request.headers.get('x-forwarded-proto') || requestUrl.protocol.replace(':', '')
+  
+  const url = new URL(`/share/${minted.token}`, `${proto}://${host}`)
   return sceneApiJson(request, {
     token: minted.token,
     url: url.toString(),
