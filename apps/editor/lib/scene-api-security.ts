@@ -289,8 +289,13 @@ function configuredOrigins(): Set<string> {
 function isSameOrigin(request: Request, origin: string): boolean {
   const parsedOrigin = parseUrl(origin)
   if (!parsedOrigin) return false
+  
   const requestUrl = new URL(request.url)
-  return normalizeOrigin(parsedOrigin) === normalizeOrigin(requestUrl)
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host
+  const proto = request.headers.get('x-forwarded-proto') || requestUrl.protocol.replace(':', '')
+  
+  const resolvedUrl = new URL(`${proto}://${host}`)
+  return normalizeOrigin(parsedOrigin) === normalizeOrigin(resolvedUrl)
 }
 
 function isLoopbackHostname(hostname: string): boolean {
