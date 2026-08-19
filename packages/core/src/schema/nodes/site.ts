@@ -110,6 +110,7 @@ export const SiteNode = BaseNode.extend({
   setbacks: z.record(z.string(), SetbackRule).default({}),
   defaultSetback: z.number().finite().min(0).default(0),
   zoning: ZoningLimits.optional(),
+  locked: z.boolean().default(false),
   children: z.array(z.string()).default([]),
 }).describe(
   dedent`

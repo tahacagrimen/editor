@@ -18,6 +18,8 @@ import {
   ChevronDown,
   Copy,
   Loader2,
+  Lock,
+  Unlock,
   MoreHorizontal,
   Pencil,
   Pentagon,
@@ -131,6 +133,12 @@ const PropertyLineSection = memo(function PropertyLineSection() {
     setMode(isEditing ? 'select' : 'edit')
   }
 
+  useEffect(() => {
+    if (siteNode.locked && isEditing) {
+      setMode('select')
+    }
+  }, [siteNode.locked, isEditing, setMode])
+
   const handlePointChange = (index: number, axis: 0 | 1, value: number) => {
     const newPoints = [...points.map((p) => [...p] as [number, number])]
     newPoints[index]![axis] = value
@@ -195,17 +203,19 @@ const PropertyLineSection = memo(function PropertyLineSection() {
           <Pentagon className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium text-sm">Property Line</span>
         </div>
-        <button
-          className={cn(
-            'flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors',
-            isEditing
-              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
-              : 'text-muted-foreground hover:bg-accent',
-          )}
-          onClick={handleToggleEdit}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
+        {!siteNode.locked && (
+          <button
+            className={cn(
+              'flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors',
+              isEditing
+                ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                : 'text-muted-foreground hover:bg-accent',
+            )}
+            onClick={handleToggleEdit}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Measurements */}
@@ -1678,6 +1688,7 @@ export function SitePanel({ projectId, onUploadAsset, onDeleteAsset }: SitePanel
   const siteNode = useScene((s) =>
     rootNodeIds[0] ? ((s.nodes[rootNodeIds[0]] as SiteNode | undefined) ?? null) : null,
   )
+  const updateNode = useScene((state) => state.updateNode)
 
   useEffect(() => {
     if (phase !== 'site') {
@@ -1697,13 +1708,23 @@ export function SitePanel({ projectId, onUploadAsset, onDeleteAsset }: SitePanel
             />
             <span className="font-medium text-sm">{siteNode.name || t('Site')}</span>
           </div>
-          <CameraPopover
-            buttonClassName="transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-            hasCamera={!!siteNode.camera}
-            nodeId={siteNode.id as AnyNodeId}
-            onOpenChange={setSiteCameraOpen}
-            open={siteCameraOpen}
-          />
+          <div className="flex items-center gap-1">
+            <button
+              className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              onClick={() => updateNode(siteNode.id, { locked: !siteNode.locked })}
+              title={siteNode.locked ? t('Unlock') : t('Lock')}
+              type="button"
+            >
+              {siteNode.locked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+            </button>
+            <CameraPopover
+              buttonClassName="transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              hasCamera={!!siteNode.camera}
+              nodeId={siteNode.id as AnyNodeId}
+              onOpenChange={setSiteCameraOpen}
+              open={siteCameraOpen}
+            />
+          </div>
         </div>
       )}
 

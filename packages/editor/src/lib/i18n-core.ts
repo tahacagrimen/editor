@@ -1303,6 +1303,8 @@ const tr: Record<string, string> = {
   'Window Tool': 'Pencere Aracı',
   Wire: 'Tel',
   Workspace: 'Çalışma Alanı',
+  Lock: 'Kilitle',
+  Unlock: 'Kilidi Aç',
   'X Brace': 'X Payanda',
   'Y Support': 'Y Payanda',
   'Zone boundary unavailable': 'Bölge sınırı kullanılamıyor',

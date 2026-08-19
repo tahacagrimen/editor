@@ -141,7 +141,7 @@ export function ParcelSetbackSection() {
       )}
 
       <PanelSection title="Setbacks">
-        <div className="flex flex-col gap-1">
+        <div className={cn('flex flex-col gap-1', site.locked && 'pointer-events-none opacity-60')}>
           {points.map((_, edgeIndex) => {
             const rule = setbackRuleForEdge(site, edgeIndex)
             const isFocused = (hoveredEdge ?? selectedEdge) === edgeIndex
@@ -191,7 +191,7 @@ export function ParcelSetbackSection() {
           })}
         </div>
 
-        <ActionGroup>
+        <ActionGroup className={cn(site.locked && 'pointer-events-none opacity-60')}>
           <ActionButton
             label="Apply to all edges"
             onClick={() =>

@@ -58,7 +58,7 @@ export function ZoningSection() {
   return (
     <PanelSection title="Zoning Limits">
       <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-2">
+        <div className={cn('grid grid-cols-2 gap-2', site.locked && 'pointer-events-none opacity-60')}>
           <MetricControl
             label="TAKS"
             min={0}
