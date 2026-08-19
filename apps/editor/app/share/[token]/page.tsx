@@ -16,6 +16,15 @@ export const dynamic = 'force-dynamic'
  * credentials by definition. The signed token is the authorization, and it is
  * verified here before the id inside it is used for anything.
  */
+async function submitPassword(sid: string, formData: FormData) {
+  'use server'
+  const pwd = formData.get('password') as string
+  if (pwd) {
+    const cookieStore = await cookies()
+    cookieStore.set(`share_pwd_${sid}`, pwd, { path: '/' })
+  }
+}
+
 export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const verified = verifyShareToken(token)
@@ -42,14 +51,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
     const providedPwd = cookieStore.get(`share_pwd_${payload.sid}`)?.value
     
     if (!providedPwd || hashSharePassword(providedPwd) !== payload.pwd) {
-      async function submitPassword(formData: FormData) {
-        'use server'
-        const pwd = formData.get('password') as string
-        if (pwd) {
-          const cookieStore = await cookies()
-          cookieStore.set(`share_pwd_${payload.sid}`, pwd, { path: '/' })
-        }
-      }
+      const boundSubmit = submitPassword.bind(null, payload.sid)
 
       return (
         <LocalizedContent>
@@ -57,7 +59,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
             <div className="w-full max-w-md rounded-2xl border border-border/60 bg-background p-6 text-center shadow-xl">
               <h1 className="font-semibold text-lg">Password Protected</h1>
               <p className="mt-2 text-muted-foreground text-sm">Enter the password to view this scene.</p>
-              <form action={submitPassword} className="mt-4 flex flex-col gap-3">
+              <form action={boundSubmit} className="mt-4 flex flex-col gap-3">
                 <input 
                   type="password" 
                   name="password" 
