@@ -17,6 +17,8 @@ Public, open-source home of `@pascal-app/{core,viewer,editor,mcp}` and the stand
 | `packages/cadastre` | TKGM (Turkish land registry) CBS client. Pure logic, zero runtime dependencies |
 | `packages/ifc-converter` | IFC → scene-graph conversion (`web-ifc`). Pure logic, no DOM, no React |
 | `packages/ui` | `@repo/ui` — internal shared primitives, private, not published |
+| `packages/eslint-config` | `@repo/eslint-config` — ESLint presets (`base`, `next-js`, `react-internal`). Private; biome is the primary linter via `bun check` |
+| `packages/typescript-config` | `@repo/typescript-config` — shared tsconfig bases (`base`, `nextjs`, `react-library`). Private |
 | `apps/editor` | Standalone editor app — composes `viewer` + `editor` + tools, and owns the scene API (`app/api/scenes/*`, backed by `@pascal-app/mcp/storage` via `lib/scene-store-server.ts`), the auth routes (`app/api/auth/*`) and the access checks in `lib/scene-api-security.ts` |
 | `apps/ifc-converter` | Next app wrapping `packages/ifc-converter` (:3003) |
 | `tooling/` | Release scripts and the shared tsconfig base |
@@ -50,6 +52,16 @@ bun run test       # turbo: every package's own test script
 bun check-types    # only the workspaces that declare it (see below)
 bun check          # biome lint + format (add :fix to write)
 bun restart        # kill :3002, clear caches, dev
+```
+
+Publishing (`@pascal-app/{core,viewer,editor,nodes,mcp}`) goes through a GitHub
+release workflow, triggered from the root:
+
+```sh
+bun run release          # package=all, bump=patch
+bun run release:minor    # package=all, bump=minor   (release:major → major)
+bun run release:beta     # package=all, bump=beta
+bun run release:viewer   # single package (viewer/core/editor/nodes/mcp), bump=patch
 ```
 
 Nothing above needs a database — the default store is the SQLite file. Postgres
