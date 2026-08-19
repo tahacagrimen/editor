@@ -1,3 +1,5 @@
+import { createEmptyGeometry } from "../../lib/empty-geometry"
+
 import {
   type AnyNodeId,
   type CeilingNode,
@@ -137,7 +139,7 @@ export function generateCeilingGeometry(
     // slot 0 unbound when this mesh (and its cloned grid overlay) is drawn,
     // which the validator rejects ("slot 0 … was not set") and which poisons
     // the whole command encoder.
-    const degenerate = new THREE.BufferGeometry()
+    const degenerate = createEmptyGeometry()
     degenerate.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(9), 3))
     degenerate.setAttribute('normal', new THREE.Float32BufferAttribute(new Float32Array(9), 3))
     degenerate.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(6), 2))

@@ -1,3 +1,5 @@
+import { createEmptyGeometry } from "../../lib/empty-geometry"
+
 import {
   type AnyNodeId,
   DEFAULT_WALL_THICKNESS,
@@ -2870,7 +2872,7 @@ function addBayWindowVisuals(node: WindowNode, mesh: THREE.Mesh) {
         0,
       )
 
-      const geometry = new THREE.BufferGeometry()
+      const geometry = createEmptyGeometry()
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
       geometry.setIndex(indices)
       geometry.computeVertexNormals()
@@ -2989,7 +2991,7 @@ function addBowWindowVisuals(node: WindowNode, mesh: THREE.Mesh) {
         indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2)
       }
 
-      const geometry = new THREE.BufferGeometry()
+      const geometry = createEmptyGeometry()
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
       geometry.setIndex(indices)
       geometry.computeVertexNormals()
@@ -3039,7 +3041,7 @@ function addBowWindowVisuals(node: WindowNode, mesh: THREE.Mesh) {
         )
       }
 
-      const geometry = new THREE.BufferGeometry()
+      const geometry = createEmptyGeometry()
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
       geometry.setIndex(indices)
       geometry.computeVertexNormals()

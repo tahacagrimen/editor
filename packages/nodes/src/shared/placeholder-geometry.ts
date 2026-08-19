@@ -26,7 +26,7 @@ export function createPlaceholderGeometry(groupCount = 0): BufferGeometry {
   geometry.setAttribute('uv', new Float32BufferAttribute(new Float32Array(6), 2))
   geometry.setAttribute('uv2', new Float32BufferAttribute(new Float32Array(6), 2))
   for (let group = 0; group < groupCount; group++) {
-    geometry.addGroup(0, 0, group)
+    geometry.addGroup(0, 3, group)
   }
   return geometry
 }

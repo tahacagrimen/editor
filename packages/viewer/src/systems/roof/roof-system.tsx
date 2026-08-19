@@ -1,3 +1,5 @@
+import { createEmptyGeometry } from "../../lib/empty-geometry"
+
 import {
   type AnyNode,
   type AnyNodeId,
@@ -139,7 +141,7 @@ const _surfaceFaceNormal = new THREE.Vector3()
  * material and can never be ray-hit.
  */
 function createDegenerateRoofPlaceholder(): THREE.BufferGeometry {
-  const placeholder = new THREE.BufferGeometry()
+  const placeholder = createEmptyGeometry()
   placeholder.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(9), 3))
   placeholder.setAttribute('normal', new THREE.Float32BufferAttribute(new Float32Array(9), 3))
   placeholder.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(6), 2))
@@ -1509,7 +1511,7 @@ export function generateRoofSegmentGeometry(
   }
 
   const { deckSlab, shinSlab, wallBrush, innerBrush, rakeBoards } = brushes
-  let resultGeo = new THREE.BufferGeometry()
+  let resultGeo = createEmptyGeometry()
 
   try {
     const hollowWall = csgEvaluator.evaluate(wallBrush, innerBrush, SUBTRACTION)
@@ -1594,7 +1596,7 @@ function createGeometryFromRawAttributes(
   uvs: number[],
   groups: RawGeometryGroup[],
 ): THREE.BufferGeometry {
-  const geometry = new THREE.BufferGeometry()
+  const geometry = createEmptyGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
@@ -2329,7 +2331,7 @@ function createGeometryFromFaces(
     })
   }
 
-  const geometry = new THREE.BufferGeometry()
+  const geometry = createEmptyGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))

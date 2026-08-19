@@ -1,3 +1,5 @@
+import { createEmptyGeometry } from "../../lib/empty-geometry"
+
 import {
   getRenderableSlabPolygon,
   type PolygonPoint2D,
@@ -101,7 +103,7 @@ function generateSolidSlabGeometry(
   const bottom = elevation - thickness
   const holePolygons = mergeSurfaceHolePolygons(slabNode.holes ?? [])
 
-  if (polygon.length < 3) return new THREE.BufferGeometry()
+  if (polygon.length < 3) return createEmptyGeometry()
 
   const positions: number[] = []
   const uvs: number[] = []
@@ -177,7 +179,7 @@ function generateSolidSlabGeometry(
     }
   }
 
-  const geometry = new THREE.BufferGeometry()
+  const geometry = createEmptyGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   geometry.setIndex(indices)
@@ -203,7 +205,7 @@ function generatePoolGeometry(
   const depth = Math.max(0, (slabNode.recessedRimElevation ?? 0) - floor)
   const holePolygons = mergeSurfaceHolePolygons(slabNode.holes ?? [])
 
-  if (polygon.length < 3) return new THREE.BufferGeometry()
+  if (polygon.length < 3) return createEmptyGeometry()
 
   const positions: number[] = []
   const uvs: number[] = []
@@ -258,7 +260,7 @@ function generatePoolGeometry(
     }
   }
 
-  const geo = new THREE.BufferGeometry()
+  const geo = createEmptyGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   geo.setIndex(indices)

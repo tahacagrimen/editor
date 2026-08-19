@@ -1,3 +1,5 @@
+import { createEmptyGeometry } from "../../lib/empty-geometry"
+
 import {
   type AnyNodeId,
   type FenceNode,
@@ -158,7 +160,7 @@ function createFenceCurveBlockPart(
   pushQuad(0, 2, 3, 1, [0, bottomY], [0, topY], [depth, innerTopV], [depth, innerBottomV])
   pushQuad(4, 5, 7, 6, [0, bottomY], [depth, innerBottomV], [depth, innerTopV], [0, topY])
 
-  const geometry = new THREE.BufferGeometry()
+  const geometry = createEmptyGeometry()
   geometry.setAttribute(
     'position',
     new THREE.Float32BufferAttribute(new Float32Array(positions), 3),
@@ -513,9 +515,9 @@ function mergeFenceParts(parts: FencePart[]): THREE.BufferGeometry {
   // An empty slot group (e.g. infill with showInfill off, or base on a floating
   // fence) must not reach mergeGeometries — it throws on an empty array. The
   // empty geometry has no position attribute, so the renderer skips its mesh.
-  if (parts.length === 0) return new THREE.BufferGeometry()
+  if (parts.length === 0) return createEmptyGeometry()
   const geometries = parts.map(createFencePartGeometry)
-  const merged = mergeGeometries(geometries, false) ?? new THREE.BufferGeometry()
+  const merged = mergeGeometries(geometries, false) ?? createEmptyGeometry()
   geometries.forEach((geometry) => {
     geometry.dispose()
   })

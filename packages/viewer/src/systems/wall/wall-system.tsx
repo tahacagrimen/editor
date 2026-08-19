@@ -1,3 +1,5 @@
+import { createEmptyGeometry } from "../../lib/empty-geometry"
+
 import {
   type AnyNode,
   type AnyNodeId,
@@ -452,6 +454,7 @@ function splitGeometryAtHorizontalPlanes(
   if (source !== geometry) geometry.dispose()
   source.dispose()
 
+  if (positions.length === 0) return createEmptyGeometry()
   const split = new THREE.BufferGeometry()
   split.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   split.computeVertexNormals()
@@ -955,7 +958,7 @@ export function generateExtrudedWall(
   // A slab at or above the storey plane leaves a plane-bound wall with no
   // body — bail before ExtrudeGeometry sees a non-positive depth.
   if (height <= 1e-9) {
-    return new THREE.BufferGeometry()
+    return createEmptyGeometry()
   }
 
   const thickness = getWallThickness(wallNode)
@@ -964,7 +967,7 @@ export function generateExtrudedWall(
   const v = { x: wallEnd.x - wallStart.x, y: wallEnd.y - wallStart.y }
   const L = Math.sqrt(v.x * v.x + v.y * v.y)
   if (L < 1e-9) {
-    return new THREE.BufferGeometry()
+    return createEmptyGeometry()
   }
   const boundaryPoints = getWallMiterBoundaryPoints(wallNode, miterData)
   const polyPoints = isCurvedWall(wallNode)
@@ -975,7 +978,7 @@ export function generateExtrudedWall(
       )
     : getWallPlanFootprint(wallNode, miterData)
   if (polyPoints.length < 3) {
-    return new THREE.BufferGeometry()
+    return createEmptyGeometry()
   }
 
   // Transform world coordinates to wall-local coordinates
