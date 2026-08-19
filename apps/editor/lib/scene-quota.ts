@@ -50,13 +50,27 @@ function positiveInt(env: NodeJS.ProcessEnv | undefined, key: string): number | 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
 }
 
+function parseQuotaBytes(env: NodeJS.ProcessEnv | undefined, key: string): number | undefined {
+  const raw = env?.[key]
+  if (raw === undefined || raw.trim() === '') return undefined
+  const parsed = Number.parseInt(raw, 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return undefined
+  
+  // If the user specified a small number (e.g. 500 or 10), they almost certainly meant MB
+  // rather than bytes, despite the ENV key name. No reasonable quota is under 100,000 bytes.
+  if (parsed < 100000) {
+    return parsed * MB
+  }
+  return parsed
+}
+
 export function resolveSceneQuotas(env: NodeJS.ProcessEnv = process.env): SceneQuotaTable {
   const limits = (tier: SceneQuotaTier): SceneQuotaLimits => ({
     maxScenes: positiveInt(env, ENV_KEYS[tier].maxScenes) ?? DEFAULT_SCENE_QUOTAS[tier].maxScenes,
     maxTotalBytes:
-      positiveInt(env, ENV_KEYS[tier].maxTotalBytes) ?? DEFAULT_SCENE_QUOTAS[tier].maxTotalBytes,
+      parseQuotaBytes(env, ENV_KEYS[tier].maxTotalBytes) ?? DEFAULT_SCENE_QUOTAS[tier].maxTotalBytes,
     maxSceneBytes:
-      positiveInt(env, ENV_KEYS[tier].maxSceneBytes) ?? DEFAULT_SCENE_QUOTAS[tier].maxSceneBytes,
+      parseQuotaBytes(env, ENV_KEYS[tier].maxSceneBytes) ?? DEFAULT_SCENE_QUOTAS[tier].maxSceneBytes,
   })
   return { guest: limits('guest'), free: limits('free') }
 }
