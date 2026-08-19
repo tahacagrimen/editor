@@ -20,7 +20,6 @@ import {
 } from '../services/storey'
 import {
   getSceneHistoryPauseDepth,
-  notifySceneCommit,
   pauseSceneHistory,
   resumeSceneHistory,
 } from '../store/history-control'
@@ -1675,17 +1674,6 @@ export function initSpaceDetectionSync(sceneStore: any, editorStore: any): () =>
 
     isProcessing = true
     pauseSceneHistory(sceneStore)
-    const oldState = sceneStore.getState()
-    const beforeSnapshot = {
-      nodes: oldState.nodes,
-      rootNodeIds: oldState.rootNodeIds,
-      collections: oldState.collections,
-      savedViews: oldState.savedViews,
-      definitions: oldState.definitions,
-      materials: oldState.materials,
-      unitPrices: oldState.unitPrices,
-      installedPlugins: oldState.installedPlugins,
-    }
 
     try {
       runSpaceDetection([...levelsToUpdate], sceneStore, editorStore, nodes)
@@ -1693,20 +1681,17 @@ export function initSpaceDetectionSync(sceneStore: any, editorStore: any): () =>
       resumeSceneHistory(sceneStore)
 
       const currentState = sceneStore.getState()
-      const currentSnapshot = {
-        nodes: currentState.nodes,
-        rootNodeIds: currentState.rootNodeIds,
-        collections: currentState.collections,
-        savedViews: currentState.savedViews,
-        definitions: currentState.definitions,
-        materials: currentState.materials,
-        unitPrices: currentState.unitPrices,
-        installedPlugins: currentState.installedPlugins,
-      }
 
-      // Emit a local commit so collaborators receive the generated slabs/ceilings
-      // without creating a separate undo step.
-      notifySceneCommit({ origin: 'local', before: beforeSnapshot, current: currentSnapshot })
+      // No explicit `notifySceneCommit` here. The generated slabs/ceilings are
+      // paused-history writes (no Zundo entry of their own), but they are still
+      // captured by the collaboration diff: `subscribeCollaborationCommits`
+      // snapshots the live store at flush time, so the enclosing edit's commit
+      // already carries the auto nodes. Emitting our own commit was worse than
+      // redundant — its `before` is the state *after* the triggering wall edit,
+      // so when this runs inside `runAsSingleSceneHistoryStep` the transaction
+      // coalescer kept that polluted `before`, `createCollaborationBatch` treated
+      // the just-drawn wall as retained (never a `node-create`), and the echo
+      // deleted it the moment the batch landed.
 
       previousSnapshots.clear()
       const postRunSnapshots = levelStructureSnapshots(currentState.nodes)

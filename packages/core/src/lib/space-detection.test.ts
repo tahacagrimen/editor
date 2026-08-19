@@ -15,6 +15,14 @@ import {
 import { encodeTerrainField } from './terrain-codec'
 import { applyHeightPatch, createTerrainField, flattenPatch } from './terrain-field'
 
+type RafFn = (cb: (time: number) => void) => number
+;(globalThis as unknown as { requestAnimationFrame?: RafFn }).requestAnimationFrame ??= (cb) => {
+  cb(0)
+  return 0
+}
+;(globalThis as unknown as { cancelAnimationFrame?: (id: number) => void }).cancelAnimationFrame ??=
+  () => {}
+
 const square: Array<[number, number]> = [
   [0, 0],
   [4, 0],
@@ -943,76 +951,98 @@ describe('planAutoSlabsForLevel', () => {
   })
 })
 
-import { subscribeSceneCommits } from '../store/history-control'
+import type { SceneCommit } from '../store/history-control'
+import { runAsSingleSceneHistoryStep } from '../store/history-control'
+import useScene, { clearSceneHistory } from '../store/use-scene'
+import {
+  collaborationSnapshot,
+  createCollaborationBatch,
+  subscribeCollaborationCommits,
+} from '../collaboration/scene-collaboration'
 
-describe('initSpaceDetectionSync commits', () => {
-  test('emits a commit containing reconciliation-generated nodes', () => {
-    // Start with a room missing one wall
-    const wallData = [
+describe('initSpaceDetectionSync collaboration commit', () => {
+  test('closing a room still emits a node-create for the closing wall', async () => {
+    const buildingId = 'building_space_commit' as AnyNodeId
+    const levelId = 'level_space_commit' as AnyNodeId
+
+    // A room missing its left wall — the exact in-session "draw the last wall"
+    // gesture that used to lose the wall.
+    const walls = [
       { id: 'wall_bottom', start: [0, 0], end: [4, 0] },
       { id: 'wall_right', start: [4, 0], end: [4, 3] },
       { id: 'wall_top', start: [4, 3], end: [0, 3] },
-    ] as const
-    const walls = wallData.map((wall) =>
-      WallNode.parse({ ...wall, parentId: 'level_0', height: 2.5 }),
-    )
-    const initialNodes = Object.fromEntries(
-      [
-        BuildingNode.parse({ id: 'building_a', children: ['level_0'] }),
-        LevelNode.parse({
-          id: 'level_0',
-          level: 0,
-          height: 2.5,
-          parentId: 'building_a',
-          children: walls.map((w) => w.id),
-        }),
-        ...walls,
-      ].map((n) => [n.id, n]),
-    ) as Record<string, AnyNode>
-
-    const sceneStore = createSceneStoreStub(initialNodes)
-    const unsubscribeSync = initSpaceDetectionSync(sceneStore, createEditorStoreStub())
-
-    let capturedCommit: any = null
-    const unsubscribeCommits = subscribeSceneCommits((commit) => {
-      capturedCommit = commit
+    ].map((wall) => WallNode.parse({ ...wall, parentId: levelId, height: 2.5 }))
+    const level = LevelNode.parse({
+      id: levelId,
+      parentId: buildingId,
+      level: 0,
+      height: 2.5,
+      children: walls.map((wall) => wall.id),
     })
+    const building = BuildingNode.parse({ id: buildingId, parentId: null, children: [levelId] })
+    const nodes = Object.fromEntries(
+      [building, level, ...walls].map((node) => [node.id, node]),
+    ) as Record<AnyNodeId, AnyNode>
+
+    useScene.setState({
+      nodes,
+      rootNodeIds: [buildingId],
+      dirtyNodes: new Set<AnyNodeId>(),
+      collections: {},
+      materials: {},
+      readOnly: false,
+    } as never)
+    clearSceneHistory()
+
+    const unsubscribeSync = initSpaceDetectionSync(useScene, createEditorStoreStub())
+
+    const commits: SceneCommit[] = []
+    const stopCollaboration = subscribeCollaborationCommits(
+      () => {
+        const state = useScene.getState()
+        return collaborationSnapshot(state.nodes, state.rootNodeIds, state)
+      },
+      (commit) => commits.push(commit),
+    )
 
     try {
-      // Add the final wall to close the room, which should trigger space detection
+      // Draw the closing wall the way wall-drafting does: one undo step.
       const closingWall = WallNode.parse({
         id: 'wall_left',
-        parentId: 'level_0',
+        parentId: levelId,
         height: 2.5,
         start: [0, 3],
         end: [0, 0],
       })
-      const current = sceneStore.getState().nodes
-      const level = current.level_0 as AnyNode & { children: string[] }
-      sceneStore.setNodes({
-        ...current,
-        wall_left: closingWall,
-        level_0: { ...level, children: [...level.children, 'wall_left'] } as AnyNode,
+      runAsSingleSceneHistoryStep(useScene, () => {
+        useScene.getState().createNode(closingWall, levelId)
+      })
+      await Promise.resolve()
+
+      expect(commits).toHaveLength(1)
+      const batch = createCollaborationBatch(commits[0]!.before, commits[0]!.current, {
+        actorId: 'alice',
+        clock: 1,
+        operationId: 'close-room',
       })
 
-      // The sync runs synchronously after setNodes via subscribe
-      expect(capturedCommit).not.toBeNull()
-      expect(capturedCommit.origin).toBe('local')
+      // The closing wall must be transmitted as a create. The old space-detection
+      // commit polluted `before` with the just-drawn wall, so it was treated as
+      // retained and the server echo deleted it.
+      expect(
+        batch.changes.some(
+          (change) => change.type === 'node-create' && change.node.id === 'wall_left',
+        ),
+      ).toBe(true)
 
-      // The commit's current snapshot should contain the auto-generated slab and ceiling
-      const committedNodes = capturedCommit.current.nodes
-      const autoSlabs = Object.values(committedNodes).filter((n) => n.type === 'slab')
-      const autoCeilings = Object.values(committedNodes).filter((n) => n.type === 'ceiling')
-
-      expect(autoSlabs.length).toBeGreaterThan(0)
-      expect(autoCeilings.length).toBeGreaterThan(0)
-
-      // The before snapshot should NOT have them
-      const beforeNodes = capturedCommit.before.nodes
-      expect(Object.values(beforeNodes).filter((n) => n.type === 'slab')).toHaveLength(0)
-      expect(Object.values(beforeNodes).filter((n) => n.type === 'ceiling')).toHaveLength(0)
+      // The reconciliation-generated slab rides the same commit's `current`.
+      expect(
+        Object.values(commits[0]!.current.nodes).some(
+          (node) => node.type === 'slab' && node.id !== 'wall_left',
+        ),
+      ).toBe(true)
     } finally {
-      unsubscribeCommits()
+      stopCollaboration()
       unsubscribeSync()
     }
   })
