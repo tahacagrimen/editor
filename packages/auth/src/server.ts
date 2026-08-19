@@ -52,6 +52,7 @@ export function createAuth(config: AuthConfig) {
   return betterAuth({
     appName: config.appName,
     baseURL: config.baseURL,
+    trustHost: true,
     secret: config.secret,
     basePath: '/api/auth',
     database: drizzleAdapter(config.db, {
