@@ -18,7 +18,7 @@ import {
 import { LocalizedContent } from '../../../../lib/i18n'
 import { cn } from '../../../../lib/utils'
 
-const MAP_HEIGHT = 176
+const MAP_DEFAULT_HEIGHT = 176
 const DEFAULT_ZOOM = 11
 /** A drag under this many pixels is a click that wobbled, not a pan. */
 const CLICK_SLOP_PX = 4
@@ -43,22 +43,26 @@ export function LocationMap({
   latitude,
   longitude,
   onPick,
+  height: requestedHeight,
 }: {
   latitude: number | undefined
   longitude: number | undefined
   onPick: (position: LonLat) => void
+  /** Override the default map height (px). Used by the parcel modal for a larger view. */
+  height?: number
 }) {
+  const mapHeight = requestedHeight ?? MAP_DEFAULT_HEIGHT
   const located = typeof latitude === 'number' && typeof longitude === 'number'
   const [center, setCenter] = useState<LonLat>(() =>
     located ? { latitude, longitude } : { latitude: 41.0082, longitude: 28.9784 },
   )
   const [zoom, setZoom] = useState(DEFAULT_ZOOM)
   const [width, setWidth] = useState(0)
-  // Measured, not assumed. `MAP_HEIGHT` is what the box asks for, but a flex
+  // Measured, not assumed. `mapHeight` is what the box asks for, but a flex
   // parent can shrink it — and then the tiles are laid out for one height while
   // a click is measured against another, so the pick lands hundreds of metres
   // from where the user aimed.
-  const [height, setHeight] = useState(MAP_HEIGHT)
+  const [height, setHeight] = useState(mapHeight)
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
@@ -211,7 +215,7 @@ export function LocationMap({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         ref={containerRef}
-        style={{ height: MAP_HEIGHT, cursor: 'crosshair' }}
+        style={{ height: mapHeight, cursor: 'crosshair' }}
       >
         {tilesFailed ? (
           <div className="flex h-full items-center justify-center px-4 text-center text-[11px] text-muted-foreground/60">

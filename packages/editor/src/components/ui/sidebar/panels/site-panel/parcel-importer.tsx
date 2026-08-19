@@ -10,6 +10,13 @@ import { cn } from '../../../../../lib/utils'
 import { PanelSection } from '../../../controls/panel-section'
 import { ActionButton, ActionGroup } from '../../../controls/action-button'
 import { formatAreaLabel } from '../../../../../lib/measurements'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../../../primitives/dialog'
 
 export function ParcelImporter({ siteNode }: { siteNode: SiteNode }) {
   const provider = useContext(ParcelProviderContext)
@@ -23,7 +30,7 @@ export function ParcelImporter({ siteNode }: { siteNode: SiteNode }) {
   const updateNode = useScene((state) => state.updateNode)
   const unit = useViewer((state) => state.unit)
 
-  const [mode, setMode] = useState<'map' | 'form'>('map')
+  const [mapOpen, setMapOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ParcelResult | null>(null)
@@ -47,25 +54,25 @@ export function ParcelImporter({ siteNode }: { siteNode: SiteNode }) {
   const [parsel, setParsel] = useState('')
 
   useEffect(() => {
-    if (!provider?.regions || mode !== 'form') return
+    if (!provider?.regions) return
     const controller = new AbortController()
     provider.regions.getIller(controller.signal).then(setIller).catch(() => {})
     return () => controller.abort()
-  }, [provider, mode])
+  }, [provider])
 
   useEffect(() => {
-    if (!provider?.regions || !ilId || mode !== 'form') return
+    if (!provider?.regions || !ilId) return
     const controller = new AbortController()
     provider.regions.getIlceler(ilId, controller.signal).then(setIlceler).catch(() => {})
     return () => controller.abort()
-  }, [provider, ilId, mode])
+  }, [provider, ilId])
 
   useEffect(() => {
-    if (!provider?.regions || !ilceId || mode !== 'form') return
+    if (!provider?.regions || !ilceId) return
     const controller = new AbortController()
     provider.regions.getMahalleler(ilceId, controller.signal).then(setMahalleler).catch(() => {})
     return () => controller.abort()
-  }, [provider, ilceId, mode])
+  }, [provider, ilceId])
 
   if (!provider) return null
 
@@ -227,87 +234,95 @@ export function ParcelImporter({ siteNode }: { siteNode: SiteNode }) {
           />
         </div>
       </div>
-      <ActionGroup className="mt-2">
-        <ActionButton 
-          disabled={!mahalleId || !ada || !parsel || loading} 
-          onClick={handleSearchForm}
-          label={loading ? t('Searching...') : t('Find Parcel')}
-        />
-      </ActionGroup>
+      <div className="mt-2 flex gap-2">
+        <ActionGroup className="flex-1">
+          <ActionButton 
+            disabled={!mahalleId || !ada || !parsel || loading} 
+            onClick={handleSearchForm}
+            label={loading ? t('Searching...') : t('Find Parcel')}
+          />
+        </ActionGroup>
+        <button
+          className="flex shrink-0 items-center gap-1 rounded border border-border/50 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+          onClick={() => setMapOpen(true)}
+          type="button"
+        >
+          <MapPin className="h-3 w-3" />
+          {t('Select from map')}
+        </button>
+      </div>
     </div>
+  )
+
+  const renderResult = (inModal: boolean) => (
+    <>
+      {error && (
+        <div className={cn("text-xs text-destructive", inModal ? "" : "px-3 pb-2")}>
+          {error}
+        </div>
+      )}
+      {result && (
+        <div className={cn("flex flex-col gap-2 rounded-md border border-border/50 bg-accent/30 p-2 text-xs", inModal ? "mt-2" : "mx-3 mb-2")}>
+          {/* Laid out as label/value rows rather than one composed sentence:
+              the dictionary is keyed by exact source strings, so a
+              "… ada … parsel" line assembled at runtime could never match. */}
+          <div className="flex justify-between text-muted-foreground">
+            <span>{t('Location')}</span>
+            <span className="font-medium text-foreground">
+              {[result.il, result.ilce, result.mahalle].filter(Boolean).join(' / ')}
+            </span>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>{t('Block / parcel')}</span>
+            <span className="font-medium text-foreground">
+              {result.ada} / {result.parsel}
+            </span>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>{t('Registered area')}</span>
+            <span className="font-medium text-foreground">
+              {result.registeredArea !== undefined
+                ? formatAreaLabel(result.registeredArea, unit, 2)
+                : '-'}
+            </span>
+          </div>
+          <div className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">
+            {t('Land registry reference data — not a surveyed site plan.')}
+          </div>
+          <ActionGroup>
+            <ActionButton onClick={() => { handleApply(); setMapOpen(false); }} label={t('Apply to Site')} />
+          </ActionGroup>
+        </div>
+      )}
+    </>
   )
 
   return (
     <LocalizedContent>
       <PanelSection title={t('Import Parcel')}>
-        <div className="flex items-center gap-2 px-3 pb-2">
-          <button
-            className={cn('flex-1 rounded py-1 text-xs transition-colors', mode === 'map' ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-accent/50')}
-            onClick={() => setMode('map')}
-          >
-            {t('From Map')}
-          </button>
-          <button
-            className={cn('flex-1 rounded py-1 text-xs transition-colors', mode === 'form' ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-accent/50')}
-            onClick={() => setMode('form')}
-          >
-            {t('Block / parcel')}
-          </button>
-        </div>
+        {renderForm()}
+        {renderResult(false)}
+      </PanelSection>
 
-        {mode === 'map' ? (
-          <div className="relative">
-            <LocationMap latitude={latitude} longitude={longitude} onPick={handleSearchMap} />
+      <Dialog onOpenChange={setMapOpen} open={mapOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{t('Select parcel from map')}</DialogTitle>
+            <DialogDescription>
+              {t('Click the map to select a parcel.')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="relative overflow-hidden rounded-md">
+            <LocationMap height={400} latitude={latitude} longitude={longitude} onPick={handleSearchMap} />
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             )}
           </div>
-        ) : (
-          renderForm()
-        )}
-
-        {error && (
-          <div className="px-3 pb-2 text-xs text-destructive">
-            {error}
-          </div>
-        )}
-
-        {result && (
-          <div className="mx-3 mb-2 flex flex-col gap-2 rounded-md border border-border/50 bg-accent/30 p-2 text-xs">
-            {/* Laid out as label/value rows rather than one composed sentence:
-                the dictionary is keyed by exact source strings, so a
-                "… ada … parsel" line assembled at runtime could never match. */}
-            <div className="flex justify-between text-muted-foreground">
-              <span>{t('Location')}</span>
-              <span className="font-medium text-foreground">
-                {[result.il, result.ilce, result.mahalle].filter(Boolean).join(' / ')}
-              </span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>{t('Block / parcel')}</span>
-              <span className="font-medium text-foreground">
-                {result.ada} / {result.parsel}
-              </span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>{t('Registered area')}</span>
-              <span className="font-medium text-foreground">
-                {result.registeredArea !== undefined
-                  ? formatAreaLabel(result.registeredArea, unit, 2)
-                  : '-'}
-              </span>
-            </div>
-            <div className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">
-              {t('Land registry reference data — not a surveyed site plan.')}
-            </div>
-            <ActionGroup>
-              <ActionButton onClick={handleApply} label={t('Apply to Site')} />
-            </ActionGroup>
-          </div>
-        )}
-      </PanelSection>
+          {renderResult(true)}
+        </DialogContent>
+      </Dialog>
     </LocalizedContent>
   )
 }

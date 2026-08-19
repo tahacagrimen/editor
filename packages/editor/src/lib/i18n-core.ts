@@ -1573,6 +1573,9 @@ const tr: Record<string, string> = {
   // Parcel importer (TKGM)
   'Import Parcel': 'Parsel içe aktar',
   'From Map': 'Haritadan',
+  'Select from map': 'Haritadan seç',
+  'Select parcel from map': 'Haritadan parsel seç',
+  'Click the map to select a parcel.': 'Haritaya tıklayarak parsel seçin.',
   City: 'İl',
   District: 'İlçe',
   Neighborhood: 'Mahalle',
