@@ -1,0 +1,15 @@
+--- .github/workflows/deploy-image.yml
++++ .github/workflows/deploy-image.yml
+@@ -51,4 +51,11 @@
+             echo "COOLIFY_WEBHOOK_URL is not set - image pushed, deployment not triggered."
+             exit 0
+           fi
+-          curl -fsS -X GET "$WEBHOOK" -H "Authorization: Bearer $TOKEN"
++          
++          # Capture the HTTP status code to provide better error messages
++          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$WEBHOOK" -H "Authorization: Bearer $TOKEN")
++          if [ "$HTTP_STATUS" = "404" ]; then
++            echo "Error: Coolify returned 404 Not Found. Please check that COOLIFY_WEBHOOK_URL in GitHub Secrets is the full 'Deploy Webhook' URL from your Coolify dashboard (e.g. https://coolify.example.com/api/v1/deploy?uuid=...)"
++            exit 1
++          fi
++          curl -fsS -X GET "$WEBHOOK" -H "Authorization: Bearer $TOKEN"
