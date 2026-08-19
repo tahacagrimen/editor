@@ -9,7 +9,6 @@ import {
   useTranslation,
 } from '@pascal-app/editor'
 import { LogOut, Settings } from 'lucide-react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { authClient } from '../../lib/auth-client'
 
@@ -44,11 +43,9 @@ export function ProfileMenu({ user }: ProfileMenuProps) {
       <DropdownMenuTrigger asChild>
         <button className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-foreground outline-none ring-offset-background transition-colors hover:bg-accent/80 focus-visible:ring-2 focus-visible:ring-ring">
           {user.image ? (
-            <Image
+            <img
               src={user.image}
               alt={user.name || user.email}
-              width={32}
-              height={32}
               className="h-full w-full rounded-full object-cover"
             />
           ) : (
