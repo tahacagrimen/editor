@@ -81,6 +81,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
   const t = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [sceneName, setSceneName] = useState(meta.name)
   const versionRef = useRef(meta.version)
   const lastCheckpointAtRef = useRef(Date.now())
   /**
@@ -138,7 +139,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
 
       const result = await saveSceneGraph({
         sceneId: meta.id,
-        name: meta.name,
+        name: sceneName,
         graph: graph as SaveGraph,
         previousGraph: lastSentGraphRef.current as SaveGraph | null,
         version: versionRef.current,
@@ -263,8 +264,20 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
         // Swallow errors silently; thumbnail upload is best-effort.
       })
     },
-    [meta.id],
+    [meta.id, sceneName],
   )
+  const handleTitleChange = async (newName: string) => {
+    setSceneName(newName)
+    try {
+      await fetch(`/api/scenes/${meta.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName }),
+      })
+    } catch (err) {
+      console.error('Failed to rename scene', err)
+    }
+  }
 
   return (
     <div className="relative h-screen w-screen">
@@ -328,7 +341,8 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
               </>
             }
             status={saveError ? t('Not saved') : `${t('Version')} ${liveVersion}`}
-            title={meta.name}
+            title={sceneName}
+            onTitleChange={handleTitleChange}
           />
         }
         onLoad={handleLoad}
