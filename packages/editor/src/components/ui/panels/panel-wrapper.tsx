@@ -283,7 +283,7 @@ export function PanelWrapper({
             )}
             <button
               aria-expanded={!collapsed}
-              aria-label={collapsed ? 'Expand panel' : 'Collapse panel'}
+              aria-label={translate(collapsed ? 'Expand panel' : 'Collapse panel', locale)}
               className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               onClick={() => setCollapsed((c) => !c)}
               type="button"

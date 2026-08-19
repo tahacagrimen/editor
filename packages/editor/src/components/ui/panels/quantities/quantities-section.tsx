@@ -10,7 +10,7 @@ import {
 import { useViewer } from '@pascal-app/viewer'
 import { Download, FileSpreadsheet, Sigma } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { LocalizedContent } from '../../../../lib/i18n'
+import { LocalizedContent, useTranslation } from '../../../../lib/i18n'
 import {
   downloadQuantityCsv,
   formatCost,
@@ -105,7 +105,20 @@ function LinePriceInput({ lineKey, unitPrice }: { lineKey: string; unitPrice: Un
  * subtree walk plus each kind's own arithmetic, so it stays cheap enough to run
  * on edit; if a scene ever outgrows that, `dirtyNodes` is the incremental hook.
  */
+/**
+ * Takeoff groups arrive as the schema's own enum value ('hinged',
+ * 'single-hung'), which no dictionary entry matches — the entries are written
+ * against the Title Case label the kind's panel shows. Normalise, then look up.
+ */
+function titleCaseEnum(value: string): string {
+  return value
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 export function QuantitiesSection() {
+  const t = useTranslation()
   const levelId = useViewer((state) => state.selection.levelId)
   const unit = useViewer((state) => state.unit)
   const metricNotation = useViewer((state) => state.metricNotation)
@@ -184,7 +197,9 @@ export function QuantitiesSection() {
                     <div className="flex flex-col px-3 py-0.5" key={`${line.key}-${line.group ?? ''}`}>
                       <div className="flex items-baseline gap-2 text-[11px]">
                         <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                          {line.group ? `${line.group} · ${line.label}` : line.label}
+                          {line.group
+                            ? `${t(titleCaseEnum(line.group))} · ${t(line.label)}`
+                            : t(line.label)}
                         </span>
                         <span className="shrink-0 text-foreground tabular-nums">
                           {formatQuantity(line.value, line.unit, unit, metricNotation)}

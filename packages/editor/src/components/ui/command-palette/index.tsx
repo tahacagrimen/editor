@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogTitle } from './../../../components/ui/pri
 import { getLevelDisplayName } from '@pascal-app/core'
 import { useCommandRegistry } from '../../../store/use-command-registry'
 import { usePaletteViewRegistry } from '../../../store/use-palette-view-registry'
+import { useTranslation } from '../../../lib/i18n'
 
 // ---------------------------------------------------------------------------
 // Open + navigation state store
@@ -88,8 +89,12 @@ function Item({
   badge?: string | (() => string)
   navigate?: boolean
 }) {
-  const resolvedLabel = resolve(label)
-  const resolvedBadge = badge ? resolve(badge) : undefined
+  // A function label escapes the JSX walk that translates the string ones —
+  // `translateReactNode` only touches props it finds as strings — so resolve
+  // first and translate the result here.
+  const t = useTranslation()
+  const resolvedLabel = t(resolve(label))
+  const resolvedBadge = badge ? t(resolve(badge)) : undefined
 
   return (
     <Command.Item

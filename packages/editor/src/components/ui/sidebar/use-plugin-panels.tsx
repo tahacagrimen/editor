@@ -11,6 +11,7 @@ import {
   useEffect,
   useSyncExternalStore,
 } from 'react'
+import { LocalizedContent } from '../../../lib/i18n'
 import useEditor from '../../../store/use-editor'
 import { editorHostPanelRegistry, type EditorHostPanel } from '../../../lib/plugin-panels'
 import { ErrorBoundary } from '../primitives/error-boundary'
@@ -50,13 +51,15 @@ function renderIconRef(ref: IconRef): ReactNode {
 
 function PluginPanelCrashed({ label }: { label: string }) {
   return (
-    <div className="flex flex-col gap-2 p-4 text-sm">
-      <p className="font-medium text-sidebar-foreground">"{label}" plugin crashed</p>
-      <p className="text-sidebar-foreground/50 text-xs">
-        This panel hit an error and was unloaded for this session. The rest of the editor is
-        unaffected — reload to try again.
-      </p>
-    </div>
+    <LocalizedContent>
+      <div className="flex flex-col gap-2 p-4 text-sm">
+        <p className="font-medium text-sidebar-foreground">{`"${label}" plugin crashed`}</p>
+        <p className="text-sidebar-foreground/50 text-xs">
+          This panel hit an error and was unloaded for this session. The rest of the editor is
+          unaffected — reload to try again.
+        </p>
+      </div>
+    </LocalizedContent>
   )
 }
 
@@ -71,7 +74,13 @@ function resolvePanelComponent(panel: EditorHostPanel): ComponentType {
   const Lazy = lazy(panel.component)
   const Wrapped: ComponentType = () => (
     <ErrorBoundary fallback={<PluginPanelCrashed label={panel.label} />}>
-      <Suspense fallback={<div className="p-4 text-sidebar-foreground/50 text-sm">Loading…</div>}>
+      <Suspense
+        fallback={
+          <LocalizedContent>
+            <div className="p-4 text-sidebar-foreground/50 text-sm">Loading…</div>
+          </LocalizedContent>
+        }
+      >
         <Lazy />
       </Suspense>
     </ErrorBoundary>

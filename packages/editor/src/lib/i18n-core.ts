@@ -2545,27 +2545,35 @@ const tr: Record<string, string> = {
   'Type *N or /N': '*N veya /N yazın',
   'Click a path (Wall/Fence/etc.)': 'Bir yol seçin (Duvar/Çit/vb.)',
 
-  // Plugins panel.
-  Plugins: 'Eklentiler',
-  'Add focused tools and content to this project.':
-    'Bu projeye odaklı araçlar ve içerikler ekleyin.',
-  'All plugins': 'Tüm eklentiler',
-  Installed: 'Yüklü',
-  'Not installed': 'Yüklü değil',
-  'Adds a new tool panel to the editor.': 'Editöre yeni bir araç paneli ekler.',
-  'Plugin ID': 'Eklenti kimliği',
-  Plugin: 'Eklenti',
-  'View plugin': 'Eklentiyi görüntüle',
-  Install: 'Yükle',
-  Uninstall: 'Kaldır',
-  'Create a Pascal plugin': 'Pascal eklentisi oluştur',
+  // Nature plugin metadata the plugins panel lists (the plugin's own panel copy
+  // lives in `pascalorg/plugin-trees`, out of this dictionary's reach).
   Nature: 'Doğa',
   'Procedural trees, flowers, and grasses for outdoor scenes.':
     'Dış mekân sahneleri için prosedürel ağaçlar, çiçekler ve otlar.',
 
+  // Takeoff rows and the enum-valued groups they split by.
+  'Face area (interior, gross)': 'İç yüzey alanı (brüt)',
+  'Face area (exterior, gross)': 'Dış yüzey alanı (brüt)',
+  Hopper: 'Alttan menteşeli',
+  'Garage Sectional': 'Seksiyonel garaj',
+  'Garage Rollup': 'Sarmal garaj',
+  'Garage Tiltup': 'Devrilir garaj',
+
+  // Command palette entries whose label is computed at open time.
+  'Camera: Switch to Orthographic': 'Kamera: Ortografiğe geç',
+  'Camera: Switch to Perspective': 'Kamera: Perspektife geç',
+
   // CAD import failures.
   'That file could not be read as a DXF.': 'Bu dosya DXF olarak okunamadı.',
   'The drawing could not be imported.': 'Çizim içe aktarılamadı.',
+}
+
+/**
+ * Look a noun up as it appears mid-sentence: the dictionary is keyed by the
+ * capitalised label the UI shows, but a composed string lowercases it first.
+ */
+function lookupNoun(noun: string): string {
+  return tr[noun] ?? tr[noun.charAt(0).toUpperCase() + noun.slice(1)] ?? noun
 }
 
 function translateDynamicText(text: string): string | null {
@@ -2682,6 +2690,24 @@ function translateDynamicText(text: string): string | null {
     const suffix = room[2] ? ` ${tr[room[2]] ?? room[2]}` : ''
     return `Oda ${room[1]}${suffix}`
   }
+
+  const showResolved = text.match(/^Show resolved \((\d+)\)$/)
+  if (showResolved) return `Çözülenleri göster (${showResolved[1]})`
+
+  // Visibility toggles compose their label from a section title that the JSX
+  // walk has usually already translated ("Show süpürgelik"), so the composed
+  // string never matches a key. Turkish puts the verb last either way.
+  const showSomething = text.match(/^Show (.+)$/)
+  const shown = showSomething?.[1]
+  if (shown) return `${lookupNoun(shown)} göster`
+
+  const hideSomething = text.match(/^Hide (.+)$/)
+  const hidden = hideSomething?.[1]
+  if (hidden) return `${lookupNoun(hidden)} gizle`
+
+  const pluginCrashed = text.match(/^"(.+)" plugin crashed$/)
+  const crashedLabel = pluginCrashed?.[1]
+  if (crashedLabel) return `"${tr[crashedLabel] ?? crashedLabel}" eklentisi çöktü`
 
   // Auto-generated node names — "Wall 3", "Slab 1", "Base Cabinet 2". Last,
   // because the specific rules above ("Floor 2" is a storey, not a slab)
