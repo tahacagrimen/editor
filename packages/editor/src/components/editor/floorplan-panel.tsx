@@ -2973,22 +2973,15 @@ function isGridAligned(value: number, step: number): boolean {
 
 // Keep visible grid spacing above a minimum pixel size so zooming stays evenly distributed.
 function getVisibleGridSteps(
-  viewportWidth: number,
-  surfaceWidth: number,
+  _viewportWidth: number,
+  _surfaceWidth: number,
 ): {
   minorStep: number
   majorStep: number
 } {
-  const pixelsPerUnit = surfaceWidth / Math.max(viewportWidth, Number.EPSILON)
-  let minorStep = WALL_GRID_STEP
-
-  while (minorStep * pixelsPerUnit < MIN_GRID_SCREEN_SPACING) {
-    minorStep *= 2
-  }
-
   return {
-    minorStep,
-    majorStep: Math.max(MAJOR_GRID_STEP, minorStep * 2),
+    minorStep: WALL_GRID_STEP,
+    majorStep: MAJOR_GRID_STEP,
   }
 }
 
