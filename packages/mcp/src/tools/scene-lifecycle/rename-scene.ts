@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type { SceneOperations } from '../../operations'
 import { SceneNotFoundError, SceneVersionConflictError } from '../../storage/types'
 import { ErrorCode, throwMcpError } from '../errors'
+import { appendLiveSceneEvent } from '../live-sync'
 
 export const renameSceneInput = {
   id: z.string().min(1).max(64),
@@ -38,6 +39,7 @@ export function registerRenameScene(server: McpServer, operations: SceneOperatio
         const meta = await operations.renameStoredScene(id, newName, {
           ...(expectedVersion !== undefined ? { expectedVersion } : {}),
         })
+        await appendLiveSceneEvent(operations, meta.id, meta.version, 'rename_scene')
         const payload = {
           id: meta.id,
           name: meta.name,

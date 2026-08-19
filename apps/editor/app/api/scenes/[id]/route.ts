@@ -195,6 +195,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const operations = await getSceneOperations()
   try {
     const meta = await operations.renameStoredScene(id, parsed.data.name, { expectedVersion })
+    if (operations.canAppendSceneEvents) {
+      await operations.appendSceneEvent({ sceneId: id, version: meta.version, kind: 'rename_scene' })
+    }
     return sceneApiJson(request, meta, {
       headers: { ETag: `"${meta.version}"` },
     })

@@ -117,12 +117,19 @@ const PropertyLineSection = memo(function PropertyLineSection() {
   const viewerUnit = useViewer((state) => state.unit)
   const metricNotation = useViewer((state) => state.metricNotation)
 
+  const isEditing = mode === 'edit'
+
+  useEffect(() => {
+    if (siteNode?.locked && isEditing) {
+      setMode('select')
+    }
+  }, [siteNode?.locked, isEditing, setMode])
+
   if (!siteNode) return null
 
   const points = siteNode.polygon?.points ?? []
   const area = calculatePolygonArea(points)
   const perimeter = calculatePerimeter(points)
-  const isEditing = mode === 'edit'
 
   // Property-line coordinates and readouts follow the metric/imperial toggle.
   const isImperial = viewerUnit === 'imperial'
@@ -132,12 +139,6 @@ const PropertyLineSection = memo(function PropertyLineSection() {
   const handleToggleEdit = () => {
     setMode(isEditing ? 'select' : 'edit')
   }
-
-  useEffect(() => {
-    if (siteNode.locked && isEditing) {
-      setMode('select')
-    }
-  }, [siteNode.locked, isEditing, setMode])
 
   const handlePointChange = (index: number, axis: 0 | 1, value: number) => {
     const newPoints = [...points.map((p) => [...p] as [number, number])]

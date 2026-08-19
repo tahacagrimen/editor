@@ -2596,6 +2596,7 @@ export function applySceneSnapshot(
       definitions: snapshot.definitions,
       installedPlugins: snapshot.installedPlugins,
       materials: snapshot.materials,
+      unitPrices: snapshot.unitPrices,
     })
     useScene.temporal.getState().clear()
   } finally {

@@ -124,10 +124,12 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
 
   const handleSave = useCallback(
     async (graph: SceneGraph, options?: { keepalive?: boolean }) => {
-      await waitForCollaboration()
+      if (!options?.keepalive) {
+        await waitForCollaboration()
+      }
       const graphJson = sceneGraphSignature(graph)
       if (graphJson === authoritativeGraphJsonRef.current) return
-      if (sceneModelSignature(graph) !== authoritativeModelJsonRef.current) return
+      if (!options?.keepalive && sceneModelSignature(graph) !== authoritativeModelJsonRef.current) return
 
       // Autosave writes drafts, which the store overwrites in place instead of
       // filing away. History still has to advance, so a save is promoted to a
@@ -214,8 +216,9 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
       try {
         const response = await fetch(`/api/scenes/${meta.id}`)
         if (!response.ok) return
-        const scene = (await response.json()) as { version: number; graph: PersistedSceneGraph }
+        const scene = (await response.json()) as { version: number; name: string; graph: PersistedSceneGraph }
         if (cancelled || scene.version <= versionRef.current) return
+        setSceneName(scene.name)
         applyLiveScene({ ...notification, version: scene.version, graph: scene.graph })
       } catch {
         // A failed fetch is not fatal: the next event re-queues, and a client
@@ -269,11 +272,23 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
   const handleTitleChange = async (newName: string) => {
     setSceneName(newName)
     try {
-      await fetch(`/api/scenes/${meta.id}`, {
+      const response = await fetch(`/api/scenes/${meta.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'If-Match': String(versionRef.current),
+        },
         body: JSON.stringify({ name: newName }),
       })
+      if (!response.ok) {
+        if (response.status === 409) {
+          setConflict(true)
+        }
+        throw new Error(`Failed to rename scene (${response.status})`)
+      }
+      const data = await response.json() as { version: number }
+      versionRef.current = data.version
+      setLiveVersion(data.version)
     } catch (err) {
       console.error('Failed to rename scene', err)
     }
