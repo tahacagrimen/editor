@@ -124,7 +124,6 @@ function annotationCategoryForRole(role: FloorplanAnnotationRole): FloorplanAnno
       return 'openingMarks'
     case 'structural-grid':
     case 'column-center':
-    case 'xline':
       return 'structuralGrids'
     case 'room-label':
       return 'roomLabels'

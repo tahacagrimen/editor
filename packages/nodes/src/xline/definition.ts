@@ -51,6 +51,9 @@ export const xlineDefinition: NodeDefinition<typeof XLineNode> = {
     icon: { kind: 'url', src: '/icons/xline.webp' },
     paletteSection: 'structure',
     paletteOrder: 71,
+    // Not in the Build palette — it is armed from the bottom bar, next to the
+    // measure button, not from the structure tool grid.
+    hidden: true,
   },
 
   mcp: {

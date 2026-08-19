@@ -8,6 +8,7 @@ import { cn } from './../../../lib/utils'
 import useEditor from './../../../store/use-editor'
 import { ActionButton } from './action-button'
 import { MeasurementControl } from './measurement-control'
+import { XLineControl } from './xline-control'
 
 type ControlId = 'select' | 'box-select' | 'zone' | 'delete'
 
@@ -110,6 +111,7 @@ export function ControlModes() {
         return (
           <Fragment key={c.id}>
             {c.id === 'delete' ? <MeasurementControl /> : null}
+            {c.id === 'delete' ? <XLineControl /> : null}
             <ActionButton
               className={cn(
                 'group text-muted-foreground',

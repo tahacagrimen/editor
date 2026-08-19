@@ -1,5 +1,4 @@
 import type { FloorplanGeometry, GeometryContext, XLineNode } from '@pascal-app/core'
-import { withFloorplanGeometryMetadata } from '@pascal-app/editor'
 
 // The "infinite" line is a long finite segment — there is no infinite SVG
 // primitive and `GeometryContext.viewState` carries no viewport bounds, so we
@@ -27,24 +26,26 @@ export function buildXLineFloorplan(
   const active = selected || highlighted
   const stroke = active && palette ? palette.selectedStroke : XLINE_STROKE
 
-  return withFloorplanGeometryMetadata(
-    {
-      kind: 'group',
-      children: [
-        {
-          kind: 'line',
-          x1: midX - ux * XLINE_HALF_LENGTH,
-          y1: midY - uy * XLINE_HALF_LENGTH,
-          x2: midX + ux * XLINE_HALF_LENGTH,
-          y2: midY + uy * XLINE_HALF_LENGTH,
-          stroke,
-          strokeWidth: active ? 1.6 : 1,
-          strokeDasharray: '10 4 2 4',
-          vectorEffect: 'non-scaling-stroke',
-          pointerEvents: 'stroke',
-        },
-      ],
-    },
-    { annotationRole: 'xline' },
-  )
+  // Deliberately NOT tagged with an annotation role. Structural grids and
+  // column centers are tagged `structuralGrids`, which `resolveFloorplan-
+  // AnnotationVisibility` hides in the default floorplan mode — a reference
+  // line the user places has to render in the default view, so it stays an
+  // ordinary always-visible node rather than a toggleable annotation.
+  return {
+    kind: 'group',
+    children: [
+      {
+        kind: 'line',
+        x1: midX - ux * XLINE_HALF_LENGTH,
+        y1: midY - uy * XLINE_HALF_LENGTH,
+        x2: midX + ux * XLINE_HALF_LENGTH,
+        y2: midY + uy * XLINE_HALF_LENGTH,
+        stroke,
+        strokeWidth: active ? 1.6 : 1,
+        strokeDasharray: '10 4 2 4',
+        vectorEffect: 'non-scaling-stroke',
+        pointerEvents: 'stroke',
+      },
+    ],
+  }
 }

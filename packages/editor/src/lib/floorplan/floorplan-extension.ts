@@ -28,7 +28,6 @@ export type FloorplanAnnotationRole =
   | 'column-center'
   | 'room-label'
   | 'stair-annotation'
-  | 'xline'
 
 export type FloorplanSchedule = {
   id: string
