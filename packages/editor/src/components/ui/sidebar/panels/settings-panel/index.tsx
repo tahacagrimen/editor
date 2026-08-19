@@ -343,10 +343,11 @@ export function SettingsPanel({
 
   return (
     <LocalizedContent>
-      <div className="flex flex-col gap-6 p-3">
-        <div className="space-y-4">
-          <label className="font-medium text-muted-foreground text-xs uppercase">
-            Preferences
+      <div className="flex h-full flex-col overflow-y-auto">
+        <div className="flex flex-col gap-6 p-3">
+          <div className="space-y-4">
+            <label className="font-medium text-muted-foreground text-xs uppercase">
+              Preferences
           </label>
 
           <div className="space-y-2">
@@ -679,6 +680,7 @@ export function SettingsPanel({
           Clear & Start New
         </Button>
       </div>
+        </div>
       </div>
     </LocalizedContent>
   )

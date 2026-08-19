@@ -175,7 +175,7 @@ export function ZonePanel() {
   }
 
   return (
-    <div className="py-1">
+    <div className="flex h-full flex-col overflow-y-auto py-1">
       {levelZones.length === 0 ? (
         <div className="px-3 py-4 text-muted-foreground text-sm">
           No zones on this level.{' '}
