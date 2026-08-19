@@ -120,7 +120,12 @@ describe('camera pose', () => {
       target: [2, 1, 3] as [number, number, number],
       projection: 'perspective' as const,
     }
-    const first = stepCameraPoseInterpolation([0, 0, 0], [0, 0, 0], { pose: destination, perspectiveFov: null }, 0.016)
+    const first = stepCameraPoseInterpolation(
+      [0, 0, 0],
+      [0, 0, 0],
+      { pose: destination, perspectiveFov: null },
+      0.016,
+    )
     expect(first.settled).toBe(false)
     expect(first.position[0]).toBeGreaterThan(0)
     expect(first.position[0]).toBeLessThan(destination.position[0])
@@ -129,7 +134,12 @@ describe('camera pose', () => {
     let target = first.target
     let settled = first.settled
     for (let frame = 0; frame < 240 && !settled; frame += 1) {
-      const step = stepCameraPoseInterpolation(position, target, { pose: destination, perspectiveFov: null }, 0.016)
+      const step = stepCameraPoseInterpolation(
+        position,
+        target,
+        { pose: destination, perspectiveFov: null },
+        0.016,
+      )
       position = step.position
       target = step.target
       settled = step.settled
@@ -158,7 +168,14 @@ describe('camera pose', () => {
       settled: true,
       target: destination.target,
     })
-    expect(stepCameraPoseInterpolation([0, 0, 0], [0, 0, 0], { pose: destination, perspectiveFov: null }, Number.NaN)).toEqual({
+    expect(
+      stepCameraPoseInterpolation(
+        [0, 0, 0],
+        [0, 0, 0],
+        { pose: destination, perspectiveFov: null },
+        Number.NaN,
+      ),
+    ).toEqual({
       position: [0, 0, 0],
       settled: false,
       target: [0, 0, 0],

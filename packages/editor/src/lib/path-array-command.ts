@@ -3,18 +3,17 @@ import {
   type AnyNodeId,
   cloneNodesInto,
   collectSubtree,
+  type FenceNode,
   runAsSingleSceneHistoryStep,
   useScene,
   type WallNode,
-  type FenceNode,
 } from '@pascal-app/core'
-import { type ArrayCommand, type Vector3, translateNodeGeometry } from './array-duplicate'
-import { rotateNodeGeometry } from './polar-array-command'
+import { type ArrayCommand, translateNodeGeometry, type Vector3 } from './array-duplicate'
 
 export function runPathArrayCommand(
   command: ArrayCommand,
   nodeIds: AnyNodeId[],
-  pathNode: AnyNode
+  pathNode: AnyNode,
 ): { createdIds: AnyNodeId[]; copies: number } | null {
   const scene = useScene.getState()
   if (scene.readOnly) return null
@@ -53,9 +52,7 @@ export function runPathArrayCommand(
 
   if (totalLength === 0) return null
 
-  const stepDistance = command.kind === 'repeat'
-    ? totalLength / count
-    : totalLength / count // Usually path array just evenly distributes 'count' items along the path
+  const stepDistance = command.kind === 'repeat' ? totalLength / count : totalLength / count // Usually path array just evenly distributes 'count' items along the path
 
   const sources: Array<{ root: AnyNode; descendants: AnyNode[] }> = []
   for (const id of nodeIds) {
@@ -86,11 +83,11 @@ export function runPathArrayCommand(
 
   runAsSingleSceneHistoryStep(useScene, () => {
     // How many copies? count?
-    const numCopies = command.kind === 'repeat' ? count : (count - 1)
-    
+    const numCopies = command.kind === 'repeat' ? count : count - 1
+
     for (let i = 1; i <= numCopies; i++) {
       const distanceAlongPath = stepDistance * i
-      
+
       // Find the point on the path
       let traveled = 0
       let pointOnPath: Vector3 | null = null
@@ -104,7 +101,10 @@ export function runPathArrayCommand(
             segment.start[1],
             segment.start[2] + (segment.end[2] - segment.start[2]) * t,
           ]
-          angleRad = -Math.atan2(segment.end[2] - segment.start[2], segment.end[0] - segment.start[0])
+          angleRad = -Math.atan2(
+            segment.end[2] - segment.start[2],
+            segment.end[0] - segment.start[0],
+          )
           break
         }
         traveled += segment.length
@@ -115,22 +115,21 @@ export function runPathArrayCommand(
         const lastSegment = segments[segments.length - 1]
         if (!lastSegment) break
         pointOnPath = lastSegment.end
-        angleRad = -Math.atan2(lastSegment.end[2] - lastSegment.start[2], lastSegment.end[0] - lastSegment.start[0])
+        angleRad = -Math.atan2(
+          lastSegment.end[2] - lastSegment.start[2],
+          lastSegment.end[0] - lastSegment.start[0],
+        )
       }
 
       // Offset from original centroid to new point
-      const offset: Vector3 = [
-        pointOnPath[0] - centroidX,
-        0,
-        pointOnPath[2] - centroidZ,
-      ]
+      const offset: Vector3 = [pointOnPath[0] - centroidX, 0, pointOnPath[2] - centroidZ]
 
       for (const { root, descendants } of sources) {
         const parentId = (root as any).parentId
         let newRoot = translateNodeGeometry(root, offset)
         // Optionally rotate to align with path (might be too complex, let's keep it simple or just rotate by angleRad)
         // newRoot = rotateNodeGeometry(newRoot, pointOnPath, angleRad)
-        
+
         const cloned = cloneNodesInto([newRoot, ...descendants], {
           rootId: root.id,
           ...(parentId ? { parentId } : {}),

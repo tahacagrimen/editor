@@ -22,6 +22,7 @@ import {
   Spherical,
   Vector3,
 } from 'three'
+import { useReducedMotion } from '../../hooks/use-reduced-motion'
 import { isCameraKeyReserved } from '../../lib/camera-key-reservation'
 import {
   type CameraPoseApplicationPlan,
@@ -40,9 +41,8 @@ import {
   collectSceneBounds,
   resolveZoomSelectionIds,
 } from '../../lib/zoom-framing'
-import { cameraPoseStore, publishCameraPose } from '../../store/camera-pose-store'
+import { publishCameraPose } from '../../store/camera-pose-store'
 import useEditor from '../../store/use-editor'
-import { useReducedMotion } from '../../hooks/use-reduced-motion'
 import {
   useActiveHandleDrag,
   useEndpointReshape,
@@ -728,7 +728,7 @@ export const CustomCameraControls = () => {
           [tempTarget.x, tempTarget.y, tempTarget.z],
           activePose.plan,
           delta,
-          reducedMotion
+          reducedMotion,
         )
         try {
           // Transition-enabled calls retain one rest listener each, so this frame loop owns smoothing.

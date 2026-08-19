@@ -1,14 +1,16 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Color, DepthTexture, Layers, Matrix4, type Object3D, Scene, UnsignedByteType } from 'three'
+import {
+  Color,
+  type DepthTexture,
+  Layers,
+  Matrix4,
+  type Object3D,
+  Scene,
+  UnsignedByteType,
+} from 'three'
 import { ssgi } from 'three/addons/tsl/display/SSGINode.js'
 import { denoise } from 'three/examples/jsm/tsl/display/DenoiseNode.js'
-import {
-  backFaceMaskMat,
-  capScene,
-  frontFaceMaskMat,
-  syncCapScene,
-} from '../../lib/scene-clipping-cap'
 import {
   add,
   diffuseColor,
@@ -39,6 +41,12 @@ import { PERF_OVERLAY_ENABLED, pushGpuSample } from '../../lib/gpu-perf'
 import { inkedEdges } from '../../lib/ink-edges'
 import { GRID_LAYER, OVERLAY_LAYER, SCENE_LAYER, ZONE_LAYER } from '../../lib/layers'
 import { mergedOutline } from '../../lib/merged-outline-node'
+import {
+  backFaceMaskMat,
+  capScene,
+  frontFaceMaskMat,
+  syncCapScene,
+} from '../../lib/scene-clipping-cap'
 import { getSceneTheme } from '../../lib/scene-themes'
 import { packNormalToRGB, unpackRGBToNormal } from '../../lib/tsl-compat'
 import useViewer from '../../store/use-viewer'
@@ -431,7 +439,7 @@ const PostProcessingPasses = ({
         const maskBackPass = pass(scene, camera, { depthBuffer: false, depthTexture })
         maskBackPass.setLayers(sceneOnlyLayers)
         maskBackPass.overrideMaterial = backFaceMaskMat
-        
+
         const maskFrontPass = pass(scene, camera, { depthBuffer: false, depthTexture })
         maskFrontPass.setLayers(sceneOnlyLayers)
         maskFrontPass.overrideMaterial = frontFaceMaskMat
@@ -440,7 +448,7 @@ const PostProcessingPasses = ({
 
         // The mask value is (backFaceHits - frontFaceHits). If > 0.5, we are inside solid poché.
         const maskValue = sub(maskBackPass.r, maskFrontPass.r).clamp(0, 1)
-        
+
         // Use step to get a crisp boolean mask
         const isCapped = step(0.5, maskValue)
         compositedSceneColor = mix(compositedSceneColor, capPass.rgb, isCapped)
@@ -805,7 +813,7 @@ const PostProcessingPasses = ({
           retryCount: retryCountRef.current,
           rendererCtor: (renderer as any).constructor?.name,
         },
-        error
+        error,
       )
       if (renderPipelineRef.current) {
         renderPipelineRef.current.dispose()

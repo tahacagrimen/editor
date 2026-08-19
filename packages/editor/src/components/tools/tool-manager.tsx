@@ -28,6 +28,8 @@ import { Alignment3DGuideLayer } from '../editor/alignment-3d-guide-layer'
 import { Elevation3DGuideLayer } from '../editor/elevation-3d-guide-layer'
 import { OpeningGuides3DLayer } from '../editor/opening-guides-3d-layer'
 import { WallSnapBeaconLayer } from '../editor/wall-snap-beacon-layer'
+import { PathArrayTool } from './array/path-array-tool'
+import { PolarArrayTool } from './array/polar-array-tool'
 import { ElevatorTool } from './elevator/elevator-tool'
 import { MoveTool } from './item/move-tool'
 import { RoofTool } from './roof/roof-tool'
@@ -38,8 +40,6 @@ import { TerrainSculptTool } from './site/terrain-sculpt-tool'
 import { StairTool } from './stair/stair-tool'
 import { ZoneBoundaryEditor } from './zone/zone-boundary-editor'
 import { ZoneTool } from './zone/zone-tool'
-import { PolarArrayTool } from './array/polar-array-tool'
-import { PathArrayTool } from './array/path-array-tool'
 
 // Cache lazy tool components keyed by their loader so React.lazy isn't
 // re-invoked across renders.

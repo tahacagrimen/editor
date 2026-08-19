@@ -44,7 +44,7 @@ const scratchNormal = new Vector3()
  */
 export function setSceneClippingPlanes(next: readonly SceneClippingPlaneInput[]): void {
   const previousLength = sceneClippingPlanes.length
-  
+
   for (let index = 0; index < next.length; index++) {
     const input = next[index]
     if (!input) continue
@@ -58,7 +58,7 @@ export function setSceneClippingPlanes(next: readonly SceneClippingPlaneInput[])
   if (sceneClippingPlanes.length > next.length) {
     sceneClippingPlanes.length = next.length
   }
-  
+
   if (sceneClippingPlanes.length !== previousLength) {
     notifyListeners()
   }

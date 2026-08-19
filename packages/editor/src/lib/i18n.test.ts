@@ -24,6 +24,27 @@ describe('translate', () => {
       'Görsel ilk noktaya göre 1.25 kat ölçeklenecek.',
     )
   })
+
+  test('translates auto-generated node names without stealing the storey names', () => {
+    expect(translate('Wall 12', 'tr')).toBe('Duvar 12')
+    expect(translate('Slab 3', 'tr')).toBe('Döşeme 3')
+    expect(translate('Base Cabinet 7', 'tr')).toBe('Alt Dolap 7')
+    // The storey rules run first: "Floor 2" is a level, not a numbered slab.
+    expect(translate('Floor 2', 'tr')).toBe('2. Kat')
+    expect(translate('Basement 1', 'tr')).toBe('1. Bodrum Kat')
+    // A name the user typed has no entry to match and stays as typed.
+    expect(translate('Kuzey blok 4', 'tr')).toBe('Kuzey blok 4')
+  })
+
+  test('translates visibility toggles composed from an already-translated title', () => {
+    expect(translate('Show grid', 'tr')).toBe('Izgara göster')
+    expect(translate('Hide skirting', 'tr')).toBe('Süpürgelik gizle')
+    // The section title reaches the label localised, so the noun is Turkish
+    // before the verb is appended.
+    expect(translate('Show süpürgelik', 'tr')).toBe('süpürgelik göster')
+    // The comment toggle keeps its own count-carrying wording.
+    expect(translate('Show resolved (3)', 'tr')).toBe('Çözülenleri göster (3)')
+  })
 })
 
 describe('translateReactNode', () => {

@@ -6,7 +6,7 @@ import {
   runAsSingleSceneHistoryStep,
   useScene,
 } from '@pascal-app/core'
-import { type ArrayCommand, type Vector3 } from './array-duplicate'
+import type { ArrayCommand, Vector3 } from './array-duplicate'
 
 function rotateVector(v: Vector3, center: Vector3, angleRad: number): Vector3 {
   const dx = v[0] - center[0]
@@ -29,7 +29,12 @@ function rotateValue(value: unknown, center: Vector3, angleRad: number): unknown
     const rotated = rotateVector([a, 0, b], center, angleRad)
     return [rotated[0], rotated[2]]
   }
-  if (value.length === 3 && typeof a === 'number' && typeof b === 'number' && typeof c === 'number') {
+  if (
+    value.length === 3 &&
+    typeof a === 'number' &&
+    typeof b === 'number' &&
+    typeof c === 'number'
+  ) {
     // 3D [x, y, z]
     const rotated = rotateVector([a, b, c], center, angleRad)
     return [rotated[0], rotated[1], rotated[2]]
@@ -40,7 +45,7 @@ function rotateValue(value: unknown, center: Vector3, angleRad: number): unknown
 export function rotateNodeGeometry<N>(node: N, center: Vector3, angleRad: number): N {
   const source = node as unknown as Record<string, unknown>
   const next: Record<string, unknown> = { ...source }
-  
+
   // Rotate translatable fields
   const TRANSLATABLE_FIELDS = ['position', 'start', 'end', 'polygon', 'holes', 'path']
   for (const field of TRANSLATABLE_FIELDS) {
@@ -64,7 +69,7 @@ export function rotateNodeGeometry<N>(node: N, center: Vector3, angleRad: number
 export function runPolarArrayCommand(
   command: ArrayCommand,
   nodeIds: AnyNodeId[],
-  center: Vector3
+  center: Vector3,
 ): { createdIds: AnyNodeId[]; copies: number } | null {
   const scene = useScene.getState()
   if (scene.readOnly) return null
@@ -77,10 +82,8 @@ export function runPolarArrayCommand(
   if (count < 1) return null
 
   // Step depends on divide or repeat
-  const stepAngle = command.kind === 'repeat' 
-    ? (totalAngleRad / count) 
-    : (totalAngleRad / count)
-  
+  const stepAngle = command.kind === 'repeat' ? totalAngleRad / count : totalAngleRad / count
+
   const sources: Array<{ root: AnyNode; descendants: AnyNode[] }> = []
   for (const id of nodeIds) {
     const subtree = collectSubtree(scene.nodes, id)
@@ -91,8 +94,8 @@ export function runPolarArrayCommand(
   const createdIds: AnyNodeId[] = []
 
   runAsSingleSceneHistoryStep(useScene, () => {
-    const numCopies = command.kind === 'repeat' ? count : (count - 1)
-    
+    const numCopies = command.kind === 'repeat' ? count : count - 1
+
     for (let i = 1; i <= numCopies; i++) {
       const angle = stepAngle * i
       for (const { root, descendants } of sources) {

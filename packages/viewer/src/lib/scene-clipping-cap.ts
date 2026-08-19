@@ -67,4 +67,3 @@ export function syncCapScene() {
     mesh.quaternion.setFromUnitVectors(Z_AXIS, plane.normal)
   }
 }
-

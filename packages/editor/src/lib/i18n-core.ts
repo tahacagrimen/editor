@@ -2563,6 +2563,51 @@ const tr: Record<string, string> = {
   'Camera: Switch to Orthographic': 'Kamera: Ortografiğe geç',
   'Camera: Switch to Perspective': 'Kamera: Perspektife geç',
 
+  and: 've',
+
+  // Privacy policy — KVKK rights and the retention/deletion clauses.
+  '7. Your Rights (GDPR & KVKK Compliance)': '7. Haklarınız (GDPR ve KVKK Uyumu)',
+  '8. Data Retention & Deletion Policy': '8. Veri Saklama ve Silme Politikası',
+  'Under the General Data Protection Regulation (GDPR) and the Turkish Personal Data Protection Law (KVKK), you have the right to:':
+    'Genel Veri Koruma Tüzüğü (GDPR) ve Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında şu haklara sahipsiniz:',
+  'Request deletion of your data (Right to be Forgotten)':
+    'Verilerinizin silinmesini talep etme (Unutulma Hakkı)',
+  'Export your data and projects in a machine-readable format (JSON) (Data Portability)':
+    'Verilerinizi ve projelerinizi makine tarafından okunabilir bir biçimde (JSON) dışa aktarma (Veri Taşınabilirliği)',
+  'To exercise any of these rights, you can use the account settings page or contact us at':
+    'Bu haklardan herhangi birini kullanmak için hesap ayarları sayfasını kullanabilir veya bizimle iletişime geçebilirsiniz:',
+  'We retain your data for as long as your account is active. When you request account deletion:':
+    'Hesabınız etkin olduğu sürece verilerinizi saklarız. Hesabınızın silinmesini talep ettiğinizde:',
+  'Your account and associated scenes are immediately soft-deleted and become inaccessible.':
+    'Hesabınız ve ilişkili sahneleriniz anında geçici olarak silinir ve erişilemez hâle gelir.',
+  'After 30 days, all your personal data, scenes, and associated files are permanently deleted from our servers.':
+    '30 gün sonra tüm kişisel verileriniz, sahneleriniz ve ilişkili dosyalarınız sunucularımızdan kalıcı olarak silinir.',
+  'System logs and analytics data are automatically purged after 90 days in accordance with our retention policy.':
+    'Sistem günlükleri ve analiz verileri, saklama politikamız uyarınca 90 gün sonra otomatik olarak silinir.',
+
+  'Routing (structure + utilities)': 'Tesisat güzergâhı (yapı + tesisat)',
+
+  // Keyboard-shortcut notes added after the dialog's first localisation pass.
+  'With 2+ objects selected, in 2D and 3D alike: drag the selection (or its dashed box) to slide it; click it to pick it up and place with the next click.':
+    "2'den fazla nesne seçiliyken, 2B ve 3B'de aynı şekilde: kaydırmak için seçimi (veya kesikli kutusunu) sürükleyin; almak için tıklayın ve bir sonraki tıklamayla yerleştirin.",
+  'Keeps the current selection; only dissolves the session group.':
+    'Mevcut seçimi korur; yalnızca oturum grubunu dağıtır.',
+  'Press again to release. The lock sets the direction; a typed value then sets the distance along it.':
+    'Bırakmak için tekrar basın. Kilit yönü belirler; ardından yazılan değer o yöndeki mesafeyi belirler.',
+  'A tap, not a hold. The mode is per context and always shown on the HUD chip; "off" is how snapping is turned off.':
+    'Basılı tutmak değil, bir kez basmak. Mod bağlama özeldir ve her zaman HUD rozetinde görünür; yakalamayı kapatmak için "kapalı" seçilir.',
+
+  // Scene themes (`packages/viewer/src/lib/scene-themes.ts`).
+  Studio: 'Stüdyo',
+  Paper: 'Kâğıt',
+  Sunset: 'Gün batımı',
+  Overcast: 'Kapalı hava',
+  Blueprint: 'Teknik çizim',
+  Mediterranean: 'Akdeniz',
+  Twilight: 'Alacakaranlık',
+  Night: 'Gece',
+  Verdant: 'Yeşillik',
+
   // CAD import failures.
   'That file could not be read as a DXF.': 'Bu dosya DXF olarak okunamadı.',
   'The drawing could not be imported.': 'Çizim içe aktarılamadı.',

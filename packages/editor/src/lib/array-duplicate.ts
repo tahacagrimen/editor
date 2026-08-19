@@ -59,7 +59,7 @@ export function parseArrayCommand(buffer: string): ArrayCommand | null {
 
   const count = Number.parseInt(digits, 10)
   if (!Number.isSafeInteger(count) || count < 1 || count > MAX_ARRAY_COUNT) return null
-  
+
   const value = valueStr ? Number.parseFloat(valueStr) : undefined
   if (valueStr && (!Number.isFinite(value) || value! <= 0)) return null
 

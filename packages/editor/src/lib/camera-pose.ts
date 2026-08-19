@@ -107,7 +107,8 @@ export function planCameraPoseApplication(value: unknown): CameraPoseApplication
       pose.projection === 'perspective' && pose.fov !== undefined
         ? Math.min(Math.max(pose.fov, MIN_PERSPECTIVE_FOV), MAX_PERSPECTIVE_FOV)
         : null,
-    transitionDuration: typeof duration === 'number' && Number.isFinite(duration) ? duration : undefined,
+    transitionDuration:
+      typeof duration === 'number' && Number.isFinite(duration) ? duration : undefined,
   }
 }
 
@@ -178,7 +179,7 @@ export function stepCameraPoseInterpolation(
   const destination = plan.pose
   const finiteDelta = Number.isFinite(deltaSeconds) ? deltaSeconds : 0
   const elapsed = Math.min(Math.max(finiteDelta, 0), MAX_INTERPOLATION_DELTA_SECONDS)
-  
+
   let timeConstant = INTERPOLATION_TIME_CONSTANT_SECONDS
   if (plan.transitionDuration && plan.transitionDuration > 0) {
     // 5 time constants ~ 99% settled
