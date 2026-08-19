@@ -5,6 +5,7 @@ import {
   CursorSphere,
   EDITOR_LAYER,
   isGridSnapActive,
+  LocalizedContent,
   triggerSFX,
   useEditor,
 } from '@pascal-app/editor'
@@ -230,17 +231,19 @@ const DuctFittingTool = () => {
       >
         {/* Same pill shell as DimensionPill so the placement HUD matches
             the drawing / dragging readouts. */}
-        <div className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border/60 bg-background/90 px-4 py-1.5 text-xs tabular-nums shadow-sm backdrop-blur">
-          <span className="font-medium text-foreground">Axis {axis.toUpperCase()}</span>
-          <span aria-hidden className="text-muted-foreground">
-            ·
-          </span>
-          <span className="text-muted-foreground">R/T rotate</span>
-          <span aria-hidden className="text-muted-foreground">
-            ·
-          </span>
-          <span className="text-muted-foreground">⌥ axis</span>
-        </div>
+        <LocalizedContent>
+          <div className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border/60 bg-background/90 px-4 py-1.5 text-xs tabular-nums shadow-sm backdrop-blur">
+            <span className="font-medium text-foreground">Axis {axis.toUpperCase()}</span>
+            <span aria-hidden className="text-muted-foreground">
+              ·
+            </span>
+            <span className="text-muted-foreground">R/T rotate</span>
+            <span aria-hidden className="text-muted-foreground">
+              ·
+            </span>
+            <span className="text-muted-foreground">⌥ axis</span>
+          </div>
+        </LocalizedContent>
       </Html>
       {/* Port-snap halo so the user sees the click will mate, not free-place. */}
       {placement.snapPort && (

@@ -1,5 +1,6 @@
 import { useSolarAnalysis } from '@pascal-app/viewer'
 import { Play, Square } from 'lucide-react'
+import { LocalizedContent } from '../../../../lib/i18n'
 
 export function SolarAnalysisUI() {
   const isAnalyzing = useSolarAnalysis((state) => state.isAnalyzing)
@@ -11,7 +12,8 @@ export function SolarAnalysisUI() {
   const hasResults = results !== null
 
   return (
-    <div className="flex flex-col border-border/40 border-b">
+    <LocalizedContent>
+      <div className="flex flex-col border-border/40 border-b">
       <div className="flex items-center gap-1.5 px-3 pt-3 pb-1.5">
         <span className="font-semibold text-muted-foreground text-xs tracking-tight">
           Annual Solar Insolation
@@ -72,5 +74,6 @@ export function SolarAnalysisUI() {
         </p>
       )}
     </div>
+    </LocalizedContent>
   )
 }

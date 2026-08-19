@@ -2466,6 +2466,106 @@ const tr: Record<string, string> = {
   'Profile updated successfully': 'Profil başarıyla güncellendi',
   'Password updated successfully': 'Parola başarıyla güncellendi',
   'All other sessions revoked': 'Diğer tüm oturumlar kapatıldı',
+
+  // Account settings: data export, account deletion and personal access tokens.
+  'Export Data': 'Verileri Dışa Aktar',
+  'Download a copy of your profile and all your scenes in JSON format.':
+    'Profilinizin ve tüm sahnelerinizin bir kopyasını JSON biçiminde indirin.',
+  'Data exported successfully': 'Veriler başarıyla dışa aktarıldı',
+  'Failed to export data': 'Veriler dışa aktarılamadı',
+  'Delete Account': 'Hesabı Sil',
+  'Permanently delete your account, scenes, and all associated data. This action cannot be undone after 30 days.':
+    'Hesabınızı, sahnelerinizi ve ilişkili tüm verileri kalıcı olarak silin. Bu işlem 30 gün sonra geri alınamaz.',
+  'Are you sure you want to delete your account? This action cannot be undone after 30 days.':
+    'Hesabınızı silmek istediğinizden emin misiniz? Bu işlem 30 gün sonra geri alınamaz.',
+  'Account deletion cancelled.': 'Hesap silme işlemi iptal edildi.',
+  'Failed to delete account': 'Hesap silinemedi',
+  'An error occurred': 'Bir hata oluştu',
+  'An unexpected error occurred': 'Beklenmeyen bir hata oluştu',
+  'Failed to sign in with Google': 'Google ile giriş yapılamadı',
+  'Your name': 'Adınız',
+  'Personal Access Tokens': 'Kişisel Erişim Anahtarları',
+  'Tokens you have generated that can be used to access the Pascal API.':
+    'Pascal API’sine erişmek için oluşturduğunuz anahtarlar.',
+  'Token created successfully. Copy it now, you will not be able to see it again:':
+    'Anahtar oluşturuldu. Şimdi kopyalayın, bir daha göremeyeceksiniz:',
+  'Token name': 'Anahtar adı',
+  'Generate new token': 'Yeni anahtar oluştur',
+  'Are you sure you want to revoke this token?':
+    'Bu anahtarı iptal etmek istediğinizden emin misiniz?',
+  'No tokens found.': 'Anahtar bulunamadı.',
+  'Refresh list': 'Listeyi yenile',
+  Revoke: 'İptal et',
+  Scopes: 'Kapsamlar',
+  Created: 'Oluşturulma',
+  'Loading...': 'Yükleniyor...',
+
+  // Cookie consent, terms checkbox and share link.
+  'We value your privacy': 'Gizliliğinize önem veriyoruz',
+  'Learn more': 'Daha fazla bilgi',
+  Accept: 'Kabul et',
+  'I have read and agree to the': 'Okudum ve kabul ediyorum:',
+  'Sign in to share scenes': 'Sahneleri paylaşmak için giriş yapın',
+
+  // Privacy policy clauses the KVKK section added after the first pass.
+  'Withdraw your consent or opt out of marketing communications':
+    'Onayınızı geri çekmek veya pazarlama iletişimlerinden çıkmak',
+  'We hold this data for a 30-day grace period to prevent accidental loss.':
+    'Kazara veri kaybını önlemek için bu verileri 30 günlük bir bekleme süresi boyunca saklarız.',
+
+  // Graphics quality (settings panel).
+  'Graphics Quality': 'Grafik Kalitesi',
+  'Adjust render and shadow quality.': 'Render ve gölge kalitesini ayarlayın.',
+  Medium: 'Orta',
+  High: 'Yüksek',
+
+  // Annual solar insolation analysis.
+  'Annual Solar Insolation': 'Yıllık Güneş Işınımı',
+  Analyze: 'Analiz et',
+  'Calculating...': 'Hesaplanıyor...',
+  'Surfaces are colored by annual sun exposure.':
+    'Yüzeyler yıllık güneşlenme süresine göre renklendirilir.',
+  Shadowed: 'Gölgede',
+  'Full Sun': 'Tam güneş',
+  'Calculate annual solar exposure per surface.': 'Her yüzey için yıllık güneşlenmeyi hesaplayın.',
+
+  // Array actions and their in-scene prompt.
+  'Polar Array': 'Kutupsal Dizi',
+  'Path Array': 'Yol Dizisi',
+  'Click to place center': 'Merkezi yerleştirmek için tıklayın',
+
+  // Quantities take-off pricing controls.
+  Currency: 'Para birimi',
+  'Unit price': 'Birim fiyat',
+
+  Clear: 'Temizle',
+  Material: 'Malzeme',
+  'M surface': 'M yüzey',
+  'Type *N [Angle]': '*N [Açı] yazın',
+  'Type *N or /N': '*N veya /N yazın',
+  'Click a path (Wall/Fence/etc.)': 'Bir yol seçin (Duvar/Çit/vb.)',
+
+  // Plugins panel.
+  Plugins: 'Eklentiler',
+  'Add focused tools and content to this project.':
+    'Bu projeye odaklı araçlar ve içerikler ekleyin.',
+  'All plugins': 'Tüm eklentiler',
+  Installed: 'Yüklü',
+  'Not installed': 'Yüklü değil',
+  'Adds a new tool panel to the editor.': 'Editöre yeni bir araç paneli ekler.',
+  'Plugin ID': 'Eklenti kimliği',
+  Plugin: 'Eklenti',
+  'View plugin': 'Eklentiyi görüntüle',
+  Install: 'Yükle',
+  Uninstall: 'Kaldır',
+  'Create a Pascal plugin': 'Pascal eklentisi oluştur',
+  Nature: 'Doğa',
+  'Procedural trees, flowers, and grasses for outdoor scenes.':
+    'Dış mekân sahneleri için prosedürel ağaçlar, çiçekler ve otlar.',
+
+  // CAD import failures.
+  'That file could not be read as a DXF.': 'Bu dosya DXF olarak okunamadı.',
+  'The drawing could not be imported.': 'Çizim içe aktarılamadı.',
 }
 
 function translateDynamicText(text: string): string | null {
@@ -2582,6 +2682,13 @@ function translateDynamicText(text: string): string | null {
     const suffix = room[2] ? ` ${tr[room[2]] ?? room[2]}` : ''
     return `Oda ${room[1]}${suffix}`
   }
+
+  // Auto-generated node names — "Wall 3", "Slab 1", "Base Cabinet 2". Last,
+  // because the specific rules above ("Floor 2" is a storey, not a slab)
+  // claim the numbered names whose base word means something else here.
+  const numbered = text.match(/^(.+) (\d+)$/)
+  const numberedBase = numbered?.[1]
+  if (numberedBase && tr[numberedBase]) return `${tr[numberedBase]} ${numbered[2]}`
 
   return null
 }

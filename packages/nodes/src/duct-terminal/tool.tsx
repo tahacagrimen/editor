@@ -18,6 +18,7 @@ import {
   getFloorStackPreviewPosition,
   isGridSnapActive,
   isMagneticSnapActive,
+  LocalizedContent,
   triggerSFX,
   useEditor,
 } from '@pascal-app/editor'
@@ -419,29 +420,31 @@ const DuctTerminalTool = () => {
         style={{ pointerEvents: 'none', userSelect: 'none' }}
         zIndexRange={[100, 0]}
       >
-        <div className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border/60 bg-background/90 px-4 py-1.5 text-xs tabular-nums shadow-sm backdrop-blur">
-          {placement.snapped && (
-            <>
-              <span className="font-medium text-primary">Snapped to duct</span>
-              <span aria-hidden className="text-muted-foreground">
-                ·
-              </span>
-            </>
-          )}
-          <span className="font-medium text-foreground">Mount {mountLabel}</span>
-          <span aria-hidden className="text-muted-foreground">
-            ·
-          </span>
-          <span className="text-muted-foreground">M surface</span>
-          {effectiveMount !== 'wall' && (
-            <>
-              <span aria-hidden className="text-muted-foreground">
-                ·
-              </span>
-              <span className="text-muted-foreground">R/T rotate</span>
-            </>
-          )}
-        </div>
+        <LocalizedContent>
+          <div className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border/60 bg-background/90 px-4 py-1.5 text-xs tabular-nums shadow-sm backdrop-blur">
+            {placement.snapped && (
+              <>
+                <span className="font-medium text-primary">Snapped to duct</span>
+                <span aria-hidden className="text-muted-foreground">
+                  ·
+                </span>
+              </>
+            )}
+            <span className="font-medium text-foreground">Mount {mountLabel}</span>
+            <span aria-hidden className="text-muted-foreground">
+              ·
+            </span>
+            <span className="text-muted-foreground">M surface</span>
+            {effectiveMount !== 'wall' && (
+              <>
+                <span aria-hidden className="text-muted-foreground">
+                  ·
+                </span>
+                <span className="text-muted-foreground">R/T rotate</span>
+              </>
+            )}
+          </div>
+        </LocalizedContent>
       </Html>
     </LevelOffsetGroup>
   )

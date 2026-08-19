@@ -26,6 +26,10 @@ export const InlineRenameInput = memo(function InlineRenameInput({
   const localizedDefaultName = translate(defaultName, locale)
   const updateNode = useScene((s) => s.updateNode)
   const name = useScene((s) => s.nodes[nodeId]?.name)
+  // Auto-generated names ("Wall 3", "Cactus") are copy the app wrote, not the
+  // user's — they read as English leftovers in the tree unless translated. A
+  // name the user typed simply misses the dictionary and stays as typed.
+  const displayName = name ? translate(name, locale) : localizedDefaultName
   const [value, setValue] = useState(name || '')
   const inputRef = useRef<HTMLInputElement>(null)
   const inputSize = Math.max((value || localizedDefaultName).length, 1)
@@ -65,7 +69,7 @@ export const InlineRenameInput = memo(function InlineRenameInput({
     return (
       <div className="group/rename flex h-5 min-w-0 items-center gap-1">
         <span className={cn('truncate border-transparent border-b', className)}>
-          {name || localizedDefaultName}
+          {displayName}
         </span>
         {onStartEditing && (
           <button

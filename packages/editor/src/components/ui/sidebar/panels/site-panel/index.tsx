@@ -377,6 +377,7 @@ const ReferenceItem = memo(function ReferenceItem({
   setSelectedReferenceId: (id: string) => void
   handleDelete: (id: string, e: React.MouseEvent) => void
 }) {
+  const t = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
   const handleSelect = () => {
     setSelectedReferenceId(refNode.id)
@@ -430,7 +431,7 @@ const ReferenceItem = memo(function ReferenceItem({
       <button
         className="z-20 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/ref:opacity-100 dark:hover:bg-white/10"
         onClick={(e) => handleDelete(refNode.id, e)}
-        title="Delete"
+        title={t('Delete')}
       >
         <Trash2 className="h-3 w-3" />
       </button>

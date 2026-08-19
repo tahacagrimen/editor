@@ -19,6 +19,7 @@ import {
   isAngleSnapActive,
   isGridSnapActive,
   isMagneticSnapActive,
+  LocalizedContent,
   markToolCancelConsumed,
   reserveCameraKeys,
   triggerSFX,
@@ -1043,9 +1044,11 @@ const DuctSegmentTool = () => {
               >
                 <div className="flex flex-col items-center gap-2">
                   {ceilingMode && !last && (
-                    <div className="whitespace-nowrap rounded-full border border-border/60 bg-background/90 px-3 py-0.5 text-[10px] text-muted-foreground shadow-sm backdrop-blur">
-                      Ceiling · C to toggle
-                    </div>
+                    <LocalizedContent>
+                      <div className="whitespace-nowrap rounded-full border border-border/60 bg-background/90 px-3 py-0.5 text-[10px] text-muted-foreground shadow-sm backdrop-blur">
+                        Ceiling · C to toggle
+                      </div>
+                    </LocalizedContent>
                   )}
                   <DimensionPill parts={pillParts} primary={pillPrimary} unit={unit} />
                 </div>

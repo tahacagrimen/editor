@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react'
 import { type IconRef, useScene } from '@pascal-app/core'
 import { ChevronLeft, ChevronRight, ExternalLink, Puzzle } from 'lucide-react'
 import { lazy, type ReactNode, Suspense, useState, useSyncExternalStore } from 'react'
+import { LocalizedContent } from '../../../../lib/i18n'
 import { editorHostPanelRegistry } from '../../../../lib/plugin-panels'
 import { Button } from '../../primitives/button'
 
@@ -58,7 +59,8 @@ export function PluginsPanel() {
     const installed = installedPlugins.includes(pluginId)
 
     return (
-      <div className="flex h-full flex-col overflow-y-auto p-4">
+      <LocalizedContent>
+        <div className="flex h-full flex-col overflow-y-auto p-4">
         <div>
           <Button
             className="rounded-full"
@@ -155,12 +157,14 @@ export function PluginsPanel() {
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
-      </div>
+        </div>
+      </LocalizedContent>
     )
   }
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-4">
+    <LocalizedContent>
+      <div className="flex h-full flex-col overflow-y-auto p-4">
       <div className="mb-5">
         <h2 className="font-semibold text-lg text-sidebar-foreground">Plugins</h2>
         <p className="mt-1 text-sidebar-foreground/60 text-sm">
@@ -213,6 +217,7 @@ export function PluginsPanel() {
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>
-    </div>
+      </div>
+    </LocalizedContent>
   )
 }

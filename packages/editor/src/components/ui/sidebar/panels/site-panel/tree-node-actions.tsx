@@ -2,6 +2,7 @@ import { type AnyNodeId, emitter, useScene } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
 import { Camera, Eye, EyeOff, Trash2 } from 'lucide-react'
 import { memo, useState } from 'react'
+import { useTranslation } from './../../../../../lib/i18n'
 import {
   Popover,
   PopoverContent,
@@ -13,6 +14,7 @@ interface TreeNodeActionsProps {
 }
 
 export const TreeNodeActions = memo(function TreeNodeActions({ nodeId }: TreeNodeActionsProps) {
+  const t = useTranslation()
   const [open, setOpen] = useState(false)
   const updateNode = useScene((state) => state.updateNode)
   const updateNodes = useScene((state) => state.updateNodes)
@@ -57,7 +59,7 @@ export const TreeNodeActions = memo(function TreeNodeActions({ nodeId }: TreeNod
       <button
         className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground dark:hover:bg-white/10"
         onClick={toggleVisibility}
-        title={isVisible ? 'Hide' : 'Show'}
+        title={isVisible ? t('Hide') : t('Show')}
       >
         {isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3 opacity-50" />}
       </button>
@@ -67,7 +69,7 @@ export const TreeNodeActions = memo(function TreeNodeActions({ nodeId }: TreeNod
           <button
             className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground dark:hover:bg-white/10"
             onClick={(e) => e.stopPropagation()}
-            title="Camera snapshot"
+            title={t('Camera snapshot')}
           >
             <Camera className="h-3 w-3" />
             {hasCamera && (

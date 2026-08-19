@@ -1,15 +1,15 @@
 'use client'
 
-import { useScene, type AnyNodeId } from '@pascal-app/core'
+import { emitter } from '@pascal-app/core'
+import { Html } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
-import { Raycaster, Vector2, Vector3 as ThreeVector3 } from 'three'
-import { Html } from '@react-three/drei'
+import { Raycaster, Vector2 } from 'three'
+import { parseArrayCommand } from '../../../lib/array-duplicate'
+import { LocalizedContent } from '../../../lib/i18n'
+import { runPolarArrayCommand } from '../../../lib/polar-array-command'
 import useInteractionScope from '../../../store/use-interaction-scope'
 import useMeasurementInput from '../../../store/use-measurement-input'
-import { parseArrayCommand } from '../../../lib/array-duplicate'
-import { runPolarArrayCommand } from '../../../lib/polar-array-command'
-import { emitter } from '@pascal-app/core'
 
 export const PolarArrayTool: React.FC = () => {
   const { camera, gl } = useThree()
@@ -35,13 +35,15 @@ export const PolarArrayTool: React.FC = () => {
         pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
         pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
         raycaster.setFromCamera(pointer, camera)
-        
+
         // Simple plane intersection for now
         const targetY = 0
         if (Math.abs(raycaster.ray.direction.y) < 0.001) return null
         const t = (targetY - raycaster.ray.origin.y) / raycaster.ray.direction.y
         if (t < 0) return null
-        const hit = raycaster.ray.origin.clone().add(raycaster.ray.direction.clone().multiplyScalar(t))
+        const hit = raycaster.ray.origin
+          .clone()
+          .add(raycaster.ray.direction.clone().multiplyScalar(t))
         return [hit.x, hit.y, hit.z] as [number, number, number]
       }
 
@@ -90,18 +92,22 @@ export const PolarArrayTool: React.FC = () => {
       {!center && hoverPoint && (
         <group position={hoverPoint}>
           <Html center style={{ pointerEvents: 'none' }}>
-            <div className="rounded border border-primary/70 bg-background/90 px-3 py-1.5 text-xs tabular-nums text-foreground shadow-sm backdrop-blur">
-              Click to place center
-            </div>
+            <LocalizedContent>
+              <div className="rounded border border-primary/70 bg-background/90 px-3 py-1.5 text-xs tabular-nums text-foreground shadow-sm backdrop-blur">
+                Click to place center
+              </div>
+            </LocalizedContent>
           </Html>
         </group>
       )}
       {center && (
         <group position={center}>
           <Html center style={{ pointerEvents: 'none' }}>
-            <div className="rounded border border-primary/70 bg-background/90 px-3 py-1.5 text-xs tabular-nums text-foreground shadow-sm backdrop-blur">
-              Type *N [Angle]
-            </div>
+            <LocalizedContent>
+              <div className="rounded border border-primary/70 bg-background/90 px-3 py-1.5 text-xs tabular-nums text-foreground shadow-sm backdrop-blur">
+                Type *N [Angle]
+              </div>
+            </LocalizedContent>
           </Html>
         </group>
       )}

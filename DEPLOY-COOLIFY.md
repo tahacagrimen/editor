@@ -215,7 +215,7 @@ commit SHA'sı.
 | Variable | Değer |
 |---|---|
 | `NEXT_PUBLIC_APP_URL` | `https://draw.menartmimarlik.com` |
-| `NEXT_PUBLIC_ASSETS_CDN_URL` | Kendi CDN'in varsa; yoksa hiç ekleme |
+| `NEXT_PUBLIC_ASSETS_CDN_URL` | `https://draw.menartmimarlik.com` — malzeme dokularının taban adresi. Boş bırakırsan dokular `editor.pascal.app`'ten çekilir. Ayrı varlık domaini kuracaksan bkz. **Adım 15b** |
 
 Bunlar secret değil **variable** — `NEXT_PUBLIC_*` değerleri zaten tarayıcıya
 gidiyor. Ama **build sırasında** bilinmek zorundalar: `next build` bu değerleri
@@ -259,9 +259,14 @@ docker pull ghcr.io/tahacagrimen/menart-3d:latest
 
 Aynı proje içinde: **+ New Resource → Docker Image** (Git repository **değil**).
 
-- Image: `ghcr.io/tahacagrimen/menart-3d:latest`
+- **Image:** `ghcr.io/tahacagrimen/menart-3d` — **tag yazma!**
+- **Tag:** `latest` (ayrı alan)
 - **Ports Exposes: `3000`**
 - Health Check Path: `/api/health`
+
+> Image ve Tag ayrı alanlar; Coolify ikisini `image:tag` diye birleştiriyor.
+> Image alanına `...menart-3d:latest` yazarsan sonuç `menart-3d:latest:latest`
+> olur ve deploy `invalid reference format` ile düşer.
 
 Henüz deploy etme — önce ortam değişkenlerini gir.
 
@@ -286,7 +291,8 @@ build GitHub'da yapıldı.
 | `GOOGLE_CLIENT_SECRET` | Adım 14. |
 | `RESEND_API_KEY` | E-posta gönderimi için. Yoksa magic link akışı hata verir. |
 | `EMAIL_FROM` | `Menart 3D <hesap@send.menartmimarlik.com>` — bkz. Adım 15. |
-| `S3_ENDPOINT` / `S3_REGION` / `S3_BUCKET` / `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | Sahne kapak görselleri (thumbnail) için. Yoksa thumbnail yüklenmez, gerisi çalışır. |
+| `NEXT_PUBLIC_ASSETS_CDN_URL` | Adım 6'daki değerin **aynısı**. Sunucu tarafında thumbnail URL'i üretirken de okunuyor. |
+| `S3_ENDPOINT` / `S3_REGION` / `S3_BUCKET` / `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | Sahne kapak görselleri için — bkz. **Adım 15b**. Yoksa thumbnail yüklenmez, gerisi çalışır. |
 
 **`PORT` değişkenini girme.** Container `next start` ile 3000'de dinler;
 `PORT=3002` yazarsan Coolify 3000'e proxy'lemeye devam eder ve site açılmaz.
@@ -294,6 +300,65 @@ build GitHub'da yapıldı.
 Kota limitlerini değiştirmek istersen (varsayılan: misafir 2 sahne / 20 MB,
 doğrulanmış hesap 25 sahne / 500 MB):
 `PASCAL_QUOTA_GUEST_MAX_SCENES`, `PASCAL_QUOTA_FREE_MAX_TOTAL_BYTES` vb.
+
+---
+
+## 9b. Bu değerleri nereden alacağım? Hesap açmam gerekiyor mu?
+
+Özet tablo — detaylar altında:
+
+| Değişken | Hesap gerekir mi | Nereden gelir | Yoksa ne olur |
+|---|---|---|---|
+| `POSTGRES_URL` | Hayır | Coolify'daki Postgres servisi (Adım 4) | Uygulama çalışmaz, tüm API `404` |
+| `REDIS_URL` | Hayır | Coolify'daki Redis servisi (Adım 5) | Rate limit kapalı, gerisi normal |
+| `BETTER_AUTH_SECRET` | **Hayır — kendin üretiyorsun** | `openssl rand -base64 32` | Herkes oturum çerezi taklit edebilir |
+| `PASCAL_SHARE_LINK_SECRET` | **Hayır — kendin üretiyorsun** | `openssl rand -base64 32` | Share butonu 503 |
+| `GOOGLE_CLIENT_ID` / `_SECRET` | Evet — Google hesabın yeterli, ücretsiz | Google Cloud Console (Adım 14) | "Google ile giriş" butonu çıkmaz; e-posta ile giriş çalışır |
+| `RESEND_API_KEY` / `EMAIL_FROM` | Evet — Resend'e kayıt, ücretsiz katman var | resend.com (Adım 15) | Magic link ve parola sıfırlama hata verir |
+| `S3_*` | Evet — bir obje depolama sağlayıcısı | Adım 15b | Sahne kapak görselleri kaydedilmez, gerisi çalışır |
+
+### Kendi ürettiklerin — hiçbir yere kayıt olmuyorsun
+
+`BETTER_AUTH_SECRET` ve `PASCAL_SHARE_LINK_SECRET` bir servisten alınan anahtar
+değil; **rastgele üretilmiş uzun birer metin**. Kendi bilgisayarında ya da
+sunucuda üret, Coolify'a yapıştır, bitti:
+
+```sh
+openssl rand -base64 32   # BETTER_AUTH_SECRET için
+openssl rand -base64 32   # PASCAL_SHARE_LINK_SECRET için — ikisi farklı olsun
+```
+
+Ne işe yarıyorlar:
+
+- **`BETTER_AUTH_SECRET`**: Oturum çerezlerini imzalar. Değeri bilen biri
+  istediği kullanıcı adına oturum üretebilir, o yüzden gerçekten rastgele olmalı
+  ve gizli kalmalı. **Değiştirirsen herkesin oturumu kapanır** (yeniden giriş
+  yaparlar, veri kaybı olmaz). Kod, değer boşsa
+  `development-secret-key-do-not-use-in-prod` varsayılanına düşüyor — production'da
+  bunu asla bırakma.
+- **`PASCAL_SHARE_LINK_SECRET`**: `/share/<token>` linklerini imzalar.
+  **Değiştirmek, dağıtılmış tüm paylaşım linklerini geçersiz kılar** — bir linki
+  iptal etmenin tek yolu da zaten budur.
+
+İkisini de bir yere not et (parola yöneticisi). Kaybedersen yenisini üretirsin,
+sonucu yukarıdaki iki satır.
+
+### Hesap açmadan da uygulama çalışır mı?
+
+Evet. Giriş sistemi dört yol sunuyor ve hepsi aynı anda açık:
+
+1. **Misafir (anonim)** — hiç kayıt olmadan çizim yapılır. Kota: 2 sahne / 20 MB.
+2. **E-posta + parola** — hiçbir dış servis gerektirmez.
+3. **Magic link** — Resend gerekir.
+4. **Google ile giriş** — Google OAuth gerekir.
+
+Yani Google ve Resend'i hiç kurmadan da site yayına girer; sadece 3. ve 4. yollar
+görünmez/çalışmaz olur.
+
+> Resend yokken bir uyarı: kayıt sırasında gönderilmesi gereken **doğrulama
+> maili** gönderilemez (kayıt yine de başarılı olur, hata "best-effort" olarak
+> loglanır). Ama parola sıfırlama akışı hata verir — kullanıcı parolasını
+> unutursa elinden bir şey gelmez. Gerçek kullanıcı alacaksan Resend'i kur.
 
 ---
 
@@ -364,37 +429,108 @@ Secret'lar tanımlı değilken workflow yine yeşil kalır, sadece son adımı a
 
 ---
 
-## 14. Google OAuth (giriş için)
+## 14. Google ile giriş (opsiyonel)
 
-Google Cloud Console → **APIs & Services → Credentials → Create OAuth client ID
-→ Web application**.
+**Kayıt olman gereken yer:** Google Cloud Console — mevcut Gmail hesabınla
+giriş yapıyorsun, ayrı bir üyelik yok. **Ücretsiz**; OAuth için kredi kartı
+istemiyor.
 
-**Authorized redirect URIs** alanına:
+### 14.1 Proje oluştur
 
-```
-https://draw.menartmimarlik.com/api/auth/callback/google
-```
+1. [console.cloud.google.com](https://console.cloud.google.com) → Google
+   hesabınla gir.
+2. Üstteki proje seçiciden **New Project** → ad: `menart-3d` → **Create**.
+3. Proje seçili hale gelsin (üstteki kutuda adı görünmeli).
 
-Yerelde de test edeceksen ikinci satır olarak:
+### 14.2 OAuth consent screen (izin ekranı)
 
-```
-http://localhost:3002/api/auth/callback/google
-```
+Credentials'tan önce bu doldurulmak zorunda — atlarsan bir sonraki adımda
+form açılmaz.
 
-Çıkan Client ID / Secret'ı Adım 9'daki değişkenlere yaz ve Coolify'dan
-**Redeploy** de. (Bu ikisi runtime değişkeni, image'ı yeniden build etmeye
-gerek yok.)
+1. Sol menü → **APIs & Services → OAuth consent screen**.
+2. User Type: **External** → Create.
+3. Zorunlu alanlar:
+   - App name: `Menart 3D`
+   - User support email: kendi adresin
+   - App logo: opsiyonel
+   - **Authorized domains**: `menartmimarlik.com`
+   - Developer contact: kendi adresin
+4. Scopes ekranında bir şey ekleme, **Save and continue**.
+5. Test users ekranında kendi adresini ekle → **Save**.
+
+> **Önemli — "Testing" modu:** Uygulama yayına alınana kadar sadece test
+> kullanıcıları listesindekiler Google ile girebilir. Herkese açmak için aynı
+> ekrandaki **Publish app** düğmesine bas. Sadece e-posta/profil bilgisi
+> istediğin için Google'ın doğrulama (verification) sürecine girmene gerek
+> yok — "Publish" yeterli.
+
+### 14.3 Client ID üret
+
+1. **APIs & Services → Credentials → + Create Credentials → OAuth client ID**.
+2. Application type: **Web application**. Ad: `menart-3d-web`.
+3. **Authorized JavaScript origins**:
+
+   ```
+   https://draw.menartmimarlik.com
+   ```
+
+4. **Authorized redirect URIs** — buradaki yol birebir bu olmalı:
+
+   ```
+   https://draw.menartmimarlik.com/api/auth/callback/google
+   ```
+
+   Yerelde de test edeceksen ikinci satır olarak:
+
+   ```
+   http://localhost:3002/api/auth/callback/google
+   ```
+
+5. **Create** → açılan kutuda **Client ID** ve **Client secret** görünür.
+   Secret'ı sonra bir daha göremezsin, hemen kopyala.
+
+### 14.4 Uygulamaya gir
+
+Çıkan iki değeri Adım 9'daki `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
+değişkenlerine yaz ve Coolify'dan **Redeploy** de. İkisi de runtime değişkeni —
+image'ı yeniden build etmene gerek yok.
+
+Kod, bu ikisi birden doluysa Google sağlayıcısını açıyor; biri eksikse buton
+hiç görünmüyor. Yani yarım bırakmak hata üretmez, sadece özellik kapalı kalır.
+
+> Hesap birleştirme açık: aynı e-posta ile önce parolayla, sonra Google ile
+> girersen ikisi tek hesapta buluşur (`trustedProviders: ['google', 'email']`).
 
 ---
 
-## 15. E-posta gönderimi (Resend) — DNS kayıtları
+## 15. E-posta gönderimi (Resend) — opsiyonel
 
-Magic link, e-posta doğrulama ve parola sıfırlama mailleri Resend üzerinden
-gidiyor. `RESEND_API_KEY` yoksa production'da bu akışlar "gönderdim" demeden
-yapılandırma hatası döner; `EMAIL_FROM` boşsa Resend'in ortak
-`onboarding@resend.dev` adresi kullanılır ve mail yalnızca hesap sahibine ulaşır.
+**Kayıt olman gereken yer:** [resend.com](https://resend.com) — GitHub veya
+e-posta ile kayıt. Ücretsiz katman ayda 3.000 mail / günde 100 mail; bu iş için
+fazlasıyla yeter, kredi kartı istemiyor.
 
-Kendi domaininden göndermek için Resend panelinde **Domains → Add Domain**:
+Uygulamanın gönderdiği dört mail var: magic link, e-posta doğrulama, parola
+sıfırlama, hoş geldin. Hepsi Resend'in REST API'sine tek bir POST ile gidiyor
+(SDK yok).
+
+`RESEND_API_KEY` yoksa production'da bu akışlar "gönderdim" demeden yapılandırma
+hatası döner — bilerek, çünkü sessizce başarılı olan bir gönderici kullanıcıya
+hiç gitmemiş mail için "gelen kutunu kontrol et" gösterirdi. `EMAIL_FROM` boşsa
+Resend'in ortak `onboarding@resend.dev` adresi kullanılır ve mail **yalnızca
+Resend hesabının sahibine** ulaşır (test için iyi, gerçek kullanıcı için işe
+yaramaz).
+
+### 15.1 API key al
+
+Resend → **API Keys → Create API Key** → izin: **Sending access** → değeri
+kopyala (`re_...`). Adım 9'daki `RESEND_API_KEY` değişkenine yaz.
+
+Bu haliyle bile magic link çalışır — ama gönderen adres `onboarding@resend.dev`
+olduğu için sadece kendine mail gidebilir. Gerçek kullanım için 15.2'yi yap.
+
+### 15.2 Kendi domaininden gönder — DNS kayıtları
+
+Resend panelinde **Domains → Add Domain**:
 
 - Domain olarak `menartmimarlik.com` yerine **`send.menartmimarlik.com`** gibi
   bir alt alan adı ver. Böylece WordPress'in mevcut e-posta kayıtlarına
@@ -409,8 +545,162 @@ Sonra `EMAIL_FROM` değerini doğruladığın alt alan adıyla uyumlu yaz:
 EMAIL_FROM=Menart 3D <hesap@send.menartmimarlik.com>
 ```
 
-E-postayı hiç kullanmayacaksan bu adımı atla — Google ile giriş tek başına
-çalışır.
+E-postayı hiç kullanmayacaksan bu adımı atla — Google ile giriş ve
+e-posta+parola tek başına çalışır (parola sıfırlama hariç).
+
+---
+
+## 15b. Kapak görselleri ve varlık CDN'i (S3 / Garage) — opsiyonel
+
+Kullanıcı bir sahneyi kaydettiğinde editör ekran görüntüsü üretip
+`POST /api/scenes/:id/thumbnail` ucuna yolluyor; route bunu 1024 px WebP'e
+küçültüp obje deposuna yüklüyor ve URL'i `scenes.thumbnail_url` alanına yazıyor.
+Sahne listesindeki önizlemeler bu URL'den geliyor.
+
+**Hiç kurmazsan bir şey bozulmaz** — `s3Client` `null` kalır, thumbnail
+yüklenmez, listede kapak görseli görünmez.
+
+### Önce `NEXT_PUBLIC_ASSETS_CDN_URL`'i doğru anlamak gerekiyor
+
+Bu değişken iki işi birden yapıyor ve ikisi birbirine bağlı:
+
+1. **Malzeme dokularının taban adresi.** Malzeme kütüphanesi dokuları
+   `/material/wood/...ktx2` gibi **göreli** yollarla tanımlı
+   (`packages/core/src/material-library.ts`) ve bu değişkene ekleniyor.
+   Varsayılan: `https://editor.pascal.app`.
+2. **Thumbnail URL'inin taban adresi.** Doluysa thumbnail adresi
+   `{CDN}/{key}`; boşsa `{S3_ENDPOINT}/{S3_BUCKET}/{key}`.
+
+Kritik ayrıntı: bu dokular (17 MB, `apps/editor/public/material`) **zaten
+image'ının içinde** ve uygulaman onları kendi domaininden servis edebiliyor.
+Yani değişkeni boş bırakırsan uygulaman, kendi elindeki dosyaları başkasının
+sunucusundan (`editor.pascal.app`) çekiyor.
+
+Katalog item'ları (GLB'ler, thumbnail'leri) mutlak Supabase adresleriyle
+tanımlı, bu değişkenden etkilenmiyorlar.
+
+Üç geçerli kurulum var:
+
+| Kurulum | Dokular | Thumbnail | Kime uygun |
+|---|---|---|---|
+| **A.** Değişken boş, S3 yok | `editor.pascal.app`'ten (dış bağımlılık) | Yok | Hızlı başlangıç |
+| **B.** `NEXT_PUBLIC_ASSETS_CDN_URL=https://draw.menartmimarlik.com`, S3 yok | Kendi sunucundan ✅ | Yok | **Önerilen başlangıç** — dış bağımlılık yok, tek satır |
+| **C.** Ayrı bir varlık domaini (Garage) + S3 | Garage'dan | Garage'dan ✅ | Kapak görseli isteyenler |
+
+B ile C'nin ortası yok: değişken tek, ikisini birden aynı adrese bakmaya
+zorluyor. Değişkeni uygulama domainine verip S3'ü de açarsan thumbnail'ler
+uygulama domaininde aranır ve 404 olur.
+
+> Önceki sürümde bu bölüm "değişkeni boş bırak" diyordu; doğrusu yukarıdaki
+> tablo — kendi sunucundan servis etmek (B) daha iyi.
+
+### Hangi depolama servisi (Coolify'ın listesinden)
+
+Uygulamanın ihtiyacı dar: **S3 API ile yazma** + **imzasız (public) GET ile
+okuma**. Coolify'ın servis listesindeki seçenekler bu ölçüte göre:
+
+| Servis | Uygun mu | Neden |
+|---|---|---|
+| **SeaweedFS** | ✅ En uygun | Gerçek S3 API. Anonim okuma, config'e `{"name":"anonymous","actions":["Read:<kova>"]}` kimliği eklenerek açılıyor — kodun beklediği `{S3_ENDPOINT}/{kova}/{key}` path-style adresi doğrudan çalışır, ekstra domain kurgusu gerekmez |
+| **Garage** | ✅ Çalışır, kurgusu farklı | S3 ucunda anonim okuma yok; public erişim ayrı web ucundan (aşağıda) |
+| **MinIO** | ✅ Listede yok ama kurulabilir | Coolify'da **Docker Compose** kaynağı olarak elle eklenebilir. Tek tık listesinden düşmesi lisans/konsol değişikliklerinden, teknik bir engelden değil |
+| Nextcloud / ownCloud / Seafile / Pydio Cells / Cloudreve / Chibisafe / Filebrowser | ❌ | Bunlar insan yüzlü dosya yönetim uygulamaları; uygulama-uygulama S3 arayüzü sunmuyorlar |
+| SFTPGo / Syncthing / Duplicati | ❌ | Sırasıyla SFTP sunucusu, dosya senkronizasyonu ve yedekleme aracı — obje deposu değil |
+
+Sıralama: **SeaweedFS** (en az uğraş) → **MinIO** (compose ile) → **Garage**
+(zaten kuruluysa mantıklı).
+
+> Garage "eski" değil — aktif geliştirilen, v1.x bir proje. Farkı, MinIO'nun
+> bucket-policy modelini uygulamaması. SeaweedFS'te de anonim kimlik eklemek
+> config dosyasına dokunmayı gerektiriyor (ve geçmişte diğer kimlikleri bozan
+> bir hata rapor edilmiş), yani "tek tıkla public bucket" hiçbirinde yok.
+
+### Garage kullanılabilir mi? Evet, ama S3 ucundan değil
+
+Coolify'ında MinIO yerine **Garage** varsa iş görür; tek farkı public okumayı
+nasıl yaptığı:
+
+- **Garage'ın S3 API ucunda anonim (imzasız) okuma yok.** Bu bilerek böyle:
+  Garage, Amazon'un ACL/bucket-policy mekanizmasını uygulamıyor, erişimi
+  "anahtar başına kova" mantığıyla yönetiyor. Yani MinIO'daki "bucket'ı public
+  yap" adımının Garage'da karşılığı yok.
+- **Bunun yerine ayrı bir web ucu var** (varsayılan port **3902**). Bir kovayı
+  `garage bucket website --allow <kova>` ile yayına açıyorsun ve kova, **adıyla
+  aynı domainden** servis ediliyor. Yani kovanın adını `assets.menartmimarlik.com`
+  koyarsan, o domain sunucuna yönlendiğinde içerik doğrudan yayınlanır.
+
+Bu, uygulamanın beklediği URL şablonuna (`{CDN}/{key}`) birebir uyuyor —
+dolayısıyla Garage ile **C kurulumu** yapılabilir.
+
+### C kurulumu: Garage ile adım adım
+
+1. **Garage'ı deploy et** (Coolify → Services → Garage).
+
+2. **Kovayı domain adıyla oluştur** — isim tesadüfi değil, web ucu kova adını
+   domain olarak kullanıyor:
+
+   ```sh
+   garage bucket create assets.menartmimarlik.com
+   garage bucket website --allow assets.menartmimarlik.com
+   ```
+
+3. **Yazma anahtarı üret ve kovaya bağla:**
+
+   ```sh
+   garage key create menart-editor
+   garage bucket allow --read --write assets.menartmimarlik.com --key menart-editor
+   ```
+
+   Çıktıdaki Key ID / Secret key `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY`
+   olacak.
+
+4. **DNS + reverse proxy:** Adım 3'teki panele `assets` için bir A kaydı ekle
+   (`72.61.95.127`). Coolify'da Garage'ın **3902** portunu
+   `assets.menartmimarlik.com` domainine bağla (S3 API portu 3900 ayrı kalsın —
+   o public olmamalı).
+
+5. **Malzeme dokularını bir kez yükle.** Domain artık uygulamanın değil
+   Garage'ın; dokuları oraya taşımazsan malzemeler kaybolur:
+
+   ```sh
+   aws s3 sync apps/editor/public/material \
+     s3://assets.menartmimarlik.com/material \
+     --endpoint-url https://s3.menartmimarlik.com
+   ```
+
+   (17 MB, tek seferlik. `rclone` de olur. Malzeme kütüphanesi büyüdükçe
+   tekrarlaman gerekir — bu, C kurulumunun bakım maliyeti.)
+
+6. **Değişkenleri gir:**
+
+   | Değişken | Değer | Nerede |
+   |---|---|---|
+   | `NEXT_PUBLIC_ASSETS_CDN_URL` | `https://assets.menartmimarlik.com` | **Hem** Adım 6'daki GitHub variable **hem** Adım 9'daki Coolify env |
+   | `S3_ENDPOINT` | Garage'ın S3 API adresi, örn. `https://s3.menartmimarlik.com` | Coolify env |
+   | `S3_BUCKET` | `assets.menartmimarlik.com` | Coolify env |
+   | `S3_REGION` | `garage` (Garage'ın config'indeki bölge adı; emin değilsen `auto`) | Coolify env |
+   | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | 3. adımdaki anahtar | Coolify env |
+
+   `NEXT_PUBLIC_ASSETS_CDN_URL` build-time değişkeni — GitHub'a yazıp **image'ı
+   yeniden build etmen** şart, sadece Coolify'a yazmak yetmez.
+
+7. **Doğrula:** bir sahne kaydet, listedeki kapak görselinin yüklendiğini gör;
+   sonra bir duvara malzeme ata, dokunun geldiğini kontrol et. İkisi de aynı
+   domainden geliyor olmalı.
+
+> Not: Eski thumbnail'ler yenisi yüklenince siliniyor (yalnızca `thumbnails/`
+> önekindekiler), yani kova sınırsız büyümüyor.
+
+### Şimdilik ne yapmalısın
+
+**B kurulumu.** Tek iş: Adım 6'daki GitHub variables'a
+`NEXT_PUBLIC_ASSETS_CDN_URL=https://draw.menartmimarlik.com` ekle, aynı değeri
+Adım 9'daki Coolify env'ine de yaz. Dokular kendi sunucundan gelir, dış
+bağımlılık kalmaz, S3 hiç gerekmez.
+
+Kapak görselleri gerçekten lazım olduğunda C'ye geçersin — geçiş sırasında
+sadece dokuları Garage'a yüklemen ve iki değişkeni değiştirip yeniden build
+alman gerekir.
 
 ---
 
@@ -439,6 +729,7 @@ Tarayıcıda:
 |---|---|---|
 | Actions build'i `--frozen-lockfile` hatasıyla ölüyor | `bun.lock` ile Dockerfile'daki bun sürümü uyuşmuyor | Dockerfile'daki `oven/bun:1.3.14-alpine` ile `package.json`'daki `packageManager` aynı olmalı |
 | Coolify `denied` / `unauthorized` diyerek image'ı çekemiyor | GHCR paketi private ve sunucu login değil | Adım 7B'deki `docker login ghcr.io`. Token'ın `read:packages` yetkisi olmalı |
+| `invalid reference format` — logda `menart-3d:latest:latest` | Image alanına tag da yazılmış | Image: `ghcr.io/tahacagrimen/menart-3d`, Tag: `latest` — ayrı alanlar |
 | `manifest unknown` | O tag henüz yüklenmemiş | Actions'ın bittiğinden emin ol; repo → Packages altında tag'i gör |
 | Deploy geçti ama eski sürüm çalışıyor | Sunucudaki `latest` cache'lenmiş | Coolify'da image'ı `:latest` yerine kısa SHA tag'i ile ver (workflow ikisini de yüklüyor), ya da sunucuda `docker pull ...:latest` deyip redeploy et |
 | Site açılıyor ama giriş `localhost:3002`'ye gidiyor | Adım 6'daki `NEXT_PUBLIC_APP_URL` variable'ı eksikken build alınmış | Variable'ı gir ve **image'ı yeniden build et** (Actions → Run workflow). Coolify'a yazmak tek başına yetmez |
@@ -447,6 +738,13 @@ Tarayıcıda:
 | Canlı senkron çalışmıyor, sekmeler ayrışıyor | Proxy SSE akışını kesiyor | Traefik'te idle timeout ≥ 30s olmalı (route her 15 sn `: keepalive` yollar). Cloudflare kullanıyorsan proxy'yi (turuncu bulut) bu yolda kapat |
 | `draw.menartmimarlik.com` açılmıyor, WordPress sitesi açılıyor | `draw` A kaydı yok ya da henüz yayılmamış | `dig +short draw.menartmimarlik.com` VPS IP'sini dönmeli |
 | SSL alınamıyor / "invalid certificate" | Let's Encrypt doğrulaması DNS oturmadan denendi | DNS yayıldıktan sonra Coolify'da domaini sil-kaydet ile yeniden dene |
+| Google girişinde `redirect_uri_mismatch` | Console'daki redirect URI ile gerçek adres birebir aynı değil | `https://draw.menartmimarlik.com/api/auth/callback/google` — protokol, alt alan adı ve yol tam eşleşmeli, sonda `/` olmamalı |
+| Google girişinde `access_denied` / "app is being tested" | OAuth consent screen hâlâ Testing modunda | Consent screen → **Publish app**, ya da kullanıcıyı Test users'a ekle |
+| "Google ile giriş" butonu hiç görünmüyor | `GOOGLE_CLIENT_ID` veya `_SECRET`'tan biri eksik | İkisi birden dolu olmalı; sonra redeploy |
+| Magic link gönderilmiyor, "yapılandırılmamış" hatası | `RESEND_API_KEY` yok | Adım 15.1 |
+| Mail sadece kendi adresime gidiyor | `EMAIL_FROM` boş → `onboarding@resend.dev` kullanılıyor | Adım 15.2'deki domain doğrulaması |
+| Sahne listesinde kapak görselleri kırık | Kova public okunamıyor (Garage'da S3 ucu anonim okuma yapmaz) | Adım 15b, C kurulumu: web ucu (3902) üzerinden domain bağla |
+| Malzeme dokuları 404 oluyor | `NEXT_PUBLIC_ASSETS_CDN_URL` dokuların bulunmadığı bir adrese bakıyor | Ya uygulama domainine çevir (Adım 15b, B kurulumu), ya da dokuları o kovaya yükle |
 | Share butonu 503 | `PASCAL_SHARE_LINK_SECRET` yok | Değişkeni ekle. **Dikkat:** bu değeri değiştirmek dağıtılmış tüm linkleri geçersiz kılar — link iptalinin tek yolu da budur |
 | Disk doldu | Eski image katmanları birikti | Adım 0b'deki prune cron'u; acil durumda `docker image prune -af` |
 | Deploy sonrası eski sahneler yok | Postgres'e geçmeden önce SQLite'a kaydedilmişler | `bunx pascal-migrate --from ~/.pascal/data/pascal.db --to "$POSTGRES_URL" --owner <userId>` (önce `--dry-run`) |

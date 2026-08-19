@@ -31,6 +31,7 @@ import {
   isAlignmentGuideActive,
   isGridSnapActive,
   type LinearUnit,
+  LocalizedContent,
   linearUnitToMeters,
   MEASUREMENT_ACTIVE_COLOR,
   type MeasurementAxis,
@@ -1269,69 +1270,71 @@ function DraftExtrusionControl({ position }: { position: Vector3 }) {
 
   return (
     <Html center position={position} style={{ pointerEvents: 'auto' }} zIndexRange={[100, 0]}>
-      <div
-        className="flex w-[300px] translate-y-9 items-center gap-1.5 rounded-md border border-border/70 bg-background/95 p-1.5 text-foreground shadow-lg"
-        data-measurement-extrusion-control
-        onClick={(event) => {
-          event.stopPropagation()
-          event.nativeEvent.stopImmediatePropagation()
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation()
-          event.nativeEvent.stopImmediatePropagation()
-        }}
-      >
-        <label className="sr-only" htmlFor="measurement-3d-extrusion-height">
-          Extrusion height
-        </label>
-        <div className="relative min-w-0 flex-1">
-          <span className="pointer-events-none absolute inset-y-0 left-2 flex items-center font-medium text-muted-foreground text-xs">
-            H
-          </span>
-          <input
-            aria-label="Extrusion height"
-            className="h-8 w-full rounded-md border border-border bg-background pr-7 pl-6 text-sm outline-none focus:border-indigo-400"
-            id="measurement-3d-extrusion-height"
-            inputMode="decimal"
-            onBlur={() => {
-              isEditing.current = false
-              const height = useMeasurementDraft.getState().extrusionHeight
-              setValue(
-                height === 0 ? '' : String(Number(metersToLinearUnit(height, unit).toFixed(3))),
-              )
-            }}
-            onChange={(event) => updateHeight(event.target.value)}
-            onFocus={() => {
-              isEditing.current = true
-            }}
-            onKeyDown={(event) => {
-              event.stopPropagation()
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                commit()
-              }
-            }}
-            placeholder="0"
-            step="0.1"
-            type="number"
-            value={value}
-          />
-          <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-muted-foreground text-xs">
-            {getLinearUnitLabel(unit)}
-          </span>
-        </div>
-        <span className="shrink-0 font-mono font-semibold text-[11px] tabular-nums text-foreground">
-          V {volumeLabel}
-        </span>
-        <button
-          className="h-8 shrink-0 rounded-full bg-indigo-500 px-3 font-medium text-white text-xs disabled:cursor-not-allowed disabled:opacity-40"
-          disabled={Math.abs(extrusionHeight) < 0.001}
-          onClick={commit}
-          type="button"
+      <LocalizedContent>
+        <div
+          className="flex w-[300px] translate-y-9 items-center gap-1.5 rounded-md border border-border/70 bg-background/95 p-1.5 text-foreground shadow-lg"
+          data-measurement-extrusion-control
+          onClick={(event) => {
+            event.stopPropagation()
+            event.nativeEvent.stopImmediatePropagation()
+          }}
+          onPointerDown={(event) => {
+            event.stopPropagation()
+            event.nativeEvent.stopImmediatePropagation()
+          }}
         >
-          Create
-        </button>
-      </div>
+          <label className="sr-only" htmlFor="measurement-3d-extrusion-height">
+            Extrusion height
+          </label>
+          <div className="relative min-w-0 flex-1">
+            <span className="pointer-events-none absolute inset-y-0 left-2 flex items-center font-medium text-muted-foreground text-xs">
+              H
+            </span>
+            <input
+              aria-label="Extrusion height"
+              className="h-8 w-full rounded-md border border-border bg-background pr-7 pl-6 text-sm outline-none focus:border-indigo-400"
+              id="measurement-3d-extrusion-height"
+              inputMode="decimal"
+              onBlur={() => {
+                isEditing.current = false
+                const height = useMeasurementDraft.getState().extrusionHeight
+                setValue(
+                  height === 0 ? '' : String(Number(metersToLinearUnit(height, unit).toFixed(3))),
+                )
+              }}
+              onChange={(event) => updateHeight(event.target.value)}
+              onFocus={() => {
+                isEditing.current = true
+              }}
+              onKeyDown={(event) => {
+                event.stopPropagation()
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  commit()
+                }
+              }}
+              placeholder="0"
+              step="0.1"
+              type="number"
+              value={value}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-muted-foreground text-xs">
+              {getLinearUnitLabel(unit)}
+            </span>
+          </div>
+          <span className="shrink-0 font-mono font-semibold text-[11px] tabular-nums text-foreground">
+            V {volumeLabel}
+          </span>
+          <button
+            className="h-8 shrink-0 rounded-full bg-indigo-500 px-3 font-medium text-white text-xs disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={Math.abs(extrusionHeight) < 0.001}
+            onClick={commit}
+            type="button"
+          >
+            Create
+          </button>
+        </div>
+      </LocalizedContent>
     </Html>
   )
 }

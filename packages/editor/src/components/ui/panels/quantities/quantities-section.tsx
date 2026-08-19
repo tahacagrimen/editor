@@ -59,6 +59,7 @@ function LinePriceInput({ lineKey, unitPrice }: { lineKey: string; unitPrice: Un
   }
 
   return (
+    <LocalizedContent>
     <div className="flex items-center gap-1">
       <select
         aria-label="Currency"
@@ -92,6 +93,7 @@ function LinePriceInput({ lineKey, unitPrice }: { lineKey: string; unitPrice: Un
         value={amount}
       />
     </div>
+    </LocalizedContent>
   )
 }
 
