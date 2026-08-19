@@ -1,4 +1,5 @@
 import type { FloorplanGeometry, GeometryContext, XLineNode } from '@pascal-app/core'
+import { withFloorplanGeometryMetadata } from '@pascal-app/editor'
 
 // The "infinite" line is a long finite segment — there is no infinite SVG
 // primitive and `GeometryContext.viewState` carries no viewport bounds, so we
@@ -31,21 +32,33 @@ export function buildXLineFloorplan(
   // AnnotationVisibility` hides in the default floorplan mode — a reference
   // line the user places has to render in the default view, so it stays an
   // ordinary always-visible node rather than a toggleable annotation.
-  return {
-    kind: 'group',
-    children: [
-      {
-        kind: 'line',
-        x1: midX - ux * XLINE_HALF_LENGTH,
-        y1: midY - uy * XLINE_HALF_LENGTH,
-        x2: midX + ux * XLINE_HALF_LENGTH,
-        y2: midY + uy * XLINE_HALF_LENGTH,
-        stroke,
-        strokeWidth: active ? 1.6 : 1,
-        strokeDasharray: '10 4 2 4',
-        vectorEffect: 'non-scaling-stroke',
-        pointerEvents: 'stroke',
-      },
-    ],
-  }
+  //
+  // `excludeFromBounds` keeps the 20 km line out of the "Fit to All" box —
+  // without it `getBBox()` expands to include the full extent and zoom
+  // extents lands a kilometre out.
+  //
+  // No `strokeDasharray`: the old `'10 4 2 4'` dash pattern with
+  // `non-scaling-stroke` on a 20 km line forced the browser to rasterize
+  // millions of individual dashes, killing 2D performance. A solid
+  // translucent line matches the 3D renderer's visual and is O(1).
+  return withFloorplanGeometryMetadata(
+    {
+      kind: 'group',
+      children: [
+        {
+          kind: 'line',
+          x1: midX - ux * XLINE_HALF_LENGTH,
+          y1: midY - uy * XLINE_HALF_LENGTH,
+          x2: midX + ux * XLINE_HALF_LENGTH,
+          y2: midY + uy * XLINE_HALF_LENGTH,
+          stroke,
+          strokeWidth: active ? 1.6 : 1,
+          strokeOpacity: active ? 1.0 : 0.4,
+          vectorEffect: 'non-scaling-stroke',
+          pointerEvents: 'stroke',
+        },
+      ],
+    },
+    { excludeFromBounds: true },
+  )
 }

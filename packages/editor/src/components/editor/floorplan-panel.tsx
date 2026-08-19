@@ -6382,6 +6382,11 @@ export function FloorplanPanel({
     let observedVersion = 0
     const measure = () => {
       let bbox: { x: number; y: number; width: number; height: number }
+      // Temporarily hide elements that opted out of bounds measurement
+      // (infinite construction lines, etc.) so they don't blow up the
+      // framing box.
+      const ignored = el.querySelectorAll<SVGElement>('[data-bbox-ignore]')
+      for (let i = 0; i < ignored.length; i++) ignored[i]!.style.display = 'none'
       try {
         const measured = el.getBBox()
         bbox = {
@@ -6391,8 +6396,10 @@ export function FloorplanPanel({
           height: measured.height,
         }
       } catch {
+        for (let i = 0; i < ignored.length; i++) ignored[i]!.style.display = ''
         return
       }
+      for (let i = 0; i < ignored.length; i++) ignored[i]!.style.display = ''
       if (bbox.width <= 0 && bbox.height <= 0) return
       setMeasuredSceneBBox((prev) => {
         if (

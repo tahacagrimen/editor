@@ -2371,8 +2371,10 @@ export const InteractiveGeometry = memo(function InteractiveGeometry({
     switch (g.kind) {
       case 'group': {
         const transform = formatTransform(g.transform)
+        const groupMetadata = readFloorplanGeometryMetadata(g)
         return (
           <g
+            data-bbox-ignore={groupMetadata.excludeFromBounds ? '' : undefined}
             data-floorplan-annotation-obstacle={
               floorplanAnnotationObstacleMode(g) ??
               (isFloorplanAnnotationObstacleGeometry(g) ? '' : undefined)

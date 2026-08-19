@@ -108,6 +108,7 @@ function styleAttrs(
   return {
     'data-floorplan-annotation-obstacle': floorplanAnnotationObstacleMode(g),
     'data-floorplan-annotation-role': annotationMetadata.annotationRole,
+    'data-bbox-ignore': annotationMetadata.excludeFromBounds ? '' : undefined,
     fill: documentStyle.fill ?? s.fill ?? 'none',
     fillOpacity: s.fillOpacity,
     stroke: documentStyle.stroke ?? s.stroke,
@@ -557,8 +558,10 @@ function renderNode(
     case 'group': {
       const transform = formatTransform(g.transform)
       const children = resolveDocumentAnnotationGroupChildren(g.children, annotationUnitsPerPoint)
+      const groupMetadata = readFloorplanGeometryMetadata(g)
       return (
         <g
+          data-bbox-ignore={groupMetadata.excludeFromBounds ? '' : undefined}
           data-floorplan-annotation-obstacle={
             isFloorplanAnnotationObstacleGeometry(g) ? '' : undefined
           }

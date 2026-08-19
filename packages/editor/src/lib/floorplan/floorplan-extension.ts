@@ -82,6 +82,13 @@ type FloorplanGeometryMetadata = {
   annotationRole?: FloorplanAnnotationRole
   annotationObstacle?: 'bounds' | 'outline'
   renderPass?: 'overlay'
+  /**
+   * When true, the geometry is excluded from the SVG bounding-box measurement
+   * used by "Fit to All" (zoom extents). Construction aids whose visual extent
+   * is deliberately larger than the model — infinite xlines, large reference
+   * grids — set this so they don't blow up the framing box.
+   */
+  excludeFromBounds?: boolean
 }
 
 type FloorplanContextExtension = {
