@@ -179,7 +179,8 @@ function generateSolidSlabGeometry(
     }
   }
 
-  const geometry = createEmptyGeometry()
+  if (positions.length === 0) return createEmptyGeometry()
+  const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   geometry.setIndex(indices)
@@ -260,7 +261,8 @@ function generatePoolGeometry(
     }
   }
 
-  const geo = createEmptyGeometry()
+  if (positions.length === 0) return createEmptyGeometry()
+  const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   geo.setIndex(indices)

@@ -160,7 +160,7 @@ function createFenceCurveBlockPart(
   pushQuad(0, 2, 3, 1, [0, bottomY], [0, topY], [depth, innerTopV], [depth, innerBottomV])
   pushQuad(4, 5, 7, 6, [0, bottomY], [depth, innerBottomV], [depth, innerTopV], [0, topY])
 
-  const geometry = createEmptyGeometry()
+  const geometry = new THREE.BufferGeometry()
   geometry.setAttribute(
     'position',
     new THREE.Float32BufferAttribute(new Float32Array(positions), 3),

@@ -142,10 +142,6 @@ const _surfaceFaceNormal = new THREE.Vector3()
  */
 function createDegenerateRoofPlaceholder(): THREE.BufferGeometry {
   const placeholder = createEmptyGeometry()
-  placeholder.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(9), 3))
-  placeholder.setAttribute('normal', new THREE.Float32BufferAttribute(new Float32Array(9), 3))
-  placeholder.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(6), 2))
-  placeholder.setAttribute('uv2', new THREE.Float32BufferAttribute(new Float32Array(6), 2))
   computeGeometryBoundsTree(placeholder)
   return placeholder
 }
@@ -1596,7 +1592,8 @@ function createGeometryFromRawAttributes(
   uvs: number[],
   groups: RawGeometryGroup[],
 ): THREE.BufferGeometry {
-  const geometry = createEmptyGeometry()
+  if (positions.length === 0) return createEmptyGeometry()
+  const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
@@ -2331,7 +2328,8 @@ function createGeometryFromFaces(
     })
   }
 
-  const geometry = createEmptyGeometry()
+  if (positions.length === 0) return createEmptyGeometry()
+  const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
