@@ -240,6 +240,14 @@ export function useSceneCollaboration({
                 ...payload.event,
                 graph: graphFromSnapshot(expected),
               })
+              // A deferred echo of an *earlier* batch is now obsolete: this
+              // response proves the server is at (or past) its version and our
+              // optimistic state is already what it stored. Leaving it pending
+              // makes `applyLatestAuthoritative` re-apply the older graph the
+              // moment `pending` hits zero, reverting the wall just published.
+              if (latestAuthoritative && latestAuthoritative.version <= payload.event.version) {
+                latestAuthoritative = null
+              }
             }
           }
           onErrorRef.current(null)
