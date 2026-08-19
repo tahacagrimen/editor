@@ -33,6 +33,8 @@ const tr: Record<string, string> = {
   'Camera controls hint': 'Kamera kontrolleri ipucu',
   'Camera snapshot': 'Kamera görüntüsü',
   Cancel: 'İptal',
+  Copy: 'Kopyala',
+  Copied: 'Kopyalandı',
   Ceiling: 'Tavan',
   'Center mark': 'Merkez işareti',
   Centimeters: 'Santimetre',

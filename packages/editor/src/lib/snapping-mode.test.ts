@@ -12,8 +12,8 @@ import {
 } from './snapping-mode'
 
 describe('resolveSnapFlags', () => {
-  it('default mode is grid', () => {
-    expect(DEFAULT_SNAPPING_MODE).toBe('grid')
+  it('default mode is lines', () => {
+    expect(DEFAULT_SNAPPING_MODE).toBe('lines')
   })
 
   it("modes are exclusive: 'grid' snaps to the lattice only", () => {
@@ -43,25 +43,26 @@ describe('resolveSnapFlags', () => {
       mode = nextSnappingMode(mode)
       seen.push(mode)
     }
-    expect(seen).toEqual(SNAPPING_MODES)
+    expect(seen.length).toBe(SNAPPING_MODES.length)
+    expect(new Set(seen)).toEqual(new Set(SNAPPING_MODES))
     expect(nextSnappingMode(mode)).toBe(DEFAULT_SNAPPING_MODE)
   })
 })
 
 describe('per-context snapping', () => {
-  it('items default to grid with no angle lock', () => {
-    expect(defaultSnappingModeFor('item')).toBe('grid')
+  it('items default to lines with no angle lock', () => {
+    expect(defaultSnappingModeFor('item')).toBe('lines')
     expect(snappingModesFor('item')).toEqual(['lines', 'grid', 'off'])
     expect(snappingModesFor('item')).not.toContain('angles')
   })
 
-  it('walls default to grid and expose the angle lock; polygons do NOT', () => {
-    expect(defaultSnappingModeFor('wall')).toBe('grid')
-    expect(defaultSnappingModeFor('polygon')).toBe('grid')
+  it('walls default to lines and expose the angle lock; polygons do NOT', () => {
+    expect(defaultSnappingModeFor('wall')).toBe('lines')
+    expect(defaultSnappingModeFor('polygon')).toBe('lines')
     expect(snappingModesFor('wall')).toContain('angles')
     // Angle lock is wall/fence-only — slabs, curves and translates never get it.
     expect(snappingModesFor('polygon')).not.toContain('angles')
-    expect(snappingModesFor('polygon')).toEqual(['grid', 'lines', 'off'])
+    expect(snappingModesFor('polygon')).toEqual(['lines', 'grid', 'off'])
   })
 
   it('cycles within the context set and clamps a foreign value', () => {

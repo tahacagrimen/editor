@@ -4,16 +4,15 @@ import { GROUP_MOVE_DRAG_LABEL, ROTATE_HANDLE_DRAG_LABEL } from './contextual-he
 /**
  * Snapping mode is a single global, user-cyclable control that maps onto the
  * two pre-existing snap knobs (`gridSnapStep` grid snap + `magneticSnap`).
- * The default `'grid'` resolves to the exact pair the editor shipped with
- * before this control existed (grid on, magnetic on), so the default path is
- * behaviourally unchanged — only when a user opts into `'lines'` or `'off'`
- * does any snap math get suppressed.
+ * The default `'lines'` enables magnetic guides (alignment axes + wall joins)
+ * without a grid lattice. Only when a user opts into `'grid'` or `'off'`
+ * does this behaviour change.
  */
 export type SnappingMode = 'grid' | 'lines' | 'angles' | 'off'
 
 export const SNAPPING_MODES: SnappingMode[] = ['grid', 'lines', 'angles', 'off']
 
-export const DEFAULT_SNAPPING_MODE: SnappingMode = 'grid'
+export const DEFAULT_SNAPPING_MODE: SnappingMode = 'lines'
 
 export type SnapFlags = {
   grid: boolean
@@ -81,14 +80,14 @@ type SnapModeSet = { modes: SnappingMode[]; default: SnappingMode }
 // angle, so those use the no-angle 'polygon' set.
 const SNAP_PROFILES: Record<SnapContext, SnapModeSet> = {
   // Wall / fence drafting + endpoint reshape: direction matters → angle lock.
-  wall: { modes: ['grid', 'lines', 'angles', 'off'], default: 'grid' },
-  // Item placement / move: grid by default; lines = magnetic alignment only (no
+  wall: { modes: ['lines', 'grid', 'angles', 'off'], default: 'lines' },
+  // Item placement / move: lines = magnetic alignment only (no
   // grid lattice), no angle lock (meaningless for a footprint).
-  item: { modes: ['lines', 'grid', 'off'], default: 'grid' },
+  item: { modes: ['lines', 'grid', 'off'], default: 'lines' },
   // Structural / surface, no direction to set: slab / ceiling / roof draft+move,
-  // whole wall/fence translate, curve reshape, polygon boundary edit. Grid by
+  // whole wall/fence translate, curve reshape, polygon boundary edit. Lines by
   // default, NO angle lock.
-  polygon: { modes: ['grid', 'lines', 'off'], default: 'grid' },
+  polygon: { modes: ['lines', 'grid', 'off'], default: 'lines' },
 }
 
 export const SNAP_CONTEXTS: SnapContext[] = ['wall', 'item', 'polygon']

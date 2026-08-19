@@ -2,6 +2,7 @@ import { type I18nLocale, translate } from '@pascal-app/editor/i18n'
 import { cookies, headers } from 'next/headers'
 import Link from 'next/link'
 import { CreateSceneButton } from '@/components/save-button'
+import { SceneCardMenu } from '@/components/scene-card-menu'
 import type { SceneMeta } from '@/components/scene-loader'
 import { ServerLocalizedContent } from '@/components/server-localized-content'
 import { resolveActor } from '@/lib/scene-api-security'
@@ -108,9 +109,9 @@ export default async function ScenesPage() {
           ) : (
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {scenes.map((scene) => (
-                <li key={scene.id}>
+                <li className="relative group rounded-xl border border-border/60 bg-background transition-colors hover:border-border hover:bg-accent/30" key={scene.id}>
                   <Link
-                    className="group block rounded-xl border border-border/60 bg-background p-4 transition-colors hover:border-border hover:bg-accent/30"
+                    className="block p-4"
                     href={`/scene/${scene.id}`}
                   >
                     <div className="flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-accent/30">
@@ -126,7 +127,7 @@ export default async function ScenesPage() {
                       )}
                     </div>
                     <div className="mt-3">
-                      <h2 className="truncate font-semibold text-sm group-hover:text-foreground">
+                      <h2 className="truncate pr-8 font-semibold text-sm group-hover:text-foreground">
                         {scene.name}
                       </h2>
                       <div className="mt-1 flex items-center justify-between text-muted-foreground text-xs">
@@ -137,6 +138,9 @@ export default async function ScenesPage() {
                       </div>
                     </div>
                   </Link>
+                  <div className="absolute right-2 bottom-3">
+                    <SceneCardMenu sceneId={scene.id} sceneName={scene.name} />
+                  </div>
                 </li>
               ))}
             </ul>
