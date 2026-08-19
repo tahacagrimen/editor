@@ -9,9 +9,9 @@ import {
   SunStudyPanel,
   useTranslation,
 } from '@pascal-app/editor'
-import { Layers, Sigma, Sun } from 'lucide-react'
+import { Layers, Sigma, Sun, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TopBarAuth } from './auth/top-bar-auth'
 import { EditorTopBar } from './editor-top-bar'
 import { CommunityViewerToolbarLeft, CommunityViewerToolbarRight } from './viewer-toolbar'
@@ -26,11 +26,11 @@ export type SharedSceneMeta = {
  * would arm, follow the cursor, and place nothing — an affordance that looks
  * broken rather than absent.
  */
-const SHARED_SIDEBAR_TABS: (SidebarTab & { component: React.ComponentType })[] = [
+const SHARED_SIDEBAR_TABS_BASE: (SidebarTab & { component: React.ComponentType })[] = [
   {
     id: 'site',
     label: 'Scene',
-    component: () => null, // Built-in SitePanel handles this — comments live here.
+    component: () => null, // Built-in SitePanel handles this
     mobileDefaultSnap: 0.5,
     mobileIcon: <Layers className="h-5 w-5" />,
     icon: (
@@ -77,10 +77,12 @@ export function SharedSceneLoader({
   initialScene,
   meta,
   token,
+  allowComments = true,
 }: {
   initialScene: SceneGraph
   meta: SharedSceneMeta
   token: string
+  allowComments?: boolean
 }) {
   const t = useTranslation()
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -88,15 +90,29 @@ export function SharedSceneLoader({
 
   useEffect(() => acquireSceneReadOnlyLease(), [])
 
+  const tabs = useMemo(() => {
+    const list = [...SHARED_SIDEBAR_TABS_BASE]
+    if (allowComments) {
+      list.push({
+        id: 'activity',
+        label: 'Activity',
+        component: () => null, // Built-in ActivityPanel handles this
+        mobileDefaultSnap: 0.5,
+        mobileIcon: <MessageSquare className="h-5 w-5" />,
+        icon: <MessageSquare className="h-5 w-5" />,
+      })
+    }
+    return list
+  }, [allowComments])
+
   const handleLoad = useCallback(async () => initialScene, [initialScene])
 
   const handleSave = useCallback(
     async (graph: SceneGraph, options?: { keepalive?: boolean }) => {
+      if (!allowComments) return
+
       const comments = (graph as { comments?: Record<string, unknown> }).comments ?? {}
       const body = JSON.stringify({ comments })
-      // The editor's autosave fires on any tracked change; under the read-only
-      // lease the only one that can happen is a comment, but a redundant PUT
-      // still costs a scene write for every unrelated store touch.
       if (lastSentRef.current === body) return
       lastSentRef.current = body
 
@@ -108,8 +124,6 @@ export function SharedSceneLoader({
           keepalive: options?.keepalive,
         })
         if (!response.ok) {
-          // Let the next change retry: a conflict here means the owner saved
-          // between our read and write, not that the comment was rejected.
           lastSentRef.current = null
           setSaveError(
             response.status === 409 ? 'Comment not saved — try again' : 'Comment not saved',
@@ -122,7 +136,7 @@ export function SharedSceneLoader({
         setSaveError('Comment not saved')
       }
     },
-    [token],
+    [token, allowComments],
   )
 
   return (
@@ -140,7 +154,7 @@ export function SharedSceneLoader({
         onLoad={handleLoad}
         onSave={handleSave}
         projectId="shared"
-        sidebarTabs={SHARED_SIDEBAR_TABS}
+        sidebarTabs={tabs}
         viewerToolbarLeft={<CommunityViewerToolbarLeft />}
         viewerToolbarRight={<CommunityViewerToolbarRight />}
       />

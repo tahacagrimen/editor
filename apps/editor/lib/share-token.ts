@@ -18,6 +18,10 @@ export type ShareTokenPayload = {
   iat: number
   /** Expires at, epoch seconds. Absent means the link does not expire. */
   exp?: number
+  /** Whether visitors can add and view comments. */
+  allowComments?: boolean
+  /** HMAC-SHA256 hash of the link password, signed by the server secret. */
+  pwd?: string
 }
 
 export type ShareTokenError = 'secret_missing' | 'malformed' | 'bad_signature' | 'expired'
@@ -40,6 +44,12 @@ function sign(body: string, secret: string): string {
   return createHmac('sha256', secret).update(body).digest('base64url')
 }
 
+export function hashSharePassword(password: string, env: NodeJS.ProcessEnv = process.env): string | null {
+  const secret = shareSecret(env)
+  if (!secret) return null
+  return sign(password, secret)
+}
+
 /**
  * Mint a token for `sceneId`. `ttlSeconds` of 0 or undefined means no expiry.
  * Returns `null` when no secret is configured — the caller must fail the
@@ -47,7 +57,13 @@ function sign(body: string, secret: string): string {
  */
 export function createShareToken(
   sceneId: string,
-  options: { ttlSeconds?: number; now?: number; env?: NodeJS.ProcessEnv } = {},
+  options: {
+    ttlSeconds?: number
+    now?: number
+    env?: NodeJS.ProcessEnv
+    allowComments?: boolean
+    password?: string
+  } = {},
 ): { token: string; payload: ShareTokenPayload } | null {
   const secret = shareSecret(options.env)
   if (!secret) return null
@@ -56,6 +72,13 @@ export function createShareToken(
   const payload: ShareTokenPayload = { sid: sceneId, iat }
   if (options.ttlSeconds && options.ttlSeconds > 0) {
     payload.exp = iat + Math.floor(options.ttlSeconds)
+  }
+  if (options.allowComments !== undefined) {
+    payload.allowComments = options.allowComments
+  }
+  if (options.password) {
+    const hash = hashSharePassword(options.password, options.env)
+    if (hash) payload.pwd = hash
   }
 
   const body = base64UrlEncode(JSON.stringify(payload))
@@ -101,7 +124,7 @@ export function verifyShareToken(
   }
 
   if (typeof parsed !== 'object' || parsed === null) return { ok: false, error: 'malformed' }
-  const { sid, iat, exp } = parsed as Record<string, unknown>
+  const { sid, iat, exp, allowComments, pwd } = parsed as Record<string, unknown>
   if (typeof sid !== 'string' || !sid) return { ok: false, error: 'malformed' }
   if (typeof iat !== 'number' || !Number.isFinite(iat)) return { ok: false, error: 'malformed' }
   if (exp !== undefined && (typeof exp !== 'number' || !Number.isFinite(exp))) {
@@ -113,5 +136,7 @@ export function verifyShareToken(
 
   const payload: ShareTokenPayload = { sid, iat }
   if (typeof exp === 'number') payload.exp = exp
+  if (typeof allowComments === 'boolean') payload.allowComments = allowComments
+  if (typeof pwd === 'string') payload.pwd = pwd
   return { ok: true, payload }
 }

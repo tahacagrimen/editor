@@ -41,6 +41,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return sceneApiJson(request, { error: verified.error }, { status })
   }
 
+  if (verified.payload.allowComments === false) {
+    return sceneApiJson(request, { error: 'comments_disabled' }, { status: 403 })
+  }
+
+  if (verified.payload.pwd) {
+    const cookieVal = request.cookies.get(`share_pwd_${verified.payload.sid}`)?.value
+    const { hashSharePassword } = await import('@/lib/share-token')
+    if (!cookieVal || hashSharePassword(cookieVal) !== verified.payload.pwd) {
+      return sceneApiJson(request, { error: 'unauthorized' }, { status: 401 })
+    }
+  }
+
   let body: unknown
   try {
     body = await request.json()

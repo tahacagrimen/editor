@@ -13,6 +13,8 @@ const MAX_TTL_SECONDS = 365 * 24 * 60 * 60
 const createShareSchema = z.object({
   /** Seconds until the link stops working. Omit or 0 for a link that never expires. */
   ttlSeconds: z.number().int().nonnegative().max(MAX_TTL_SECONDS).optional(),
+  allowComments: z.boolean().optional(),
+  password: z.string().min(1).optional(),
 })
 
 export function OPTIONS(request: NextRequest) {
@@ -59,7 +61,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const scene = await operations.loadStoredScene(id)
   if (!scene) return sceneApiJson(request, { error: 'not_found' }, { status: 404 })
 
-  const minted = createShareToken(id, { ttlSeconds: parsed.data.ttlSeconds })
+  const minted = createShareToken(id, { 
+    ttlSeconds: parsed.data.ttlSeconds,
+    allowComments: parsed.data.allowComments,
+    password: parsed.data.password,
+  })
   if (!minted) {
     // Same shape as the scene API's missing-token response: a deployment
     // configuration problem, not a client error.

@@ -258,6 +258,11 @@ export { AgentPromptBox } from './components/ui/panels/agent/agent-prompt-box'
 export { CadUnderlayPanel } from './components/ui/panels/cad-underlay-panel'
 // Item collections UI — used by the kind-owned ItemPanel in nodes/.
 export { CollectionsPopover } from './components/ui/panels/collections/collections-popover'
+export {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from './components/ui/primitives/popover'
 export { CommentsSection } from './components/ui/panels/comments/comments-section'
 // Phase 5 Stage E — kinds with bespoke editors (slab holes list,
 // ceiling height presets, etc.) use `parametrics.customPanel` to mount
