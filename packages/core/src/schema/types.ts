@@ -46,6 +46,7 @@ import { StructuralGridNode } from './nodes/structural-grid'
 import { TurbineVentNode } from './nodes/turbine-vent'
 import { WallNode } from './nodes/wall'
 import { WindowNode } from './nodes/window'
+import { XLineNode } from './nodes/xline'
 import { ZoneNode } from './nodes/zone'
 
 export const AnyNode = z.discriminatedUnion('type', [
@@ -56,6 +57,7 @@ export const AnyNode = z.discriminatedUnion('type', [
   ColumnNode,
   ConstructionDimensionNode,
   StructuralGridNode,
+  XLineNode,
   WallNode,
   FenceNode,
   CabinetNode,

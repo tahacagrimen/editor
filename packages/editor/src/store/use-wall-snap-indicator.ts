@@ -24,6 +24,11 @@ const WALL_SNAP_LABELS: Record<WallSnapKind, string> = {
 }
 
 export function wallSnapLabel(point: Pick<WallSnapPoint, 'kind' | 'source'>): string {
+  // A reference line is its own category — never conflated with built geometry
+  // or the drawing under it.
+  if (point.source === 'xline') {
+    return 'On reference line'
+  }
   // An imported drawing is never silently conflated with built geometry.
   if (point.source === 'cad') {
     return point.kind === 'wall'
@@ -45,7 +50,7 @@ export type WallSnapPoint = {
    * which the beacon tints differently so it is never ambiguous whether the
    * cursor caught the model or the drawing under it.
    */
-  source?: 'wall' | 'cad'
+  source?: 'wall' | 'cad' | 'xline'
 }
 
 type WallSnapIndicatorState = {

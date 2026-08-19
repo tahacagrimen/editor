@@ -20,6 +20,7 @@ import {
   type WallNode,
   WallNode as WallSchema,
   type WindowNode,
+  type XLineNode,
 } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
 import { findCadSnapOnLevel } from '../../../lib/cad-snap-source'
@@ -37,6 +38,7 @@ import {
   WALL_BUILDABLE_SNAP_RADIUS,
   WALL_CONNECT_SNAP_RADIUS,
   WALL_JOIN_SNAP_RADIUS,
+  WALL_XLINE_SNAP_RADIUS,
   type WallDraftSnapResult,
   type WallPlanPoint,
   type WallSnapRadii,
@@ -458,6 +460,17 @@ export function snapWallDraftPointDetailed(args: SnapWallDraftArgs): WallDraftSn
     }
   }
 
+  // XLines are level-local construction reference lines. Gathered once here so
+  // the magnetic pass below can snap onto them from the raw cursor.
+  const xlines = currentLevelId
+    ? Object.values(nodes)
+        .filter(
+          (n): n is XLineNode =>
+            n.type === 'xline' && n.parentId === currentLevelId && n.visible !== false,
+        )
+        .map((n) => [n.origin, n.through] as const)
+    : []
+
   const enforceViolation = (result: WallDraftSnapResult): WallDraftSnapResult => {
     if (!shouldSnapToBuildable || buildableRings.length === 0) return result
     const isValid = buildableRings.some((ring) =>
@@ -515,6 +528,31 @@ export function snapWallDraftPointDetailed(args: SnapWallDraftArgs): WallDraftSn
           snap: cad.kind === 'segment' ? 'wall' : cad.kind,
           targetWallIds: [],
           source: 'cad',
+        })
+      }
+      return enforceViolation({
+        point: wallBody,
+        snap: 'wall',
+        targetWallIds: wallIdsAtSnapPoint(wallBody, walls, ignoreWallIds),
+      })
+    }
+
+    // XLine reference lines snap like the CAD underlay: the model's own wall
+    // body still wins a tie, but otherwise the construction line outranks the
+    // grid/angle base point computed below.
+    const xlineFoot = snapServices.lines.snapToInfinite(point, xlines, WALL_XLINE_SNAP_RADIUS)
+    if (xlineFoot) {
+      const xlinePoint: WallPlanPoint = [xlineFoot[0], xlineFoot[1]]
+      const wallBody = findWallSnapTarget(point, walls, {
+        ignoreWallIds,
+        radius: snapRadii?.wall,
+      })
+      if (!wallBody || distanceSquared(point, xlinePoint) < distanceSquared(point, wallBody)) {
+        return enforceViolation({
+          point: xlinePoint,
+          snap: 'wall',
+          targetWallIds: [],
+          source: 'xline',
         })
       }
       return enforceViolation({

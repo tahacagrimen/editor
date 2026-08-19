@@ -6,6 +6,7 @@ import {
   snapPointAlongAngleRay,
   snapPointToAngle,
   snapPointToGrid,
+  snapPointToInfiniteLines,
   snapScalar,
   snapServices,
   snapVec3ToGrid,
@@ -154,6 +155,52 @@ describe('snapAngleToList', () => {
   })
 })
 
+describe('snapPointToInfiniteLines', () => {
+  test('snaps a point already on the line to itself', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [10, 0]]]
+    expect(snapPointToInfiniteLines([5, 0], lines, 0.35)).toEqual([5, 0])
+  })
+
+  test('projects a nearby point to its perpendicular foot', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [10, 0]]]
+    expect(snapPointToInfiniteLines([5, 0.3], lines, 0.35)).toEqual([5, 0])
+  })
+
+  test('projects onto a diagonal line', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [1, 1]]]
+    const foot = snapPointToInfiniteLines([1, 0], lines, 1)
+    expect(foot?.[0]).toBeCloseTo(0.5)
+    expect(foot?.[1]).toBeCloseTo(0.5)
+  })
+
+  test('is unbounded: snaps past the finite segment endpoints', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [1, 0]]]
+    expect(snapPointToInfiniteLines([5, 0.1], lines, 0.2)).toEqual([5, 0])
+  })
+
+  test('picks the nearest of several lines', () => {
+    const lines: Array<[Vec2, Vec2]> = [
+      [[0, 0], [10, 0]],
+      [[0, 10], [10, 10]],
+    ]
+    expect(snapPointToInfiniteLines([5, 1], lines, 5)).toEqual([5, 0])
+  })
+
+  test('returns null when no line is within tolerance', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [10, 0]]]
+    expect(snapPointToInfiniteLines([5, 1], lines, 0.5)).toBeNull()
+  })
+
+  test('treats a degenerate (zero-length) line as its single point', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [0, 0]]]
+    expect(snapPointToInfiniteLines([0.1, 0], lines, 0.2)).toEqual([0, 0])
+  })
+
+  test('returns null for an empty line set', () => {
+    expect(snapPointToInfiniteLines([0, 0], [], 1)).toBeNull()
+  })
+})
+
 describe('snapServices facade', () => {
   test('grid.snap matches snapPointToGrid', () => {
     expect(snapServices.grid.snap([0.3, 0.6], 0.25)).toEqual(snapPointToGrid([0.3, 0.6], 0.25))
@@ -169,5 +216,10 @@ describe('snapServices facade', () => {
     expect(snapServices.angle.snapTo(from, cursor, Math.PI / 4)).toEqual(
       snapPointToAngle(from, cursor, Math.PI / 4),
     )
+  })
+
+  test('lines.snapToInfinite matches snapPointToInfiniteLines', () => {
+    const lines: Array<[Vec2, Vec2]> = [[[0, 0], [10, 0]]]
+    expect(snapServices.lines.snapToInfinite([5, 0.3], lines, 0.35)).toEqual([5, 0])
   })
 })

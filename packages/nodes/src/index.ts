@@ -46,6 +46,7 @@ import { structuralGridDefinition } from './structural-grid'
 import { turbineVentDefinition } from './turbine-vent'
 import { wallDefinition } from './wall'
 import { windowDefinition } from './window'
+import { xlineDefinition } from './xline'
 import { zoneDefinition } from './zone'
 
 /**
@@ -99,6 +100,7 @@ export const builtinPlugin: Plugin = {
     measurementDefinition as unknown as AnyNodeDefinition,
     constructionDimensionDefinition as unknown as AnyNodeDefinition,
     structuralGridDefinition as unknown as AnyNodeDefinition,
+    xlineDefinition as unknown as AnyNodeDefinition,
     sectionPlaneDefinition as unknown as AnyNodeDefinition,
     // Roof-mounted accessories (custom renderer + bespoke roof-event tool).
     boxVentDefinition as unknown as AnyNodeDefinition,
@@ -181,4 +183,5 @@ export { structuralGridDefinition } from './structural-grid'
 export { turbineVentDefinition } from './turbine-vent'
 export { wallDefinition } from './wall'
 export { windowDefinition } from './window'
+export { xlineDefinition } from './xline'
 export { zoneDefinition } from './zone'

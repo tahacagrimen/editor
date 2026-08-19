@@ -215,6 +215,46 @@ export function snapPointToPolygonEdges(
   return null
 }
 
+/**
+ * Snaps a point onto the nearest of a set of infinite lines. Each line is
+ * expressed as two points `[a, b]`; the projection parameter `t` is left
+ * **unbounded** (unlike `snapPointToPolygonEdges`, which clamps to the finite
+ * edge), because an XLine / construction line extends both ways.
+ */
+export function snapPointToInfiniteLines(
+  point: Vec2,
+  lines: readonly (readonly [Vec2, Vec2])[],
+  tolerance: number,
+): Vec2 | null {
+  if (tolerance <= 0 || lines.length === 0) return null
+
+  let best: Vec2 | null = null
+  let bestDist = Number.POSITIVE_INFINITY
+
+  for (const [a, b] of lines) {
+    const dx = b[0] - a[0]
+    const dy = b[1] - a[1]
+    const l2 = dx * dx + dy * dy
+    if (l2 === 0) {
+      const dist = Math.hypot(point[0] - a[0], point[1] - a[1])
+      if (dist <= tolerance && dist < bestDist) {
+        bestDist = dist
+        best = a
+      }
+      continue
+    }
+    const t = ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / l2
+    const foot: Vec2 = [a[0] + t * dx, a[1] + t * dy]
+    const dist = Math.hypot(point[0] - foot[0], point[1] - foot[1])
+    if (dist <= tolerance && dist < bestDist) {
+      bestDist = dist
+      best = foot
+    }
+  }
+
+  return best
+}
+
 // ─── Top-level SnapServices facade ────────────────────────────────────
 
 /**
@@ -241,6 +281,13 @@ export type SnapServices = {
       tolerance: number,
     ) => Vec2 | null
   }
+  lines: {
+    snapToInfinite: (
+      point: Vec2,
+      lines: readonly (readonly [Vec2, Vec2])[],
+      tolerance: number,
+    ) => Vec2 | null
+  }
 }
 
 export const snapServices: SnapServices = {
@@ -255,5 +302,8 @@ export const snapServices: SnapServices = {
   },
   polygon: {
     snapToEdges: snapPointToPolygonEdges,
+  },
+  lines: {
+    snapToInfinite: snapPointToInfiniteLines,
   },
 }

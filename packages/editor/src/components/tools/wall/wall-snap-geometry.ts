@@ -37,7 +37,7 @@ export type WallDraftSnapResult = {
    * it never carries `targetWallIds`, so nothing downstream can mistake a
    * traced line for a wall to join or split.
    */
-  source?: 'wall' | 'cad'
+  source?: 'wall' | 'cad' | 'xline'
   /** True when the point lies outside the site's buildable area. */
   violation?: boolean
 }
@@ -67,6 +67,8 @@ export const WALL_INTERSECTION_SNAP_RADIUS = 0.5
 // stronger is in range. Kept tight so the soft snap never overrides the user's
 // intent to sit just off the line.
 export const WALL_BUILDABLE_SNAP_RADIUS = 0.2
+// Capture radius for an XLine construction line (a magnetic reference line).
+export const WALL_XLINE_SNAP_RADIUS = 0.35
 
 /**
  * Which part of a wall the drafted line represents.

@@ -304,6 +304,7 @@ export {
   WindowNode,
   WindowType,
 } from './nodes/window'
+export { XLineNode } from './nodes/xline'
 export { ZoneNode } from './nodes/zone'
 export {
   generateSavedViewId,

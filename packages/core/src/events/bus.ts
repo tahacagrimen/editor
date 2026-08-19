@@ -50,6 +50,7 @@ import type {
   TurbineVentNode,
   WallNode,
   WindowNode,
+  XLineNode,
   ZoneNode,
 } from '../schema'
 import type { AnyNode } from '../schema/types'
@@ -113,6 +114,7 @@ export type RoofSegmentEvent = NodeEvent<RoofSegmentNode>
 export type StairEvent = NodeEvent<StairNode>
 export type StairSegmentEvent = NodeEvent<StairSegmentNode>
 export type StructuralGridEvent = NodeEvent<StructuralGridNode>
+export type XLineEvent = NodeEvent<XLineNode>
 export type WindowEvent = NodeEvent<WindowNode>
 export type DoorEvent = NodeEvent<DoorNode>
 export type ElevatorEvent = NodeEvent<ElevatorNode>
@@ -333,6 +335,7 @@ type EditorEvents = GridEvents &
   NodeEvents<'stair', StairEvent> &
   NodeEvents<'stair-segment', StairSegmentEvent> &
   NodeEvents<'structural-grid', StructuralGridEvent> &
+  NodeEvents<'xline', XLineEvent> &
   NodeEvents<'window', WindowEvent> &
   NodeEvents<'door', DoorEvent> &
   NodeEvents<'scan', ScanEvent> &
