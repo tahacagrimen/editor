@@ -122,6 +122,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
       meta={meta}
       showCost={showCost}
       summary={summary}
+      token={token}
     />
   )
 }

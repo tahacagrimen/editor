@@ -1,15 +1,32 @@
 'use client'
 
-import type { BuildingNode, LevelNode } from '@pascal-app/core'
+import {
+  type AnyNode,
+  type BuildingNode,
+  type CameraPose,
+  type CommentId,
+  type CommentThread,
+  type LevelNode,
+  useScene,
+} from '@pascal-app/core'
 import { applySceneGraphToEditor, type SceneGraph, useTranslation } from '@pascal-app/editor'
 import { SceneEnvironment, useViewer, Viewer } from '@pascal-app/viewer'
-import { CameraControls } from '@react-three/drei'
+import { CameraControls, type CameraControlsImpl } from '@react-three/drei'
 import { Eye } from 'lucide-react'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Vector3 } from 'three'
+import {
+  buildShareCommentInput,
+  numberShareComments,
+  type ShareCommentDraft,
+  visibleShareCommentPins,
+} from '@/lib/share-comments'
 import type { ShareLocation } from '@/lib/share-location'
 import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
 import { formatShareLevelStats, readShareLevels } from '@/lib/share-scene-levels'
 import type { ShareSummary } from '@/lib/share-summary'
+import { ShareCommentPins3D, ShareCommentPlacement3D } from './share-comment-pins-3d'
+import { ShareCommentsPanel } from './share-comments-panel'
 import { ShareFloorplan } from './share-floorplan'
 import { ShareLocationPanel } from './share-location-panel'
 import { ShareQuantitiesPanel } from './share-quantities-panel'
@@ -30,7 +47,11 @@ const TABS: { id: ShareTab; label: string }[] = [
   { id: 'yorum', label: 'Comments' },
 ]
 
-function ShareCameraControls() {
+function ShareCameraControls({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<CameraControlsImpl | null>
+}) {
   return (
     <CameraControls
       makeDefault
@@ -38,6 +59,7 @@ function ShareCameraControls() {
       maxPolarAngle={Math.PI / 2 - 0.05}
       minDistance={1}
       minPolarAngle={0}
+      ref={controlsRef}
     />
   )
 }
@@ -47,6 +69,7 @@ export function SharePresentation({
   location,
   meta,
   summary,
+  token,
   allowComments = true,
   showCost = true,
 }: {
@@ -54,6 +77,7 @@ export function SharePresentation({
   location: ShareLocation | null
   meta: SharePresentationMeta
   summary: ShareSummary
+  token: string
   allowComments?: boolean
   showCost?: boolean
 }) {
@@ -63,11 +87,31 @@ export function SharePresentation({
     levelIdx: 0,
     tab: 'ozet',
   })
+  const [comments, setComments] = useState<Record<CommentId, CommentThread>>(
+    () => (initialScene.comments ?? {}) as Record<CommentId, CommentThread>,
+  )
+  const [placingComment, setPlacingComment] = useState(false)
+  const [commentDraft, setCommentDraft] = useState<ShareCommentDraft | null>(null)
+  const [activeCommentId, setActiveCommentId] = useState<string | null>(null)
+  const [savingComment, setSavingComment] = useState(false)
+  const [commentError, setCommentError] = useState<string | null>(null)
+  const controlsRef = useRef<CameraControlsImpl | null>(null)
 
   const levels = useMemo(() => readShareLevels(initialScene), [initialScene])
   const levelIdx = levels.length === 0 ? 0 : Math.min(viewState.levelIdx, levels.length - 1)
   const selectedLevel = levels[levelIdx] ?? null
-  const commentCount = Object.keys(initialScene.comments ?? {}).length
+  const numberedComments = useMemo(() => numberShareComments(comments), [comments])
+  const visibleCommentPins = useMemo(
+    () => visibleShareCommentPins(numberedComments, selectedLevel?.id ?? null),
+    [numberedComments, selectedLevel?.id],
+  )
+  const commentCount = numberedComments.length
+  const sceneNodes = initialScene.nodes as unknown as Record<string, AnyNode>
+  const nodeKinds = useMemo(() => Object.values(sceneNodes).map((node) => node.type), [sceneNodes])
+  const levelNames = useMemo(
+    () => Object.fromEntries(levels.map((level) => [level.id, level.name])),
+    [levels],
+  )
   const metadataLines = [meta.parcelLine, meta.revisionLine, meta.sharedByLine].filter(
     (line): line is string => Boolean(line),
   )
@@ -94,6 +138,117 @@ export function SharePresentation({
   const selectTab = (tab: ShareTab) => {
     setViewState((current) => ({ ...current, tab }))
   }
+
+  const persistComments = useCallback(
+    async (next: Record<CommentId, CommentThread>) => {
+      setComments(next)
+      useScene.setState({ comments: next })
+      setSavingComment(true)
+      setCommentError(null)
+      try {
+        const response = await fetch(`/api/share/${encodeURIComponent(token)}/comments`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ comments: next }),
+        })
+        if (!response.ok) throw new Error(`comment_save_${response.status}`)
+      } catch {
+        setCommentError(t('Your comment could not be saved. Please try again.'))
+      } finally {
+        setSavingComment(false)
+      }
+    },
+    [t, token],
+  )
+
+  const dropComment = useCallback(
+    (draft: Omit<ShareCommentDraft, 'origin'> & { camera: CameraPose }) => {
+      setCommentDraft({ ...draft, origin: '3d' })
+      setPlacingComment(false)
+      setActiveCommentId(null)
+      setViewState((current) => ({ ...current, tab: 'yorum' }))
+    },
+    [],
+  )
+
+  const dropFloorplanComment = useCallback(
+    (position: [number, number, number]) => {
+      setCommentDraft({
+        position,
+        ...(selectedLevel && { levelId: selectedLevel.id }),
+        origin: '2d',
+      })
+      setPlacingComment(false)
+      setActiveCommentId(null)
+      setViewState((current) => ({ ...current, tab: 'yorum' }))
+    },
+    [selectedLevel],
+  )
+
+  const submitComment = (author: string, body: string) => {
+    if (!commentDraft) return
+    const input = buildShareCommentInput(commentDraft, author, body)
+    if (!input) return
+    useScene.setState({ comments })
+    const id = useScene.getState().createComment(input)
+    const next = useScene.getState().comments
+    setCommentDraft(null)
+    setActiveCommentId(id)
+    void persistComments(next)
+  }
+
+  const replyToComment = (id: string, author: string, body: string) => {
+    if (!(author.trim() && body.trim())) return
+    useScene.setState({ comments })
+    useScene.getState().addCommentReply(id as CommentId, {
+      author: { name: author.trim() },
+      body: body.trim(),
+    })
+    void persistComments(useScene.getState().comments)
+  }
+
+  const focusComment = useCallback(
+    (id: string) => {
+      const item = numberedComments.find(({ thread }) => thread.id === id)
+      if (!item) return
+      const { thread } = item
+      const nextLevelIdx = thread.levelId
+        ? levels.findIndex((level) => level.id === thread.levelId)
+        : -1
+      setActiveCommentId(id)
+      setViewState((current) => ({
+        ...current,
+        tab: 'yorum',
+        ...(nextLevelIdx >= 0 ? { levelIdx: nextLevelIdx } : {}),
+        ...(thread.camera ? { mode: '3d' as const } : {}),
+      }))
+      window.requestAnimationFrame(() => {
+        document.getElementById(`share-comment-${id}`)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        })
+        if (thread.camera && controlsRef.current) {
+          const [px, py, pz] = thread.camera.position
+          const [tx, ty, tz] = thread.camera.target
+          void controlsRef.current.setLookAt(px, py, pz, tx, ty, tz, true)
+        } else if (controlsRef.current && viewState.mode === '3d') {
+          const position = controlsRef.current.getPosition(new Vector3(), false)
+          const target = controlsRef.current.getTarget(new Vector3(), false)
+          const [tx, ty, tz] = thread.anchor.position
+          void controlsRef.current.setLookAt(
+            tx + position.x - target.x,
+            ty + position.y - target.y,
+            tz + position.z - target.z,
+            tx,
+            ty,
+            tz,
+            true,
+          )
+        }
+      })
+    },
+    [levels, numberedComments, viewState.mode],
+  )
 
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-clip bg-background text-foreground">
@@ -145,7 +300,9 @@ export function SharePresentation({
           </div>
 
           <div
-            className="relative h-[clamp(300px,50vh,560px)] min-w-0 overflow-hidden bg-muted"
+            className={`relative h-[clamp(300px,50vh,560px)] min-w-0 overflow-hidden bg-muted ${
+              placingComment ? 'cursor-crosshair' : ''
+            }`}
             data-level-id={selectedLevel?.id}
           >
             <div
@@ -158,7 +315,23 @@ export function SharePresentation({
                 selectionManager="custom"
               >
                 <SceneEnvironment />
-                <ShareCameraControls />
+                <ShareCameraControls controlsRef={controlsRef} />
+                <ShareCommentPins3D
+                  activeId={activeCommentId}
+                  comments={visibleCommentPins}
+                  draftPosition={commentDraft?.origin === '3d' ? commentDraft.position : null}
+                  nodes={sceneNodes}
+                  onPinClick={focusComment}
+                />
+                {allowComments && placingComment && viewState.mode === '3d' && (
+                  <ShareCommentPlacement3D
+                    controls={controlsRef}
+                    levelId={selectedLevel?.id ?? null}
+                    nodeKinds={nodeKinds}
+                    nodes={sceneNodes}
+                    onDrop={dropComment}
+                  />
+                )}
               </Viewer>
             </div>
 
@@ -168,8 +341,14 @@ export function SharePresentation({
             >
               <ShareFloorplan
                 active={viewState.mode === '2d'}
+                activeCommentId={activeCommentId}
+                comments={visibleCommentPins}
+                draftPosition={commentDraft?.origin === '2d' ? commentDraft.position : null}
                 graph={initialScene}
                 levelId={selectedLevel?.id ?? null}
+                onDropComment={dropFloorplanComment}
+                onPinClick={focusComment}
+                placementEnabled={allowComments && placingComment && viewState.mode === '2d'}
               />
             </div>
 
@@ -246,8 +425,28 @@ export function SharePresentation({
           </div>
 
           <ShareTabPanel
-            allowComments={allowComments}
-            commentCount={commentCount}
+            commentsPanel={
+              <ShareCommentsPanel
+                activeId={activeCommentId}
+                allowComments={allowComments}
+                comments={numberedComments}
+                draft={commentDraft}
+                error={commentError}
+                levelNames={levelNames}
+                locale="tr-TR"
+                onCancelDraft={() => setCommentDraft(null)}
+                onFocus={focusComment}
+                onReply={replyToComment}
+                onStartPlacing={() => {
+                  setCommentDraft(null)
+                  setActiveCommentId(null)
+                  setPlacingComment((current) => !current)
+                }}
+                onSubmitDraft={submitComment}
+                placing={placingComment}
+                saving={savingComment}
+              />
+            }
             selectedLevelId={selectedLevel?.id ?? null}
             selectedLevelArea={selectedLevel?.area ?? null}
             selectedLevelName={selectedLevel?.name ?? null}
@@ -318,8 +517,7 @@ function ShareTabPanel({
   showCost,
   summary,
   location,
-  commentCount,
-  allowComments,
+  commentsPanel,
 }: {
   tab: ShareTab
   selectedLevelName: string | null
@@ -328,8 +526,7 @@ function ShareTabPanel({
   showCost: boolean
   summary: ShareSummary
   location: ShareLocation | null
-  commentCount: number
-  allowComments: boolean
+  commentsPanel: React.ReactNode
 }) {
   const t = useTranslation()
 
@@ -354,17 +551,7 @@ function ShareTabPanel({
 
       {tab === 'konum' && location && <ShareLocationPanel location={location} />}
 
-      {tab === 'yorum' && (
-        <div className="p-4">
-          <p className="text-muted-foreground text-sm">
-            {allowComments
-              ? commentCount > 0
-                ? t('Comments are available for this scene.')
-                : t('No comments yet.')
-              : t('This link is closed to comments. You can only view it.')}
-          </p>
-        </div>
-      )}
+      {tab === 'yorum' && commentsPanel}
     </div>
   )
 }

@@ -2036,6 +2036,26 @@ const tr: Record<string, string> = {
   'Delete comment': 'Yorumu sil',
   'Close comment': 'Yorumu kapat',
   'Hide resolved': 'Çözülenleri gizle',
+  comments: 'yorum',
+  open: 'açık',
+  'Add comment': 'Yorum ekle',
+  'Choose a point': 'Bir nokta seç',
+  'New comment': 'Yeni yorum',
+  'Cancel comment': 'Yorumu iptal et',
+  'Your note': 'Notunuz',
+  'Send comment': 'Yorumu gönder',
+  'Sending…': 'Gönderiliyor…',
+  'Your reply': 'Yanıtınız',
+  'Focus comment': 'Yoruma odaklan',
+  'Unknown level': 'Bilinmeyen kat',
+  'All levels': 'Tüm katlar',
+  'No comments yet. Tap the model to leave the first note.':
+    'Henüz yorum yok. Modele dokunarak ilk notu bırakabilirsin.',
+  'Your comment could not be saved. Please try again.':
+    'Yorumunuz kaydedilemedi. Lütfen tekrar deneyin.',
+  'This link is closed to comments. You can only view it.':
+    'Bu bağlantı yorum eklemeye kapalı. Sadece görüntüleyebilirsin.',
+  'No comments yet.': 'Henüz yorum yok.',
   // Agent activity
   'Agent activity': 'Ajan etkinliği',
   Connected: 'Bağlı',

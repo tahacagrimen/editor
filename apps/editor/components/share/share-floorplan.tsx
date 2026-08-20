@@ -13,7 +13,9 @@ import {
   FloorplanGeometryRenderer,
   type SceneGraph,
 } from '@pascal-app/editor'
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { NumberedShareComment } from '@/lib/share-comments'
+import { floorplanPointToWorld, worldPointToFloorplan } from '@/lib/share-comments'
 
 type FloorplanEntry = {
   id: string
@@ -145,39 +147,154 @@ function buildFloorplanEntries(graph: SceneGraph, levelId: string): FloorplanEnt
 
 export function ShareFloorplan({
   active,
+  activeCommentId,
+  comments,
+  draftPosition,
   graph,
   levelId,
+  onDropComment,
+  onPinClick,
+  placementEnabled,
 }: {
   active: boolean
+  activeCommentId: string | null
+  comments: NumberedShareComment[]
+  draftPosition: [number, number, number] | null
   graph: SceneGraph
   levelId: string | null
+  onDropComment: (position: [number, number, number]) => void
+  onPinClick: (id: string) => void
+  placementEnabled: boolean
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const contentRef = useRef<SVGGElement>(null)
+  const [unitsPerPixel, setUnitsPerPixel] = useState(0.02)
   const entries = useMemo(
     () => (levelId ? buildFloorplanEntries(graph, levelId) : []),
     [graph, levelId],
   )
+  const buildingTransform = useMemo(() => {
+    const nodes = graph.nodes as unknown as Record<string, AnyNode>
+    const level = levelId ? nodes[levelId] : null
+    const building = level?.parentId ? nodes[level.parentId] : null
+    const position = (building as { position?: unknown } | null)?.position
+    const rotation = (building as { rotation?: unknown } | null)?.rotation
+    return {
+      position:
+        Array.isArray(position) && position.length === 3
+          ? (position as [number, number, number])
+          : ([0, 0, 0] as [number, number, number]),
+      rotationY: Array.isArray(rotation) && typeof rotation[1] === 'number' ? rotation[1] : 0,
+    }
+  }, [graph.nodes, levelId])
 
   useLayoutEffect(() => {
     if (!(active && levelId && entries.length > 0 && svgRef.current && contentRef.current)) return
     const bounds = contentRef.current.getBBox()
     if (!(bounds.width > 0 && bounds.height > 0)) return
     const padding = Math.max(0.75, Math.max(bounds.width, bounds.height) * 0.08)
+    const viewWidth = bounds.width + padding * 2
     svgRef.current.setAttribute(
       'viewBox',
-      `${bounds.x - padding} ${bounds.y - padding} ${bounds.width + padding * 2} ${bounds.height + padding * 2}`,
+      `${bounds.x - padding} ${bounds.y - padding} ${viewWidth} ${bounds.height + padding * 2}`,
     )
+    if (svgRef.current.clientWidth > 0) {
+      setUnitsPerPixel(viewWidth / svgRef.current.clientWidth)
+    }
   }, [active, entries.length, levelId])
+
+  useLayoutEffect(() => {
+    if (!(active && activeCommentId && svgRef.current)) return
+    const item = comments.find(({ thread }) => thread.id === activeCommentId)
+    if (!item) return
+    const local = worldPointToFloorplan(
+      item.thread.anchor.position,
+      buildingTransform.position,
+      buildingTransform.rotationY,
+    )
+    const viewBox = svgRef.current.viewBox.baseVal
+    if (!(viewBox.width > 0 && viewBox.height > 0)) return
+    svgRef.current.setAttribute(
+      'viewBox',
+      `${local.x - viewBox.width / 2} ${local.y - viewBox.height / 2} ${viewBox.width} ${viewBox.height}`,
+    )
+  }, [active, activeCommentId, buildingTransform, comments])
+
+  const handlePointerDown = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!(placementEnabled && event.button === 0)) return
+    if (event.target instanceof Element && event.target.closest('[data-share-comment-pin]')) return
+    const matrix = svgRef.current?.getScreenCTM()
+    if (!matrix) return
+    const local = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse())
+    event.preventDefault()
+    event.stopPropagation()
+    onDropComment(
+      floorplanPointToWorld(
+        { x: local.x, y: local.y },
+        buildingTransform.position,
+        buildingTransform.rotationY,
+      ),
+    )
+  }
+
+  const renderPin = (
+    position: [number, number, number],
+    label: React.ReactNode,
+    options: { id?: string; resolved?: boolean; draft?: boolean; active?: boolean },
+  ) => {
+    const local = worldPointToFloorplan(
+      position,
+      buildingTransform.position,
+      buildingTransform.rotationY,
+    )
+    return (
+      <foreignObject
+        data-share-comment-pin=""
+        height={44}
+        key={options.id ?? 'draft'}
+        style={{ overflow: 'visible', pointerEvents: 'auto' }}
+        transform={`translate(${local.x} ${local.y}) scale(${unitsPerPixel})`}
+        width={44}
+        x={-22}
+        y={-22}
+      >
+        {options.draft ? (
+          <span className="flex size-11 items-center justify-center rounded-full border-2 border-primary border-dashed bg-background/90 font-extrabold text-primary shadow-md">
+            +
+          </span>
+        ) : (
+          <button
+            aria-label={`Open comment ${label}`}
+            className={`flex size-11 items-center justify-center rounded-full border-2 font-extrabold text-xs shadow-md ${
+              options.resolved
+                ? 'border-muted-foreground bg-background text-muted-foreground'
+                : 'border-primary bg-primary text-primary-foreground'
+            } ${options.active ? 'ring-4 ring-primary/30' : ''}`}
+            onClick={(event) => {
+              event.stopPropagation()
+              if (options.id) onPinClick(options.id)
+            }}
+            onPointerDown={(event) => event.stopPropagation()}
+            type="button"
+          >
+            {label}
+          </button>
+        )}
+      </foreignObject>
+    )
+  }
 
   return (
     <svg
       aria-label="Selected level floor plan"
-      className="h-full w-full bg-background text-foreground"
+      className={`h-full w-full bg-background text-foreground ${
+        placementEnabled ? 'cursor-crosshair' : ''
+      }`}
       data-share-floorplan=""
+      onPointerDown={handlePointerDown}
       preserveAspectRatio="xMidYMid meet"
       ref={svgRef}
-      role="img"
+      role="group"
       viewBox="-10 -10 20 20"
     >
       <g pointerEvents="none" ref={contentRef}>
@@ -190,6 +307,14 @@ export function ShareFloorplan({
           />
         ))}
       </g>
+      {comments.map(({ number, thread }) =>
+        renderPin(thread.anchor.position, number, {
+          id: thread.id,
+          resolved: thread.resolved === true,
+          active: activeCommentId === thread.id,
+        }),
+      )}
+      {draftPosition && renderPin(draftPosition, '+', { draft: true })}
     </svg>
   )
 }
