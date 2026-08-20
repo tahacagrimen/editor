@@ -16,6 +16,15 @@ describe('translate', () => {
     expect(translate('Read only', 'tr')).toBe('Salt okunur')
   })
 
+  test('uses the binding summary labels on share links', () => {
+    expect(translate('Total construction', 'tr')).toBe('Toplam inşaat')
+    expect(translate('Footprint area', 'tr')).toBe('Taban alanı')
+    expect(translate('Land area', 'tr')).toBe('Yüzölçümü')
+    expect(translate('Zoning check', 'tr')).toBe('İmar kontrolü')
+    expect(translate('Exceeded', 'tr')).toBe('Aşıldı')
+    expect(translate('Suitable', 'tr')).toBe('Uygun')
+  })
+
   test('translates dynamic editor labels', () => {
     expect(translate('Level 3', 'tr')).toBe('Kat 3')
     expect(translate('Measure: Distance', 'tr')).toBe('Ölç: Mesafe')

@@ -51,6 +51,16 @@
       "import": "./dist/material-library.js",
       "default": "./dist/material-library.js"
     },
+    "./site-setbacks": {
+      "types": "./dist/lib/site-setbacks.d.ts",
+      "import": "./dist/lib/site-setbacks.js",
+      "default": "./dist/lib/site-setbacks.js"
+    },
+    "./site-zoning": {
+      "types": "./dist/lib/site-zoning.d.ts",
+      "import": "./dist/lib/site-zoning.js",
+      "default": "./dist/lib/site-zoning.js"
+    },
     "./spatial-grid": {
       "types": "./dist/hooks/spatial-grid/spatial-grid-manager.d.ts",
       "import": "./dist/hooks/spatial-grid/spatial-grid-manager.js",

@@ -12,6 +12,8 @@ describe('share presentation shell', () => {
     const route = readFileSync(routePath, 'utf8')
 
     expect(route).toContain('<SharePresentation')
+    expect(route).toContain('buildShareSummary(graph)')
+    expect(route).toContain('summary={summary}')
     expect(route).not.toContain('<Editor')
   })
 

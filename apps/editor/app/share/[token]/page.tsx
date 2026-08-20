@@ -5,6 +5,7 @@ import { LocalizedContent } from '@/components/localized-content'
 import { SharePresentation } from '@/components/share/share-presentation'
 import { getSceneOperations } from '@/lib/scene-store-server'
 import { buildSharePresentationMeta } from '@/lib/share-presentation-meta'
+import { buildShareSummary } from '@/lib/share-summary'
 import { hashSharePassword, verifyShareToken } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
@@ -107,8 +108,16 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
     ownerName,
     expiresAtSeconds: payload.exp,
   })
+  const summary = buildShareSummary(graph)
 
-  return <SharePresentation allowComments={allowComments} initialScene={initialScene} meta={meta} />
+  return (
+    <SharePresentation
+      allowComments={allowComments}
+      initialScene={initialScene}
+      meta={meta}
+      summary={summary}
+    />
+  )
 }
 
 async function resolveOwnerName(ownerId: string | null): Promise<string | null> {

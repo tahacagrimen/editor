@@ -8,7 +8,9 @@ import { Eye, MapPin } from 'lucide-react'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
 import { formatShareLevelStats, readShareLevels } from '@/lib/share-scene-levels'
+import type { ShareSummary } from '@/lib/share-summary'
 import { ShareFloorplan } from './share-floorplan'
+import { ShareSummaryPanel } from './share-summary-panel'
 
 export type ShareViewState = {
   mode: '3d' | '2d'
@@ -40,10 +42,12 @@ function ShareCameraControls() {
 export function SharePresentation({
   initialScene,
   meta,
+  summary,
   allowComments = true,
 }: {
   initialScene: SceneGraph
   meta: SharePresentationMeta
+  summary: ShareSummary
   allowComments?: boolean
 }) {
   const t = useTranslation()
@@ -238,6 +242,7 @@ export function SharePresentation({
             commentCount={commentCount}
             selectedLevelId={selectedLevel?.id ?? null}
             selectedLevelName={selectedLevel?.name ?? null}
+            summary={summary}
             tab={viewState.tab}
           />
         </section>
@@ -298,12 +303,14 @@ function ShareTabPanel({
   tab,
   selectedLevelName,
   selectedLevelId,
+  summary,
   commentCount,
   allowComments,
 }: {
   tab: ShareTab
   selectedLevelName: string | null
   selectedLevelId: string | null
+  summary: ShareSummary
   commentCount: number
   allowComments: boolean
 }) {
@@ -317,14 +324,7 @@ function ShareTabPanel({
       id={`share-tab-panel-${tab}`}
       role="tabpanel"
     >
-      {tab === 'ozet' && (
-        <div className="border-border border-b p-4">
-          <p className="font-extrabold text-[10px] text-muted-foreground uppercase tracking-[0.08em]">
-            {t('Selected level')}
-          </p>
-          <p className="mt-2 break-words font-extrabold text-lg">{selectedLevelName ?? '—'}</p>
-        </div>
-      )}
+      {tab === 'ozet' && <ShareSummaryPanel summary={summary} />}
 
       {tab === 'metraj' && (
         <div className="max-w-full overflow-x-auto">
