@@ -4,12 +4,17 @@ import {
   type PricedQuantityTakeoff,
   priceQuantityTakeoff,
   type QuantityTakeoff,
-  type QuantityUnit,
 } from '@pascal-app/core/quantities'
 import { type CommentThread, normalizeComments, normalizeUnitPrices } from '@pascal-app/core/schema'
 import { translate } from '@pascal-app/editor/i18n'
 import PDFDocument from 'pdfkit'
 import { z } from 'zod'
+import {
+  formatShareDate,
+  formatShareMoney,
+  formatShareNumber,
+  formatShareQuantity,
+} from './share-format'
 import { readShareLevels } from './share-scene-levels'
 import { buildShareSummary, type ShareSummary } from './share-summary'
 
@@ -133,8 +138,8 @@ export function buildSharePdfModel({
       kind: 'level',
       id: level.id,
       name: translate(level.name, 'tr'),
-      area: level.area === null ? null : formatNumber(level.area, ' m²'),
-      height: level.height === null ? null : formatNumber(level.height, ' m'),
+      area: level.area === null ? null : `${formatShareNumber(level.area)} m²`,
+      height: level.height === null ? null : `${formatShareNumber(level.height)} m`,
       ...(asset?.planImage && { planImage: asset.planImage }),
       lines: priced ? quantityLines(priced, showCost) : [],
       showCost,
@@ -164,55 +169,28 @@ function quantityLines(takeoff: PricedQuantityTakeoff, showCost: boolean): Share
   return takeoff.sections.flatMap((section) =>
     section.lines.map((line) => ({
       label: `${translate(section.label, 'tr')} · ${line.group ? `${line.group} · ` : ''}${translate(line.label, 'tr')}`,
-      quantity: formatQuantity(line.value, line.unit),
+      quantity: formatShareQuantity(line.value, line.unit),
       ...(showCost && {
         unitPrice: line.unitPrice
-          ? formatMoney(line.unitPrice.amount, line.unitPrice.currency)
+          ? formatShareMoney(line.unitPrice.amount, line.unitPrice.currency)
           : '—',
         amount:
           line.cost !== undefined && line.unitPrice
-            ? formatMoney(line.cost, line.unitPrice.currency)
+            ? formatShareMoney(line.cost, line.unitPrice.currency)
             : '—',
       }),
     })),
   )
 }
 
-function formatQuantity(value: number, unit: QuantityUnit): string {
-  if (unit === 'count')
-    return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(value)
-  const suffix = unit === 'length' ? ' m' : unit === 'area' ? ' m²' : ' m³'
-  return formatNumber(value, suffix)
-}
-
-function formatNumber(value: number, suffix = ''): string {
-  return `${new Intl.NumberFormat('tr-TR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)}${suffix}`
-}
-
-function formatMoney(value: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value)
-  } catch {
-    return `${formatNumber(value)} ${currency}`
-  }
-}
-
 function formatDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return new Intl.DateTimeFormat('tr-TR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }).format(date)
+  return (
+    formatShareDate(value, {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }) ?? ''
+  )
 }
 
 const PAGE_WIDTH = 595.28

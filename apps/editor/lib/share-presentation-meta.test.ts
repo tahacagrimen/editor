@@ -43,9 +43,43 @@ describe('share presentation metadata', () => {
       parcelLine: 'İstanbul / Kadıköy / Fikirtepe · Ada 214 / Parsel 7',
       revisionLine: 'Rev. 12 · 18 Ağu 2026',
       sharedByLine: 'Paylaşan: Menart Mimarlık',
-      expiryLine: '12 Eyl 2026’ya kadar geçerli',
+      expiryLine: 'Şu tarihe kadar geçerli: 12 Eyl 2026',
       expiryUrgent: true,
     })
+  })
+
+  test('keeps server-rendered metadata in English when that cookie locale is selected', () => {
+    const graph = {
+      nodes: {
+        site_1: {
+          id: 'site_1',
+          type: 'site',
+          children: [],
+          parcel: {
+            il: 'Istanbul',
+            ilce: 'Kadikoy',
+            mahalle: 'Fikirtepe',
+            ada: '214',
+            parsel: '7',
+          },
+        },
+      },
+      rootNodeIds: ['site_1'],
+    } as unknown as SceneGraph
+
+    const meta = buildSharePresentationMeta({
+      name: 'Villa',
+      version: 2,
+      updatedAt: '2026-08-18T12:00:00.000Z',
+      graph,
+      ownerName: 'Menart',
+      expiresAtSeconds: Date.parse('2026-09-12T12:00:00.000Z') / 1000,
+      locale: 'en',
+    })
+    expect(meta.parcelLine).toContain('Block 214 / Parcel 7')
+    expect(meta.revisionLine).toStartWith('Rev. 2')
+    expect(meta.sharedByLine).toBe('Shared by: Menart')
+    expect(meta.expiryLine).toStartWith('Valid until')
   })
 
   test('omits metadata lines when their source data is absent', () => {

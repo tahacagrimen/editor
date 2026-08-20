@@ -3,6 +3,7 @@
 import { useTranslation } from '@pascal-app/editor'
 import { Copy, Link2, Loader2, RotateCcw, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { formatShareDate } from '@/lib/share-format'
 
 type ManagedShareLink = {
   id: string
@@ -179,9 +180,9 @@ export function SceneShareLinksPanel({ active, sceneId }: { active: boolean; sce
                       {link.revokedAt ? t('Revoked') : expired ? t('Expired') : t('Active')}
                     </p>
                     <p className="mt-1 text-muted-foreground text-xs tabular-nums">
-                      {t('View only')} · {t('Created')} {formatDate(link.createdAt)} ·{' '}
+                      {t('View only')} · {t('Created')} {formatManagedDate(link.createdAt)} ·{' '}
                       {link.expiresAt
-                        ? `${t('Expires')} ${formatDate(link.expiresAt)}`
+                        ? `${t('Expires')} ${formatManagedDate(link.expiresAt)}`
                         : t('Never expires')}
                     </p>
                     <p className="mt-1 truncate text-muted-foreground text-xs">
@@ -212,10 +213,12 @@ export function SceneShareLinksPanel({ active, sceneId }: { active: boolean; sce
   )
 }
 
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('tr-TR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value))
+function formatManagedDate(value: string): string {
+  return (
+    formatShareDate(value, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }) ?? ''
+  )
 }

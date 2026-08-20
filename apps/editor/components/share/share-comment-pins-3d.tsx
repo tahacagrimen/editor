@@ -9,6 +9,7 @@ import {
   type NodeEvent,
   resolveCommentAnchorPosition,
 } from '@pascal-app/core'
+import { useTranslation } from '@pascal-app/editor'
 import { type CameraControlsImpl, Html } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import { useEffect, useMemo } from 'react'
@@ -81,9 +82,10 @@ export function ShareScenePin({
   onClick: () => void
   resolved: boolean
 }) {
+  const t = useTranslation()
   return (
     <button
-      aria-label={`Open comment ${number}`}
+      aria-label={`${t('Open comment')} ${number}`}
       className={`flex size-11 items-center justify-center rounded-full border-2 font-extrabold text-xs shadow-md transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
         resolved
           ? 'border-muted-foreground bg-background text-muted-foreground'

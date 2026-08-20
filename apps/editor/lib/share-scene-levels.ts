@@ -1,4 +1,5 @@
 import type { SceneGraph } from '@pascal-app/editor'
+import { formatShareNumber } from './share-format'
 
 export type ShareLevel = {
   id: string
@@ -8,11 +9,6 @@ export type ShareLevel = {
   area: number | null
   height: number | null
 }
-
-const areaFormatter = new Intl.NumberFormat('tr-TR', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
 
 function polygonArea(points: unknown): number {
   if (!Array.isArray(points) || points.length < 3) return 0
@@ -114,7 +110,7 @@ export function readShareLevels(scene: SceneGraph): ShareLevel[] {
 
 export function formatShareLevelStats(level: ShareLevel): string | null {
   const values: string[] = []
-  if (level.area !== null) values.push(`${areaFormatter.format(level.area)} m²`)
-  if (level.height !== null) values.push(`${areaFormatter.format(level.height)} m`)
+  if (level.area !== null) values.push(`${formatShareNumber(level.area)} m²`)
+  if (level.height !== null) values.push(`${formatShareNumber(level.height)} m`)
   return values.length > 0 ? values.join(' · ') : null
 }

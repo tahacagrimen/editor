@@ -1,4 +1,5 @@
 import type { AnyNodeId, CameraPose, CommentId, CommentThread } from '@pascal-app/core'
+import { formatShareDate } from './share-format'
 
 export type NumberedShareComment = {
   number: number
@@ -81,14 +82,16 @@ export function visibleShareCommentPins(
 }
 
 export function formatShareCommentTime(iso: string, locale: string): string {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return ''
-  return new Intl.DateTimeFormat(locale, {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
+  // Keep the parameter until the app's two locale sources are reconciled.
+  void locale
+  return (
+    formatShareDate(iso, {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    }) ?? ''
+  )
 }
 
 export function floorplanPointToWorld(

@@ -12,6 +12,7 @@ import {
   createFloorplanContextExtensions,
   FloorplanGeometryRenderer,
   type SceneGraph,
+  useTranslation,
 } from '@pascal-app/editor'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { NumberedShareComment } from '@/lib/share-comments'
@@ -166,6 +167,7 @@ export function ShareFloorplan({
   onPinClick: (id: string) => void
   placementEnabled: boolean
 }) {
+  const t = useTranslation()
   const svgRef = useRef<SVGSVGElement>(null)
   const contentRef = useRef<SVGGElement>(null)
   const [unitsPerPixel, setUnitsPerPixel] = useState(0.02)
@@ -264,7 +266,7 @@ export function ShareFloorplan({
           </span>
         ) : (
           <button
-            aria-label={`Open comment ${label}`}
+            aria-label={`${t('Open comment')} ${label}`}
             className={`flex size-11 items-center justify-center rounded-full border-2 font-extrabold text-xs shadow-md ${
               options.resolved
                 ? 'border-muted-foreground bg-background text-muted-foreground'
@@ -286,7 +288,7 @@ export function ShareFloorplan({
 
   return (
     <svg
-      aria-label="Selected level floor plan"
+      aria-label={t('Selected level floor plan')}
       className={`h-full w-full bg-background text-foreground ${
         placementEnabled ? 'cursor-crosshair' : ''
       }`}

@@ -9,6 +9,7 @@ import {
 } from '@pascal-app/editor'
 import { useCallback, useState } from 'react'
 import { authClient } from '@/lib/auth-client'
+import { formatShareDate } from '@/lib/share-format'
 import { cn } from '@/lib/utils'
 import { TOP_BAR_ACTION } from './editor-top-bar'
 
@@ -222,7 +223,14 @@ function ShareSettingsSummary({
       {created.expiresAt ? (
         <>
           {t('This link is valid until')}{' '}
-          <strong className="text-foreground">{formatShareDate(created.expiresAt)}</strong>.{' '}
+          <strong className="text-foreground">
+            {formatShareDate(created.expiresAt, {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </strong>
+          .{' '}
         </>
       ) : (
         <>{t('This link never expires.')} </>
@@ -236,12 +244,4 @@ function ShareSettingsSummary({
       {created.passwordProtected ? t('It is password protected.') : t('It has no password.')}
     </p>
   )
-}
-
-function formatShareDate(value: string): string {
-  return new Intl.DateTimeFormat('tr-TR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(value))
 }

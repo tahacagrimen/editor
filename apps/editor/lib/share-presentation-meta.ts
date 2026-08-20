@@ -1,12 +1,8 @@
 import type { SceneGraph } from '@pascal-app/editor'
+import { type I18nLocale, translate } from '@pascal-app/editor/i18n'
+import { formatShareDate as formatShareDateValue } from './share-format'
 
 const EXPIRY_WARNING_WINDOW_MS = 48 * 60 * 60 * 1000
-
-const turkishDateFormatter = new Intl.DateTimeFormat('tr-TR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-})
 
 export type SharePresentationMeta = {
   name: string
@@ -25,6 +21,7 @@ type ShareMetaInput = {
   ownerName?: string | null
   expiresAtSeconds?: number
   nowMs?: number
+  locale?: I18nLocale
 }
 
 type ParcelSummary = {
@@ -76,8 +73,11 @@ function readParcelSummary(graph: SceneGraph): ParcelSummary | null {
 }
 
 export function formatShareDate(value: string | number): string | null {
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? null : turkishDateFormatter.format(date)
+  return formatShareDateValue(value, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 export function buildSharePresentationMeta({
@@ -88,7 +88,9 @@ export function buildSharePresentationMeta({
   ownerName,
   expiresAtSeconds,
   nowMs = Date.now(),
+  locale = 'tr',
 }: ShareMetaInput): SharePresentationMeta {
+  const t = (source: string) => translate(source, locale)
   const parcel = readParcelSummary(graph)
   const updatedDate = formatShareDate(updatedAt)
   const owner = nonEmptyString(ownerName)
@@ -101,11 +103,11 @@ export function buildSharePresentationMeta({
   return {
     name,
     parcelLine: parcel
-      ? `${parcel.il} / ${parcel.ilce} / ${parcel.mahalle} · Ada ${parcel.ada} / Parsel ${parcel.parsel}`
+      ? `${parcel.il} / ${parcel.ilce} / ${parcel.mahalle} · ${t('Block')} ${parcel.ada} / ${t('Parcel')} ${parcel.parsel}`
       : undefined,
-    revisionLine: updatedDate ? `Rev. ${version} · ${updatedDate}` : undefined,
-    sharedByLine: owner ? `Paylaşan: ${owner}` : undefined,
-    expiryLine: expiryDate ? `${expiryDate}’ya kadar geçerli` : undefined,
+    revisionLine: updatedDate ? `${t('Rev.')} ${version} · ${updatedDate}` : undefined,
+    sharedByLine: owner ? `${t('Shared by')}: ${owner}` : undefined,
+    expiryLine: expiryDate ? `${t('Valid until')} ${expiryDate}` : undefined,
     expiryUrgent:
       expiresAtMs === null
         ? undefined

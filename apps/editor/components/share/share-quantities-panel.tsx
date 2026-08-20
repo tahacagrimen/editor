@@ -7,15 +7,10 @@ import {
   useScene,
 } from '@pascal-app/core'
 import { useTranslation } from '@pascal-app/editor'
-import {
-  downloadQuantityCsv,
-  formatCost,
-  formatQuantity,
-  takeoffForSubtree,
-} from '@pascal-app/editor/quantities'
-import { useViewer } from '@pascal-app/viewer'
+import { downloadQuantityCsv, takeoffForSubtree } from '@pascal-app/editor/quantities'
 import { Download } from 'lucide-react'
 import { useMemo } from 'react'
+import { formatShareMoney, formatShareQuantity } from '@/lib/share-format'
 
 function titleCaseEnum(value: string): string {
   return value
@@ -45,8 +40,6 @@ export function ShareQuantitiesPanel({
   showCost: boolean
 }) {
   const t = useTranslation()
-  const unit = useViewer((state) => state.unit)
-  const metricNotation = useViewer((state) => state.metricNotation)
   const nodes = useScene((state) => state.nodes)
   const materials = useScene((state) => state.materials)
   const unitPrices = useScene((state) => state.unitPrices)
@@ -125,11 +118,9 @@ export function ShareQuantitiesPanel({
                   <QuantitySectionRows
                     key={section.kind}
                     lines={section.lines}
-                    metricNotation={metricNotation}
                     sectionLabel={t(section.label)}
                     showCost={showCost}
                     t={t}
-                    unit={unit}
                   />
                 ))}
               </tbody>
@@ -145,7 +136,7 @@ export function ShareQuantitiesPanel({
                       {levelLabel} {t('total')}
                     </span>
                     <span className="shrink-0 font-extrabold text-lg tabular-nums">
-                      {formatCost(total.cost, total.currency)}
+                      {formatShareMoney(total.cost, total.currency)}
                     </span>
                   </div>
                 ))
@@ -156,9 +147,7 @@ export function ShareQuantitiesPanel({
               <TotalLine
                 label={levelLabel}
                 value={
-                  selectedLevelArea === null
-                    ? '—'
-                    : formatQuantity(selectedLevelArea, 'area', unit, metricNotation, 2)
+                  selectedLevelArea === null ? '—' : formatShareQuantity(selectedLevelArea, 'area')
                 }
               />
             )}
@@ -180,15 +169,11 @@ function QuantitySectionRows({
   lines,
   showCost,
   t,
-  unit,
-  metricNotation,
 }: {
   sectionLabel: string
   lines: PricedQuantityLine[]
   showCost: boolean
   t: (source: string) => string
-  unit: Parameters<typeof formatQuantity>[2]
-  metricNotation: Parameters<typeof formatQuantity>[3]
 }) {
   return (
     <>
@@ -208,18 +193,18 @@ function QuantitySectionRows({
           <tr className="border-border border-b" key={`${line.key}-${line.group ?? ''}`}>
             <td className="max-w-64 px-4 py-2.5 text-muted-foreground">{label}</td>
             <td className="whitespace-nowrap px-4 py-2.5 text-right">
-              {formatQuantity(line.value, line.unit, unit, metricNotation, 2)}
+              {formatShareQuantity(line.value, line.unit)}
             </td>
             {showCost && (
               <>
                 <td className="whitespace-nowrap px-4 py-2.5 text-right">
                   {line.unitPrice
-                    ? formatCost(line.unitPrice.amount, line.unitPrice.currency)
+                    ? formatShareMoney(line.unitPrice.amount, line.unitPrice.currency)
                     : '—'}
                 </td>
                 <td className="whitespace-nowrap px-4 py-2.5 text-right">
                   {line.unitPrice && line.cost !== undefined
-                    ? formatCost(line.cost, line.unitPrice.currency)
+                    ? formatShareMoney(line.cost, line.unitPrice.currency)
                     : '—'}
                 </td>
               </>

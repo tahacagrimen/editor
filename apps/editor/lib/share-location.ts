@@ -1,14 +1,6 @@
 import type { AnyNode, SiteNode } from '@pascal-app/core/schema'
 import type { SceneGraph } from '@pascal-app/editor'
-
-const coordinateFormatter = new Intl.NumberFormat('tr-TR', {
-  minimumFractionDigits: 4,
-  maximumFractionDigits: 4,
-})
-
-const angleFormatter = new Intl.NumberFormat('tr-TR', {
-  maximumFractionDigits: 2,
-})
+import { formatShareNumber } from './share-format'
 
 export type ShareLocation = {
   points: Array<[number, number]>
@@ -53,11 +45,20 @@ export function buildShareLocation(graph: SceneGraph): ShareLocation | null {
   if (hasCoordinates) {
     rows.push({
       label: 'Coordinate',
-      value: `${coordinateFormatter.format(site.latitude!)} · ${coordinateFormatter.format(site.longitude!)}`,
+      value: `${formatShareNumber(site.latitude!, {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+      })} · ${formatShareNumber(site.longitude!, {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+      })}`,
     })
   }
   rows.push(
-    { label: 'North angle', value: `${angleFormatter.format(site.northOffset ?? 0)}°` },
+    {
+      label: 'North angle',
+      value: `${formatShareNumber(site.northOffset ?? 0, { maximumFractionDigits: 2 })}°`,
+    },
     {
       label: 'Source',
       value: parcel.source === 'tkgm' ? 'TKGM parcel query' : 'Manual parcel record',

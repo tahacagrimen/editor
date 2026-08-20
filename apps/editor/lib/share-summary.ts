@@ -2,12 +2,8 @@ import type { AnyNode, AnyNodeId, SiteNode } from '@pascal-app/core/schema'
 import { readSiteBuildable } from '@pascal-app/core/site-setbacks'
 import { readSiteZoning } from '@pascal-app/core/site-zoning'
 import type { SceneGraph } from '@pascal-app/editor'
+import { formatShareNumber } from './share-format'
 import { readShareLevels } from './share-scene-levels'
-
-const decimalFormatter = new Intl.NumberFormat('tr-TR', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
 
 export type ShareParcelRow = {
   label: 'Location' | 'Neighbourhood' | 'Block / parcel' | 'Sheet' | 'Quality' | 'Land area'
@@ -43,7 +39,7 @@ export type ShareSummary = {
 }
 
 function number(value: number): string {
-  return decimalFormatter.format(value)
+  return formatShareNumber(value)
 }
 
 function findSite(graph: SceneGraph): SiteNode | null {
