@@ -1,7 +1,8 @@
 import type { NextRequest, NextResponse } from 'next/server'
 import { guardSceneApiRequest, sceneApiJson } from './scene-api-security'
 import { verifyShareAccess } from './share-access'
-import { hashSharePassword, type ShareTokenPayload } from './share-token'
+import { sharePasswordCookieName } from './share-password'
+import { type ShareTokenPayload, sharePasswordHashMatches } from './share-token'
 
 export async function authorizeSharePdf(
   request: NextRequest,
@@ -31,8 +32,8 @@ export async function authorizeSharePdf(
   }
 
   if (verified.payload.pwd) {
-    const cookie = request.cookies.get(`share_pwd_${verified.payload.sid}`)?.value
-    if (!cookie || hashSharePassword(cookie) !== verified.payload.pwd) {
+    const cookie = request.cookies.get(sharePasswordCookieName(verified.payload.sid, 'api'))?.value
+    if (!cookie || !sharePasswordHashMatches(cookie, verified.payload.pwd)) {
       return {
         ok: false,
         response: sceneApiJson(request, { error: 'unauthorized' }, { status: 401 }),

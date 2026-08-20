@@ -1,5 +1,6 @@
 import type { SceneGraph } from '@pascal-app/editor'
 import { type I18nLocale, translate } from '@pascal-app/editor/i18n'
+import { LockKeyhole } from 'lucide-react'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { ServerLocalizedContent } from '@/components/server-localized-content'
@@ -8,9 +9,10 @@ import { getSceneOperations } from '@/lib/scene-store-server'
 import { verifyShareAccess } from '@/lib/share-access'
 import { prepareShareGraph } from '@/lib/share-graph'
 import { buildShareLocation } from '@/lib/share-location'
+import { sharePasswordCookieName } from '@/lib/share-password'
 import { buildSharePresentationMeta } from '@/lib/share-presentation-meta'
 import { buildShareSummary } from '@/lib/share-summary'
-import { hashSharePassword, shareCostsVisible } from '@/lib/share-token'
+import { shareCostsVisible, sharePasswordHashMatches } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,17 +24,15 @@ export const dynamic = 'force-dynamic'
  * credentials by definition. The signed token is the authorization, and it is
  * verified here before the id inside it is used for anything.
  */
-async function submitPassword(sid: string, formData: FormData) {
-  'use server'
-  const pwd = formData.get('password') as string
-  if (pwd) {
-    const cookieStore = await cookies()
-    cookieStore.set(`share_pwd_${sid}`, pwd, { path: '/' })
-  }
-}
-
-export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
+export default async function SharePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>
+  searchParams: Promise<{ e?: string }>
+}) {
   const { token } = await params
+  const { e: passwordError } = await searchParams
   const cookieStore = await cookies()
   const locale: I18nLocale = cookieStore.get('pascal-locale')?.value === 'en' ? 'en' : 'tr'
   const t = (source: string) => translate(source, locale)
@@ -68,34 +68,46 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   const payload = verified.payload
 
   if (payload.pwd) {
-    const providedPwd = cookieStore.get(`share_pwd_${payload.sid}`)?.value
+    const passwordCredential = cookieStore.get(sharePasswordCookieName(payload.sid))?.value
 
-    if (!providedPwd || hashSharePassword(providedPwd) !== payload.pwd) {
-      const boundSubmit = submitPassword.bind(null, payload.sid)
-
+    if (!passwordCredential || !sharePasswordHashMatches(passwordCredential, payload.pwd)) {
       return (
         <ServerLocalizedContent locale={locale}>
           <div className="flex min-h-screen items-center justify-center bg-background p-6">
-            <div className="w-full max-w-md rounded-2xl border border-border/60 bg-background p-6 text-center shadow-xl">
-              <h1 className="font-semibold text-lg">This share is password protected</h1>
-              <p className="mt-2 text-muted-foreground text-sm">
+            <div className="w-full max-w-md border-2 border-border bg-background p-6 shadow-xl sm:p-8">
+              <div className="mb-8 flex items-center justify-between border-border border-b-2 pb-4">
+                <div className="flex items-baseline gap-1.5 font-extrabold tracking-tight">
+                  <span>MENART</span>
+                  <span className="text-primary">3D</span>
+                </div>
+                <LockKeyhole aria-hidden="true" className="size-5 text-primary" />
+              </div>
+              <h1 className="font-extrabold text-2xl tracking-tight">
+                This share is password protected
+              </h1>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Enter the password to view this scene.
               </p>
-              {providedPwd && (
-                <p className="mt-2 text-red-700 text-sm dark:text-red-400">
-                  Wrong password. Please try again.
+              {passwordError === '1' && (
+                <p className="mt-4 border-destructive border-l-2 pl-3 text-red-700 text-sm dark:text-red-400">
+                  Incorrect password. Ask the sender for it again.
                 </p>
               )}
-              <form action={boundSubmit} className="mt-4 flex flex-col gap-3">
+              <form
+                action={`/share/${encodeURIComponent(token)}/unlock`}
+                className="mt-6 flex flex-col gap-3"
+                method="post"
+              >
                 <input
-                  className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary/50"
+                  autoComplete="current-password"
+                  className="min-h-11 border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
                   name="password"
                   placeholder="Password"
                   required
                   type="password"
                 />
                 <button
-                  className="rounded-md bg-primary py-2 font-medium text-primary-foreground text-sm transition-opacity hover:opacity-90"
+                  className="min-h-11 bg-primary px-4 py-2 font-extrabold text-primary-foreground text-sm transition-opacity hover:opacity-90"
                   type="submit"
                 >
                   View scene

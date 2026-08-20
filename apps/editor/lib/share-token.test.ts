@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { createShareToken, shareCostsVisible, shareSecret, verifyShareToken } from './share-token'
+import {
+  createShareToken,
+  hashSharePassword,
+  shareCostsVisible,
+  sharePasswordHashMatches,
+  shareSecret,
+  verifyShareToken,
+} from './share-token'
 
 const env = { PASCAL_SHARE_LINK_SECRET: 'test-secret' } as unknown as NodeJS.ProcessEnv
 const otherEnv = { PASCAL_SHARE_LINK_SECRET: 'other-secret' } as unknown as NodeJS.ProcessEnv
@@ -11,6 +18,18 @@ describe('shareSecret', () => {
   test('treats a blank secret as absent so a stray empty var cannot sign links', () => {
     expect(shareSecret({ PASCAL_SHARE_LINK_SECRET: '   ' } as never)).toBeNull()
     expect(shareSecret(emptyEnv)).toBeNull()
+  })
+})
+
+describe('share password credentials', () => {
+  test('compares only hashes and rejects the old plaintext cookie format', () => {
+    const expected = hashSharePassword('kapı', env)
+    const other = hashSharePassword('yanlış', env)
+    if (!(expected && other)) throw new Error('hash expected')
+
+    expect(sharePasswordHashMatches(expected, expected)).toBe(true)
+    expect(sharePasswordHashMatches(other, expected)).toBe(false)
+    expect(sharePasswordHashMatches('kapı', expected)).toBe(false)
   })
 })
 

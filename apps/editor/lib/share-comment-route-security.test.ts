@@ -5,7 +5,7 @@ import {
   authorizeShareCommentWrite,
   shareCommentRateLimitOptions,
 } from './share-comment-route-security'
-import { createShareToken } from './share-token'
+import { createShareToken, hashSharePassword } from './share-token'
 
 const previousSecret = process.env.PASCAL_SHARE_LINK_SECRET
 const previousRedis = process.env.REDIS_URL
@@ -71,8 +71,18 @@ describe('share comment route authorization', () => {
     expect(denied.ok).toBe(false)
     if (!denied.ok) expect(denied.response.status).toBe(401)
 
+    const credential = hashSharePassword('correct')
+    if (!credential) throw new Error('credential expected')
+
+    const plaintext = await authorizeShareCommentWrite(
+      request('share_api_pwd_scene_1=correct'),
+      created.token,
+      'new-thread',
+    )
+    expect(plaintext.ok).toBe(false)
+
     const allowed = await authorizeShareCommentWrite(
-      request('share_pwd_scene_1=correct'),
+      request(`share_api_pwd_scene_1=${credential}`),
       created.token,
       'new-thread',
     )

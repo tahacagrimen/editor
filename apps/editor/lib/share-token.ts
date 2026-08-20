@@ -55,6 +55,16 @@ export function hashSharePassword(
   return sign(password, secret)
 }
 
+/** Compare an already-hashed share credential without leaking a useful timing signal. */
+export function sharePasswordHashMatches(candidate: string, expected: string): boolean {
+  const candidateBuffer = Buffer.from(candidate)
+  const expectedBuffer = Buffer.from(expected)
+  return (
+    candidateBuffer.length === expectedBuffer.length &&
+    timingSafeEqual(candidateBuffer, expectedBuffer)
+  )
+}
+
 /**
  * Mint a token for `sceneId`. `ttlSeconds` of 0 or undefined means no expiry.
  * Returns `null` when no secret is configured — the caller must fail the

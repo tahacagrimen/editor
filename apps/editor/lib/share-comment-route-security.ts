@@ -5,7 +5,8 @@ import {
   sceneApiJson,
 } from '@/lib/scene-api-security'
 import { verifyShareAccess } from '@/lib/share-access'
-import { hashSharePassword, type ShareTokenPayload } from '@/lib/share-token'
+import { sharePasswordCookieName } from '@/lib/share-password'
+import { type ShareTokenPayload, sharePasswordHashMatches } from '@/lib/share-token'
 import { SHARE_COMMENT_LIMITS } from './share-comment-write'
 
 type ShareCommentAction = 'new-thread' | 'reply'
@@ -56,8 +57,8 @@ export async function authorizeShareCommentWrite(
   }
 
   if (verified.payload.pwd) {
-    const cookie = request.cookies.get(`share_pwd_${verified.payload.sid}`)?.value
-    if (!cookie || hashSharePassword(cookie) !== verified.payload.pwd) {
+    const cookie = request.cookies.get(sharePasswordCookieName(verified.payload.sid, 'api'))?.value
+    if (!cookie || !sharePasswordHashMatches(cookie, verified.payload.pwd)) {
       return {
         ok: false,
         response: sceneApiJson(request, { error: 'unauthorized' }, { status: 401 }),

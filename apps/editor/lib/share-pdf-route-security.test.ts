@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, test } from 'bun:test'
 import { NextRequest } from 'next/server'
 import { __resetRedisForTests } from './redis'
 import { authorizeSharePdf } from './share-pdf-route-security'
-import { createShareToken } from './share-token'
+import { createShareToken, hashSharePassword } from './share-token'
 
 const oldSecret = process.env.PASCAL_SHARE_LINK_SECRET
 const oldRedis = process.env.REDIS_URL
@@ -46,7 +46,13 @@ test('password-protected PDF tokens require the share-page cookie', async () => 
   expect(denied.ok).toBe(false)
   if (!denied.ok) expect(denied.response.status).toBe(401)
 
-  expect((await authorizeSharePdf(request('share_pwd_scene_1=secret'), created.token)).ok).toBe(
-    true,
+  expect((await authorizeSharePdf(request('share_api_pwd_scene_1=secret'), created.token)).ok).toBe(
+    false,
   )
+
+  const credential = hashSharePassword('secret')
+  if (!credential) throw new Error('credential expected')
+  expect(
+    (await authorizeSharePdf(request(`share_api_pwd_scene_1=${credential}`), created.token)).ok,
+  ).toBe(true)
 })

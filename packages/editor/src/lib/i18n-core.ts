@@ -2112,9 +2112,11 @@ const tr: Record<string, string> = {
   'Parcel boundary is shown on the map': 'Parsel sınırı haritada gösteriliyor',
   'TKGM reference data — not a survey drawing':
     'TKGM referans verisi — aplikasyon krokisi değildir',
-  'This share is password protected': 'Bu paylaşım şifreyle korunuyor',
+  'This share is password protected': 'Bu paylaşım şifreli',
   'Enter the password to view this scene.': 'Bu sahneyi görüntülemek için şifreyi girin.',
   'Wrong password. Please try again.': 'Şifre yanlış. Lütfen tekrar deneyin.',
+  'Incorrect password. Ask the sender for it again.':
+    'Şifre hatalı. Paylaşan kişiden tekrar isteyebilirsin.',
   'View scene': 'Sahneyi görüntüle',
   'This share link has expired. Ask whoever sent it for a new one.':
     'Bu paylaşım bağlantısının süresi doldu. Gönderen kişiden yeni bir bağlantı isteyin.',
