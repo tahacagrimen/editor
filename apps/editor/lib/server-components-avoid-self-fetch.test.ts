@@ -15,7 +15,7 @@ import { join } from 'node:path'
  * in a single-replica dev box — nothing fails until deploy or login, by which
  * point the cause is far away.
  */
-const PAGES = ['app/scenes/page.tsx', 'app/scene/[id]/page.tsx']
+const PAGES = ['app/scenes/page.tsx', 'app/scene/[id]/page.tsx', 'app/share/[token]/page.tsx']
 
 const appRoot = join(import.meta.dir, '..')
 

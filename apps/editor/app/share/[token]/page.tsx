@@ -1,10 +1,10 @@
 import type { SceneGraph } from '@pascal-app/editor'
-import Link from 'next/link'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 import { LocalizedContent } from '@/components/localized-content'
-import { SharedSceneLoader } from '@/components/shared-scene-loader'
+import { SharePresentation } from '@/components/share/share-presentation'
 import { getSceneOperations } from '@/lib/scene-store-server'
-import { verifyShareToken, hashSharePassword } from '@/lib/share-token'
+import { hashSharePassword, verifyShareToken } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +49,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   if (payload.pwd) {
     const cookieStore = await cookies()
     const providedPwd = cookieStore.get(`share_pwd_${payload.sid}`)?.value
-    
+
     if (!providedPwd || hashSharePassword(providedPwd) !== payload.pwd) {
       const boundSubmit = submitPassword.bind(null, payload.sid)
 
@@ -58,18 +58,20 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
           <div className="flex min-h-screen items-center justify-center bg-background p-6">
             <div className="w-full max-w-md rounded-2xl border border-border/60 bg-background p-6 text-center shadow-xl">
               <h1 className="font-semibold text-lg">Password Protected</h1>
-              <p className="mt-2 text-muted-foreground text-sm">Enter the password to view this scene.</p>
+              <p className="mt-2 text-muted-foreground text-sm">
+                Enter the password to view this scene.
+              </p>
               <form action={boundSubmit} className="mt-4 flex flex-col gap-3">
-                <input 
-                  type="password" 
-                  name="password" 
-                  className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary/50" 
-                  placeholder="Password" 
-                  required 
+                <input
+                  className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary/50"
+                  name="password"
+                  placeholder="Password"
+                  required
+                  type="password"
                 />
-                <button 
-                  type="submit" 
-                  className="rounded-md bg-primary py-2 text-primary-foreground font-medium text-sm transition-opacity hover:opacity-90"
+                <button
+                  className="rounded-md bg-primary py-2 font-medium text-primary-foreground text-sm transition-opacity hover:opacity-90"
+                  type="submit"
                 >
                   Unlock
                 </button>
@@ -93,16 +95,14 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   }
 
   const allowComments = payload.allowComments ?? true
-  if (!allowComments && scene.graph) {
-    delete (scene.graph as any).comments
-  }
+  const graph = scene.graph as SceneGraph
+  const initialScene = allowComments ? graph : { ...graph, comments: {} }
 
   return (
-    <SharedSceneLoader
-      initialScene={scene.graph as SceneGraph}
-      meta={{ name: scene.name, version: scene.version }}
-      token={token}
+    <SharePresentation
       allowComments={allowComments}
+      initialScene={initialScene}
+      meta={{ name: scene.name, version: scene.version }}
     />
   )
 }
