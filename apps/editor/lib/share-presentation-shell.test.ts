@@ -10,6 +10,7 @@ const quantitiesPath = join(appRoot, 'components/share/share-quantities-panel.ts
 const shareLinkButtonPath = join(appRoot, 'components/share-link-button.tsx')
 const shareApiPath = join(appRoot, 'app/api/scenes/[id]/share/route.ts')
 const shareCommentsApiPath = join(appRoot, 'app/api/share/[token]/comments/route.ts')
+const shareRepliesApiPath = join(appRoot, 'app/api/share/[token]/comments/[id]/replies/route.ts')
 const locationPath = join(appRoot, 'components/share/share-location-panel.tsx')
 
 describe('share presentation shell', () => {
@@ -86,6 +87,7 @@ describe('share presentation shell', () => {
     const route = readFileSync(routePath, 'utf8')
     const shareApi = readFileSync(shareApiPath, 'utf8')
     const commentsApi = readFileSync(shareCommentsApiPath, 'utf8')
+    const repliesApi = readFileSync(shareRepliesApiPath, 'utf8')
     const shareButton = readFileSync(shareLinkButtonPath, 'utf8')
 
     expect(shareButton).toContain('JSON.stringify({ allowComments, showCost')
@@ -93,7 +95,12 @@ describe('share presentation shell', () => {
     expect(shareApi).toContain('showCost: parsed.data.showCost')
     expect(route).toContain('prepareShareGraph(graph, { allowComments, showCost })')
     expect(route).toContain('showCost={showCost}')
-    expect(commentsApi).toContain('replaceShareComments(scene.graph')
+    expect(commentsApi).toContain('replaceShareComments(')
+    expect(commentsApi).toContain('export async function POST')
+    expect(commentsApi).not.toContain('export async function PUT')
+    expect(commentsApi).not.toContain('export async function DELETE')
+    expect(commentsApi).not.toContain('export async function PATCH')
+    expect(repliesApi).toContain('appendShareCommentReply')
   })
 
   test('the location tab is omitted without a parcel and never calls a cadastral provider', () => {

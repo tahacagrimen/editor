@@ -35,9 +35,9 @@ export function ShareCommentsPanel({
   saving: boolean
   onCancelDraft: () => void
   onFocus: (id: string) => void
-  onReply: (id: string, author: string, body: string) => void
+  onReply: (id: string, author: string, body: string) => Promise<boolean>
   onStartPlacing: () => void
-  onSubmitDraft: (author: string, body: string) => void
+  onSubmitDraft: (author: string, body: string) => Promise<boolean>
 }) {
   const t = useTranslation()
   const [author, setAuthor] = useState('')
@@ -64,23 +64,23 @@ export function ShareCommentsPanel({
     }
   }
 
-  const submitDraft = () => {
+  const submitDraft = async () => {
     const name = author.trim()
     const body = draftBody.trim()
     if (!(name && body)) return
     rememberAuthor(name)
-    onSubmitDraft(name, body)
-    setDraftBody('')
+    if (await onSubmitDraft(name, body)) setDraftBody('')
   }
 
-  const submitReply = (id: string) => {
+  const submitReply = async (id: string) => {
     const name = author.trim()
     const body = replyBody.trim()
     if (!(name && body)) return
     rememberAuthor(name)
-    onReply(id, name, body)
-    setReplyBody('')
-    setReplyFor(null)
+    if (await onReply(id, name, body)) {
+      setReplyBody('')
+      setReplyFor(null)
+    }
   }
 
   const openCount = comments.filter(({ thread }) => !thread.resolved).length
@@ -147,7 +147,7 @@ export function ShareCommentsPanel({
           <button
             className="mt-2 inline-flex min-h-11 items-center gap-2 bg-primary px-4 font-extrabold text-primary-foreground text-xs uppercase tracking-[0.04em] disabled:cursor-not-allowed disabled:opacity-40"
             disabled={saving || !author.trim() || !draftBody.trim()}
-            onClick={submitDraft}
+            onClick={() => void submitDraft()}
             type="button"
           >
             <Send aria-hidden="true" className="size-4" />
@@ -260,7 +260,7 @@ export function ShareCommentsPanel({
                         <button
                           className="mt-2 min-h-11 bg-primary px-4 font-extrabold text-primary-foreground text-xs uppercase tracking-[0.04em] disabled:opacity-40"
                           disabled={saving || !author.trim() || !replyBody.trim()}
-                          onClick={() => submitReply(thread.id)}
+                          onClick={() => void submitReply(thread.id)}
                           type="button"
                         >
                           {t('Reply')}

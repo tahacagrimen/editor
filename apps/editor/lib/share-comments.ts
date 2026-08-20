@@ -39,6 +39,24 @@ export function buildShareCommentInput(
   }
 }
 
+/** A conflict retry reuses the exact client-generated id in `payload`. */
+export async function postShareCommentWrite(
+  url: string,
+  payload: unknown,
+  fetcher: typeof fetch = fetch,
+): Promise<Response> {
+  let response: Response | null = null
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    response = await fetcher(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (response.status !== 409 || attempt === 1) return response
+  }
+  return response ?? new Response(null, { status: 500 })
+}
+
 /**
  * Pin numbers are document-wide and stable: filtering the visible level must
  * never renumber the same discussion differently in the scene and the list.

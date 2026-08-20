@@ -25,9 +25,9 @@ const baseProps = {
   saving: false,
   onCancelDraft: () => {},
   onFocus: () => {},
-  onReply: () => {},
+  onReply: async () => true,
   onStartPlacing: () => {},
-  onSubmitDraft: () => {},
+  onSubmitDraft: async () => true,
 }
 
 test('a closed share keeps existing threads readable without mounting placement controls', () => {

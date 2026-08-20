@@ -4,6 +4,7 @@ import {
   buildShareCommentInput,
   floorplanPointToWorld,
   numberShareComments,
+  postShareCommentWrite,
   visibleShareCommentPins,
   worldPointToFloorplan,
 } from './share-comments'
@@ -16,6 +17,24 @@ const thread = (id: string, createdAt: string, levelId?: string): CommentThread 
   createdAt,
   ...(levelId && { levelId: levelId as never }),
   replies: [],
+})
+
+test('a 409 retry resends the same client id and body', async () => {
+  const requests: RequestInit[] = []
+  const responses = [new Response(null, { status: 409 }), new Response(null, { status: 200 })]
+  const response = await postShareCommentWrite(
+    '/comments',
+    { id: 'comment_client-stable', body: 'Once' },
+    (async (_url: string | URL | Request, init?: RequestInit) => {
+      requests.push(init ?? {})
+      return responses.shift() ?? new Response(null, { status: 500 })
+    }) as typeof fetch,
+  )
+
+  expect(response.status).toBe(200)
+  expect(requests).toHaveLength(2)
+  expect(requests[0]?.body).toBe(requests[1]?.body)
+  expect(requests[1]?.body).toContain('comment_client-stable')
 })
 
 describe('share comment numbering', () => {

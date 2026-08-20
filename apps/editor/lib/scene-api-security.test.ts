@@ -67,3 +67,26 @@ test('applies configured CORS origins for preflight', async () => {
   expect(response.status).toBe(204)
   expect(response.headers.get('access-control-allow-origin')).toBe('https://app.example')
 })
+
+test('supports an IP-only endpoint budget with rate-limit response headers', async () => {
+  stubAuth(async () => ({ user: { id: 'signed-in-user' } }))
+  const { validateRequestRateLimit } = await loadSecurity()
+  const calls: unknown[][] = []
+  const request = new Request('https://editor.example/api/share/token/comments', {
+    headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' },
+  })
+
+  const response = await validateRequestRateLimit(
+    request,
+    { limit: 5, keyPrefix: 'share-comments:new', ipOnly: true },
+    async (...args) => {
+      calls.push(args)
+      return { allowed: false, limit: 5, remaining: 0, retryAfter: 12, resetAt: 1_800_000 }
+    },
+  )
+
+  expect(calls).toEqual([['share-comments:new:ip:203.0.113.9', 5, 60_000]])
+  expect(response?.status).toBe(429)
+  expect(response?.headers.get('retry-after')).toBe('12')
+  expect(response?.headers.get('x-ratelimit-limit')).toBe('5')
+})

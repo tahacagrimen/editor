@@ -6,8 +6,9 @@ import {
   type CameraPose,
   type CommentId,
   type CommentThread,
+  generateCommentId,
+  generateCommentReplyId,
   type LevelNode,
-  useScene,
 } from '@pascal-app/core'
 import { applySceneGraphToEditor, type SceneGraph, useTranslation } from '@pascal-app/editor'
 import { SceneEnvironment, useViewer, Viewer } from '@pascal-app/viewer'
@@ -18,6 +19,7 @@ import { Vector3 } from 'three'
 import {
   buildShareCommentInput,
   numberShareComments,
+  postShareCommentWrite,
   type ShareCommentDraft,
   visibleShareCommentPins,
 } from '@/lib/share-comments'
@@ -139,21 +141,20 @@ export function SharePresentation({
     setViewState((current) => ({ ...current, tab }))
   }
 
-  const persistComments = useCallback(
-    async (next: Record<CommentId, CommentThread>) => {
-      setComments(next)
-      useScene.setState({ comments: next })
+  const performCommentWrite = useCallback(
+    async (path: string, payload: unknown) => {
       setSavingComment(true)
       setCommentError(null)
       try {
-        const response = await fetch(`/api/share/${encodeURIComponent(token)}/comments`, {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ comments: next }),
-        })
+        const response = await postShareCommentWrite(
+          `/api/share/${encodeURIComponent(token)}/comments${path}`,
+          payload,
+        )
         if (!response.ok) throw new Error(`comment_save_${response.status}`)
+        return true
       } catch {
         setCommentError(t('Your comment could not be saved. Please try again.'))
+        return false
       } finally {
         setSavingComment(false)
       }
@@ -185,26 +186,61 @@ export function SharePresentation({
     [selectedLevel],
   )
 
-  const submitComment = (author: string, body: string) => {
-    if (!commentDraft) return
+  const submitComment = async (author: string, body: string) => {
+    if (!commentDraft) return false
     const input = buildShareCommentInput(commentDraft, author, body)
-    if (!input) return
-    useScene.setState({ comments })
-    const id = useScene.getState().createComment(input)
-    const next = useScene.getState().comments
+    if (!input) return false
+    const id = generateCommentId()
+    const createdAt = new Date().toISOString()
+    const saved = await performCommentWrite('', {
+      id,
+      anchor: input.anchor,
+      name: input.author.name,
+      body: input.body,
+      ...(input.levelId && { levelId: input.levelId }),
+      ...(input.camera && { camera: input.camera }),
+    })
+    if (!saved) return false
+    setComments((current) => ({
+      ...current,
+      [id]: { ...input, id, createdAt, replies: [] },
+    }))
     setCommentDraft(null)
     setActiveCommentId(id)
-    void persistComments(next)
+    return true
   }
 
-  const replyToComment = (id: string, author: string, body: string) => {
-    if (!(author.trim() && body.trim())) return
-    useScene.setState({ comments })
-    useScene.getState().addCommentReply(id as CommentId, {
-      author: { name: author.trim() },
-      body: body.trim(),
+  const replyToComment = async (id: string, author: string, body: string) => {
+    if (!(author.trim() && body.trim())) return false
+    const replyId = generateCommentReplyId()
+    const name = author.trim()
+    const text = body.trim()
+    const saved = await performCommentWrite(`/${encodeURIComponent(id)}/replies`, {
+      id: replyId,
+      name,
+      body: text,
     })
-    void persistComments(useScene.getState().comments)
+    if (!saved) return false
+    setComments((current) => {
+      const thread = current[id as CommentId]
+      if (!thread) return current
+      return {
+        ...current,
+        [id]: {
+          ...thread,
+          replies: [
+            ...thread.replies,
+            {
+              id: replyId,
+              author: { name },
+              body: text,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        },
+      }
+    })
+    return true
   }
 
   const focusComment = useCallback(

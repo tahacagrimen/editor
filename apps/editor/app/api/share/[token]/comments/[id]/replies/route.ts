@@ -3,28 +3,28 @@ import type { NextRequest } from 'next/server'
 import { sceneApiJson, sceneApiPreflight } from '@/lib/scene-api-security'
 import { getSceneOperations } from '@/lib/scene-store-server'
 import { authorizeShareCommentWrite } from '@/lib/share-comment-route-security'
-import { appendShareComment, shareCommentCreateSchema } from '@/lib/share-comment-write'
+import { appendShareCommentReply, shareCommentReplySchema } from '@/lib/share-comment-write'
 import { replaceShareComments } from '@/lib/share-graph'
 
 export const dynamic = 'force-dynamic'
 
-type RouteParams = { params: Promise<{ token: string }> }
+type RouteParams = { params: Promise<{ token: string; id: string }> }
 
 export function OPTIONS(request: NextRequest) {
   return sceneApiPreflight(request)
 }
 
-/** Append one visitor-owned thread; no request can replace or edit the bag. */
+/** Append one anonymous reply; parent authorship/body/resolution are immutable. */
 export async function POST(request: NextRequest, { params }: RouteParams) {
-  const { token } = await params
-  const access = await authorizeShareCommentWrite(request, token, 'new-thread')
+  const { token, id } = await params
+  const access = await authorizeShareCommentWrite(request, token, 'reply')
   if (!access.ok) return access.response
 
-  const parsed = shareCommentCreateSchema.safeParse(await readJson(request))
+  const parsed = shareCommentReplySchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return sceneApiJson(
       request,
-      { error: 'invalid_comment', details: parsed.error.issues },
+      { error: 'invalid_reply', details: parsed.error.issues },
       { status: 422 },
     )
   }
@@ -34,12 +34,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const scene = await operations.loadStoredScene(access.payload.sid)
     if (!scene) return sceneApiJson(request, { error: 'not_found' }, { status: 404 })
 
-    const result = appendShareComment(normalizeComments(scene.graph.comments), parsed.data)
+    const result = appendShareCommentReply(
+      normalizeComments(scene.graph.comments),
+      id as `comment_${string}`,
+      parsed.data,
+    )
     if (!result.ok) {
-      return sceneApiJson(request, { error: result.error }, { status: 422 })
+      const status = result.error === 'thread_not_found' ? 404 : 422
+      return sceneApiJson(request, { error: result.error }, { status })
     }
-    // A retry after an ambiguous response finds its client-generated id and
-    // succeeds without a second save or duplicate thread.
     if (!result.created) {
       return sceneApiJson(
         request,
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         ) as never,
         thumbnailUrl: scene.thumbnailUrl,
         expectedVersion: scene.version,
-        operation: 'share-comment:create',
+        operation: 'share-comment:reply',
         saveMode: 'draft',
       })
       return sceneApiJson(

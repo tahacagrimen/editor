@@ -3,6 +3,7 @@ import { projectMembers, projects, scenes } from '@pascal-app/db/schema'
 import { and, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { getAuth } from './auth'
+import type { RateLimitResult } from './rate-limit'
 import { checkRateLimit } from './rate-limit'
 
 const DEFAULT_RATE_LIMIT_PER_MINUTE = 120
@@ -197,13 +198,17 @@ export async function sceneApiPreflight(request: Request): Promise<NextResponse>
 
 export async function guardSceneApiRequest(
   request: Request,
-  opts: { skipRateLimit?: boolean; skipAuth?: boolean } = {},
+  opts: {
+    skipRateLimit?: boolean
+    skipAuth?: boolean
+    rateLimit?: RequestRateLimitOptions
+  } = {},
 ): Promise<NextResponse | null> {
   const originError = validateOrigin(request)
   if (originError) return originError
 
   if (!opts.skipRateLimit) {
-    const rateError = await validateRateLimit(request)
+    const rateError = await validateRequestRateLimit(request, opts.rateLimit)
     if (rateError) return rateError
   }
 
@@ -233,16 +238,38 @@ function validateOrigin(request: Request): NextResponse | null {
   return sceneApiJson(request, { error: 'origin_not_allowed' }, { status: 403 })
 }
 
-async function validateRateLimit(request: Request): Promise<NextResponse | null> {
-  const limit = rateLimitPerMinute()
+export type RequestRateLimitOptions = {
+  /** Explicit endpoint budget. Defaults to the scene API environment setting. */
+  limit?: number
+  windowMs?: number
+  /** Keeps independent endpoint budgets from consuming the scene API bucket. */
+  keyPrefix?: string
+  /** Share links are anonymous capabilities, so their subject is always the client IP. */
+  ipOnly?: boolean
+}
+
+export async function validateRequestRateLimit(
+  request: Request,
+  options: RequestRateLimitOptions = {},
+  limiter: (
+    key: string,
+    limit: number,
+    windowMs: number,
+  ) => Promise<RateLimitResult | null> = checkRateLimit,
+): Promise<NextResponse | null> {
+  const limit = options.limit ?? rateLimitPerMinute()
   if (limit <= 0) return null
 
   // User-based keying, IP only as the anonymous fallback — a NAT's fifty
   // users must not throttle each other off one shared IP.
-  const actor = await resolveActor(request)
-  const key = actor.type === 'user' ? `user:${actor.userId}` : `ip:${clientIp(request)}`
+  const subject = options.ipOnly
+    ? `ip:${clientIp(request)}`
+    : await resolveActor(request).then((actor) =>
+        actor.type === 'user' ? `user:${actor.userId}` : `ip:${clientIp(request)}`,
+      )
+  const key = options.keyPrefix ? `${options.keyPrefix}:${subject}` : subject
 
-  const result = await checkRateLimit(key, limit, RATE_LIMIT_WINDOW_MS)
+  const result = await limiter(key, limit, options.windowMs ?? RATE_LIMIT_WINDOW_MS)
   if (!result || result.allowed) return null
 
   const response = sceneApiJson(request, { error: 'rate_limited' }, { status: 429 })
@@ -289,11 +316,12 @@ function configuredOrigins(): Set<string> {
 function isSameOrigin(request: Request, origin: string): boolean {
   const parsedOrigin = parseUrl(origin)
   if (!parsedOrigin) return false
-  
+
   const requestUrl = new URL(request.url)
-  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host
+  const host =
+    request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host
   const proto = request.headers.get('x-forwarded-proto') || requestUrl.protocol.replace(':', '')
-  
+
   const resolvedUrl = new URL(`${proto}://${host}`)
   return normalizeOrigin(parsedOrigin) === normalizeOrigin(resolvedUrl)
 }
