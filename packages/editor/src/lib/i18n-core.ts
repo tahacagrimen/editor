@@ -2087,6 +2087,8 @@ const tr: Record<string, string> = {
     'Salt-görüntüleme bağlantısı oluştur — ziyaretçiler gezebilir, ölçebilir ve yorum bırakabilir, düzenleyemez',
   'View only': 'Salt görüntüleme',
   'Read only': 'Salt okunur',
+  'Download PDF summary': 'PDF özetini indir',
+  'The PDF could not be prepared. Please try again.': 'PDF hazırlanamadı. Lütfen tekrar deneyin.',
   'Comment not saved': 'Yorum kaydedilmedi',
   'Comment not saved — try again': 'Yorum kaydedilmedi — tekrar deneyin',
   'Hide resolved comments': 'Çözülen yorumları gizle',

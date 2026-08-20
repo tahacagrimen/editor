@@ -2,6 +2,7 @@
 
 import {
   type AnyNode,
+  type AnyNodeId,
   type BuildingNode,
   type CameraPose,
   type CommentId,
@@ -10,10 +11,16 @@ import {
   generateCommentReplyId,
   type LevelNode,
 } from '@pascal-app/core'
-import { applySceneGraphToEditor, type SceneGraph, useTranslation } from '@pascal-app/editor'
+import {
+  applySceneGraphToEditor,
+  type SceneGraph,
+  ThumbnailGenerator,
+  useTranslation,
+} from '@pascal-app/editor'
+import { takeoffForSubtree } from '@pascal-app/editor/quantities'
 import { SceneEnvironment, useViewer, Viewer } from '@pascal-app/viewer'
 import { CameraControls, type CameraControlsImpl } from '@react-three/drei'
-import { Eye } from 'lucide-react'
+import { Download, Eye, LoaderCircle } from 'lucide-react'
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Vector3 } from 'three'
 import {
@@ -24,6 +31,12 @@ import {
   visibleShareCommentPins,
 } from '@/lib/share-comments'
 import type { ShareLocation } from '@/lib/share-location'
+import {
+  captureShareSnapshot,
+  downloadSharePdf,
+  rasterizeShareFloorplan,
+  waitForSharePdfAssets,
+} from '@/lib/share-pdf-client'
 import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
 import { formatShareLevelStats, readShareLevels } from '@/lib/share-scene-levels'
 import type { ShareSummary } from '@/lib/share-summary'
@@ -97,6 +110,8 @@ export function SharePresentation({
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null)
   const [savingComment, setSavingComment] = useState(false)
   const [commentError, setCommentError] = useState<string | null>(null)
+  const [preparingPdf, setPreparingPdf] = useState(false)
+  const [pdfError, setPdfError] = useState<string | null>(null)
   const controlsRef = useRef<CameraControlsImpl | null>(null)
 
   const levels = useMemo(() => readShareLevels(initialScene), [initialScene])
@@ -286,6 +301,42 @@ export function SharePresentation({
     [levels, numberedComments, viewState.mode],
   )
 
+  const createPdf = useCallback(async () => {
+    if (preparingPdf) return
+    setPreparingPdf(true)
+    setPdfError(null)
+    try {
+      const snapshot = await captureShareSnapshot()
+      await waitForSharePdfAssets()
+      const assets = await Promise.all(
+        levels.map(async (level) => {
+          const host = document.querySelector<HTMLElement>(
+            `[data-share-pdf-level="${CSS.escape(level.id)}"]`,
+          )
+          const svg = host?.querySelector<SVGSVGElement>('[data-share-floorplan]')
+          const planImage = svg ? await rasterizeShareFloorplan(svg) : undefined
+          const takeoff = takeoffForSubtree(
+            level.id as AnyNodeId,
+            {
+              nodes: initialScene.nodes,
+              materials: initialScene.materials ?? {},
+            } as never,
+          )
+          return {
+            id: level.id,
+            ...(planImage && { planImage }),
+            takeoff,
+          }
+        }),
+      )
+      await downloadSharePdf(token, { ...(snapshot && { snapshot }), levels: assets }, meta.name)
+    } catch {
+      setPdfError(t('The PDF could not be prepared. Please try again.'))
+    } finally {
+      setPreparingPdf(false)
+    }
+  }, [initialScene, levels, meta.name, preparingPdf, t, token])
+
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-clip bg-background text-foreground">
       <header className="sticky top-0 z-20 border-border border-b-2 bg-background/95 backdrop-blur">
@@ -295,6 +346,20 @@ export function SharePresentation({
             <span className="text-primary">3D</span>
           </div>
           <div className="min-w-0 flex-1" />
+          <button
+            aria-label={t('Download PDF summary')}
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 border border-border px-3 font-extrabold text-[11px] uppercase tracking-[0.08em] transition-colors hover:bg-accent disabled:cursor-wait disabled:opacity-60"
+            disabled={preparingPdf}
+            onClick={createPdf}
+            type="button"
+          >
+            {preparingPdf ? (
+              <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />
+            ) : (
+              <Download aria-hidden="true" className="size-3.5" />
+            )}
+            PDF
+          </button>
           <span className="inline-flex min-h-9 shrink-0 items-center gap-1.5 border border-border px-2 text-[11px] font-extrabold uppercase tracking-[0.08em]">
             <Eye aria-hidden="true" className="size-3.5" />
             {t('Read only')}
@@ -352,6 +417,7 @@ export function SharePresentation({
               >
                 <SceneEnvironment />
                 <ShareCameraControls controlsRef={controlsRef} />
+                <ThumbnailGenerator onThumbnailCapture={() => {}} />
                 <ShareCommentPins3D
                   activeId={activeCommentId}
                   comments={visibleCommentPins}
@@ -493,6 +559,39 @@ export function SharePresentation({
           />
         </section>
       </main>
+
+      {preparingPdf && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed top-0 left-[-12000px] w-[1200px] opacity-0"
+          data-share-pdf-assets=""
+        >
+          {levels.map((level) => (
+            <div className="h-[760px] w-[1200px]" data-share-pdf-level={level.id} key={level.id}>
+              <ShareFloorplan
+                active
+                activeCommentId={null}
+                comments={[]}
+                draftPosition={null}
+                graph={initialScene}
+                levelId={level.id}
+                onDropComment={() => {}}
+                onPinClick={() => {}}
+                placementEnabled={false}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {pdfError && (
+        <p
+          aria-live="polite"
+          className="mx-auto max-w-[1440px] border-red-300 border-t px-4 py-3 text-red-700 text-sm dark:text-red-400"
+        >
+          {pdfError}
+        </p>
+      )}
 
       <footer className="mx-auto flex max-w-[1440px] flex-wrap gap-x-4 gap-y-1 border-border border-t-2 px-4 py-4 text-muted-foreground text-xs tabular-nums">
         <span className="break-words font-extrabold text-foreground">{meta.name}</span>

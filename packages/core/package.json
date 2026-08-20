@@ -61,6 +61,11 @@
       "import": "./dist/lib/site-zoning.js",
       "default": "./dist/lib/site-zoning.js"
     },
+    "./quantities": {
+      "types": "./dist/lib/quantities-server.d.ts",
+      "import": "./dist/lib/quantities-server.js",
+      "default": "./dist/lib/quantities-server.js"
+    },
     "./spatial-grid": {
       "types": "./dist/hooks/spatial-grid/spatial-grid-manager.d.ts",
       "import": "./dist/hooks/spatial-grid/spatial-grid-manager.js",
