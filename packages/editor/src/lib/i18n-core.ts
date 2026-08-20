@@ -2033,6 +2033,7 @@ const tr: Record<string, string> = {
   'Create a view-only link — visitors can look, measure and comment, not edit':
     'Salt-görüntüleme bağlantısı oluştur — ziyaretçiler gezebilir, ölçebilir ve yorum bırakabilir, düzenleyemez',
   'View only': 'Salt görüntüleme',
+  'Read only': 'Salt okunur',
   'Comment not saved': 'Yorum kaydedilmedi',
   'Comment not saved — try again': 'Yorum kaydedilmedi — tekrar deneyin',
   'Hide resolved comments': 'Çözülen yorumları gizle',

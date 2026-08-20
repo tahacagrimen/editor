@@ -5,16 +5,12 @@ import { SceneEnvironment, Viewer } from '@pascal-app/viewer'
 import { CameraControls } from '@react-three/drei'
 import { Eye, Layers3, MapPin } from 'lucide-react'
 import { useLayoutEffect, useMemo, useState } from 'react'
+import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
 
 export type ShareViewState = {
   mode: '3d' | '2d'
   levelIdx: number
   tab: 'ozet' | 'metraj' | 'konum' | 'yorum'
-}
-
-export type SharePresentationMeta = {
-  name: string
-  version: number
 }
 
 type ShareLevel = {
@@ -97,6 +93,9 @@ export function SharePresentation({
   const levelIdx = levels.length === 0 ? 0 : Math.min(viewState.levelIdx, levels.length - 1)
   const selectedLevel = levels[levelIdx] ?? null
   const commentCount = Object.keys(initialScene.comments ?? {}).length
+  const metadataLines = [meta.parcelLine, meta.revisionLine, meta.sharedByLine].filter(
+    (line): line is string => Boolean(line),
+  )
 
   // Viewer is store-backed. Hydrating the server-provided graph is the only
   // scene write on this page; presentation state remains local and no save,
@@ -110,7 +109,7 @@ export function SharePresentation({
   }
 
   return (
-    <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-background text-foreground">
+    <div className="min-h-dvh w-full max-w-full overflow-x-clip bg-background text-foreground">
       <header className="sticky top-0 z-20 border-border border-b-2 bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-4 py-3">
           <div className="flex items-baseline gap-1.5 font-extrabold tracking-tight">
@@ -118,19 +117,21 @@ export function SharePresentation({
             <span className="text-primary">3D</span>
           </div>
           <div className="min-w-0 flex-1" />
-          <span className="inline-flex min-h-9 shrink-0 items-center gap-1.5 border border-border px-2 text-[11px] font-extrabold tracking-[0.08em]">
+          <span className="inline-flex min-h-9 shrink-0 items-center gap-1.5 border border-border px-2 text-[11px] font-extrabold uppercase tracking-[0.08em]">
             <Eye aria-hidden="true" className="size-3.5" />
-            {t('View only')}
+            {t('Read only')}
           </span>
         </div>
-        <div className="mx-auto max-w-[1440px] px-4 pb-3">
-          <h1 className="break-words font-extrabold text-xl leading-tight tracking-tight">
+        <div className="mx-auto min-w-0 max-w-[1440px] px-4 pb-1">
+          <h1 className="min-w-0 break-words font-extrabold text-xl leading-tight tracking-tight [text-wrap:pretty]">
             {meta.name}
           </h1>
-          <p className="mt-1 text-muted-foreground text-xs tabular-nums">
-            {t('Revision')} {meta.version}
-          </p>
         </div>
+        <ShareMetadataLines
+          expiryLine={meta.expiryLine}
+          expiryUrgent={meta.expiryUrgent}
+          lines={metadataLines}
+        />
       </header>
 
       <main className="mx-auto flex w-full max-w-[1440px] flex-wrap items-start">
@@ -257,7 +258,18 @@ export function SharePresentation({
         </section>
       </main>
 
-      <footer className="mx-auto flex max-w-[1440px] flex-wrap gap-x-4 gap-y-1 border-border border-t-2 px-4 py-4 text-muted-foreground text-xs">
+      <footer className="mx-auto flex max-w-[1440px] flex-wrap gap-x-4 gap-y-1 border-border border-t-2 px-4 py-4 text-muted-foreground text-xs tabular-nums">
+        <span className="break-words font-extrabold text-foreground">{meta.name}</span>
+        {metadataLines.map((line) => (
+          <span key={line}>{line}</span>
+        ))}
+        {meta.expiryLine && (
+          <span
+            className={meta.expiryUrgent ? 'font-extrabold text-red-700 dark:text-red-400' : ''}
+          >
+            {meta.expiryLine}
+          </span>
+        )}
         <span>{t('View-only share link · editing is disabled')}</span>
         <a
           className="text-primary hover:underline"
@@ -268,6 +280,31 @@ export function SharePresentation({
           {t('Made with Menart 3D')}
         </a>
       </footer>
+    </div>
+  )
+}
+
+function ShareMetadataLines({
+  lines,
+  expiryLine,
+  expiryUrgent,
+}: {
+  lines: string[]
+  expiryLine?: string
+  expiryUrgent?: boolean
+}) {
+  if (lines.length === 0 && !expiryLine) return null
+
+  return (
+    <div className="mx-auto flex max-w-[1440px] flex-wrap gap-x-3.5 gap-y-1 px-4 pb-2.5 text-[11.5px] text-muted-foreground tabular-nums">
+      {lines.map((line) => (
+        <span key={line}>{line}</span>
+      ))}
+      {expiryLine && (
+        <span className={expiryUrgent ? 'font-extrabold text-red-700 dark:text-red-400' : ''}>
+          {expiryLine}
+        </span>
+      )}
     </div>
   )
 }

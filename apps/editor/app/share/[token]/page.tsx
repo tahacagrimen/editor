@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { LocalizedContent } from '@/components/localized-content'
 import { SharePresentation } from '@/components/share/share-presentation'
 import { getSceneOperations } from '@/lib/scene-store-server'
+import { buildSharePresentationMeta } from '@/lib/share-presentation-meta'
 import { hashSharePassword, verifyShareToken } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
@@ -97,14 +98,30 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   const allowComments = payload.allowComments ?? true
   const graph = scene.graph as SceneGraph
   const initialScene = allowComments ? graph : { ...graph, comments: {} }
+  const ownerName = await resolveOwnerName(scene.ownerId)
+  const meta = buildSharePresentationMeta({
+    name: scene.name,
+    version: scene.version,
+    updatedAt: scene.updatedAt,
+    graph,
+    ownerName,
+    expiresAtSeconds: payload.exp,
+  })
 
-  return (
-    <SharePresentation
-      allowComments={allowComments}
-      initialScene={initialScene}
-      meta={{ name: scene.name, version: scene.version }}
-    />
-  )
+  return <SharePresentation allowComments={allowComments} initialScene={initialScene} meta={meta} />
+}
+
+async function resolveOwnerName(ownerId: string | null): Promise<string | null> {
+  if (!(ownerId && process.env.POSTGRES_URL)) return null
+
+  const { getDatabase } = await import('@pascal-app/db')
+  const db = getDatabase()
+  const owner = await db.query.users.findFirst({
+    columns: { name: true },
+    where: (users, { and, eq, isNull }) => and(eq(users.id, ownerId), isNull(users.deletedAt)),
+  })
+
+  return owner?.name.trim() || null
 }
 
 function ShareProblem({ heading, body }: { heading: string; body: string }) {

@@ -12,6 +12,10 @@ describe('translate', () => {
     expect(translate('Settings', 'en')).toBe('Settings')
   })
 
+  test('uses the binding read-only label on share links', () => {
+    expect(translate('Read only', 'tr')).toBe('Salt okunur')
+  })
+
   test('translates dynamic editor labels', () => {
     expect(translate('Level 3', 'tr')).toBe('Kat 3')
     expect(translate('Measure: Distance', 'tr')).toBe('Ölç: Mesafe')
