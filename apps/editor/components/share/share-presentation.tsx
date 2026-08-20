@@ -4,12 +4,14 @@ import type { BuildingNode, LevelNode } from '@pascal-app/core'
 import { applySceneGraphToEditor, type SceneGraph, useTranslation } from '@pascal-app/editor'
 import { SceneEnvironment, useViewer, Viewer } from '@pascal-app/viewer'
 import { CameraControls } from '@react-three/drei'
-import { Eye, MapPin } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { useLayoutEffect, useMemo, useState } from 'react'
+import type { ShareLocation } from '@/lib/share-location'
 import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
 import { formatShareLevelStats, readShareLevels } from '@/lib/share-scene-levels'
 import type { ShareSummary } from '@/lib/share-summary'
 import { ShareFloorplan } from './share-floorplan'
+import { ShareLocationPanel } from './share-location-panel'
 import { ShareQuantitiesPanel } from './share-quantities-panel'
 import { ShareSummaryPanel } from './share-summary-panel'
 
@@ -42,12 +44,14 @@ function ShareCameraControls() {
 
 export function SharePresentation({
   initialScene,
+  location,
   meta,
   summary,
   allowComments = true,
   showCost = true,
 }: {
   initialScene: SceneGraph
+  location: ShareLocation | null
   meta: SharePresentationMeta
   summary: ShareSummary
   allowComments?: boolean
@@ -67,6 +71,7 @@ export function SharePresentation({
   const metadataLines = [meta.parcelLine, meta.revisionLine, meta.sharedByLine].filter(
     (line): line is string => Boolean(line),
   )
+  const tabs = location ? TABS : TABS.filter((tab) => tab.id !== 'konum')
 
   // Viewer is store-backed. Hydrating the server-provided graph is the only
   // scene write on this page; presentation state remains local and no save,
@@ -216,7 +221,7 @@ export function SharePresentation({
             className="flex max-w-full overflow-x-auto border-border border-b-2"
             role="tablist"
           >
-            {TABS.map((tab) => {
+            {tabs.map((tab) => {
               const selected = viewState.tab === tab.id
               return (
                 <button
@@ -249,6 +254,7 @@ export function SharePresentation({
             showCost={showCost}
             summary={summary}
             tab={viewState.tab}
+            location={location}
           />
         </section>
       </main>
@@ -311,6 +317,7 @@ function ShareTabPanel({
   selectedLevelArea,
   showCost,
   summary,
+  location,
   commentCount,
   allowComments,
 }: {
@@ -320,6 +327,7 @@ function ShareTabPanel({
   selectedLevelArea: number | null
   showCost: boolean
   summary: ShareSummary
+  location: ShareLocation | null
   commentCount: number
   allowComments: boolean
 }) {
@@ -344,12 +352,7 @@ function ShareTabPanel({
         />
       )}
 
-      {tab === 'konum' && (
-        <div className="flex min-h-72 flex-col items-center justify-center gap-3 bg-muted p-8 text-center text-muted-foreground">
-          <MapPin aria-hidden="true" className="size-10" strokeWidth={1.25} />
-          <p className="text-sm">{t('Location details will appear here.')}</p>
-        </div>
-      )}
+      {tab === 'konum' && location && <ShareLocationPanel location={location} />}
 
       {tab === 'yorum' && (
         <div className="p-4">

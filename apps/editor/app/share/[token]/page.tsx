@@ -5,6 +5,7 @@ import { LocalizedContent } from '@/components/localized-content'
 import { SharePresentation } from '@/components/share/share-presentation'
 import { getSceneOperations } from '@/lib/scene-store-server'
 import { prepareShareGraph } from '@/lib/share-graph'
+import { buildShareLocation } from '@/lib/share-location'
 import { buildSharePresentationMeta } from '@/lib/share-presentation-meta'
 import { buildShareSummary } from '@/lib/share-summary'
 import { hashSharePassword, shareCostsVisible, verifyShareToken } from '@/lib/share-token'
@@ -111,11 +112,13 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
     expiresAtSeconds: payload.exp,
   })
   const summary = buildShareSummary(graph)
+  const location = buildShareLocation(graph)
 
   return (
     <SharePresentation
       allowComments={allowComments}
       initialScene={initialScene}
+      location={location}
       meta={meta}
       showCost={showCost}
       summary={summary}

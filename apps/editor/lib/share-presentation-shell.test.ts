@@ -10,6 +10,7 @@ const quantitiesPath = join(appRoot, 'components/share/share-quantities-panel.ts
 const shareLinkButtonPath = join(appRoot, 'components/share-link-button.tsx')
 const shareApiPath = join(appRoot, 'app/api/scenes/[id]/share/route.ts')
 const shareCommentsApiPath = join(appRoot, 'app/api/share/[token]/comments/route.ts')
+const locationPath = join(appRoot, 'components/share/share-location-panel.tsx')
 
 describe('share presentation shell', () => {
   test('the share route mounts its purpose-built presentation, not the editor', () => {
@@ -93,5 +94,16 @@ describe('share presentation shell', () => {
     expect(route).toContain('prepareShareGraph(graph, { allowComments, showCost })')
     expect(route).toContain('showCost={showCost}')
     expect(commentsApi).toContain('replaceShareComments(scene.graph')
+  })
+
+  test('the location tab is omitted without a parcel and never calls a cadastral provider', () => {
+    const presentation = readFileSync(presentationPath, 'utf8')
+    const location = readFileSync(locationPath, 'utf8')
+
+    expect(presentation).toContain("TABS.filter((tab) => tab.id !== 'konum')")
+    expect(presentation).toContain("tab === 'konum' && location")
+    expect(location).toContain('<polygon')
+    expect(location).not.toContain('fetch(')
+    expect(location).not.toContain('/api/cadastre')
   })
 })

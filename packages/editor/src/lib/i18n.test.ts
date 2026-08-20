@@ -42,6 +42,12 @@ describe('translate', () => {
     )
   })
 
+  test('uses the binding parcel-location copy on share links', () => {
+    expect(translate('Open in maps', 'tr')).toBe('Haritada aç')
+    expect(translate('North angle', 'tr')).toBe('Kuzey açısı')
+    expect(translate('TKGM parcel query', 'tr')).toBe('TKGM parsel sorgu')
+  })
+
   test('translates dynamic editor labels', () => {
     expect(translate('Level 3', 'tr')).toBe('Kat 3')
     expect(translate('Measure: Distance', 'tr')).toBe('Ölç: Mesafe')
