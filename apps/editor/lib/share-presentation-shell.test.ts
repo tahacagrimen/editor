@@ -6,6 +6,7 @@ const appRoot = join(import.meta.dir, '..')
 const routePath = join(appRoot, 'app/share/[token]/page.tsx')
 const presentationPath = join(appRoot, 'components/share/share-presentation.tsx')
 const floorplanPath = join(appRoot, 'components/share/share-floorplan.tsx')
+const quantitiesPath = join(appRoot, 'components/share/share-quantities-panel.tsx')
 
 describe('share presentation shell', () => {
   test('the share route mounts its purpose-built presentation, not the editor', () => {
@@ -39,9 +40,13 @@ describe('share presentation shell', () => {
 
   test('mobile overflow is contained and theme-unsafe chrome is absent', () => {
     const presentation = readFileSync(presentationPath, 'utf8')
+    const quantities = readFileSync(quantitiesPath, 'utf8')
 
     expect(presentation).toContain('flex-wrap')
-    expect(presentation.match(/overflow-x-auto/g)?.length ?? 0).toBeGreaterThanOrEqual(3)
+    expect(
+      (presentation.match(/overflow-x-auto/g)?.length ?? 0) +
+        (quantities.match(/overflow-x-auto/g)?.length ?? 0),
+    ).toBeGreaterThanOrEqual(3)
     expect(presentation.match(/min-h-12/g)?.length ?? 0).toBeGreaterThanOrEqual(2)
     expect(presentation).not.toContain('bg-white/10')
     expect(presentation).not.toContain('text-white')
@@ -55,5 +60,21 @@ describe('share presentation shell', () => {
     expect(presentation).toContain("t('Read only')")
     expect(presentation).toContain('meta.expiryLine')
     expect(presentation).toContain('dark:text-red-400')
+  })
+
+  test('the read-only takeoff follows the selected level without editor controls', () => {
+    const presentation = readFileSync(presentationPath, 'utf8')
+    const quantities = readFileSync(quantitiesPath, 'utf8')
+
+    expect(presentation).toContain('selectedLevelId={selectedLevelId}')
+    expect(quantities).toContain(
+      'takeoffForSubtree(selectedLevelId as AnyNodeId, { materials, nodes })',
+    )
+    expect(quantities).toContain('priceQuantityTakeoff(takeoff, unitPrices)')
+    expect(quantities).toContain('max-w-full overflow-x-auto')
+    expect(quantities).toContain('downloadQuantityCsv(priced')
+    expect(quantities).not.toContain('<input')
+    expect(quantities).not.toContain('setUnitPrice')
+    expect(quantities).not.toContain('removeUnitPrice')
   })
 })

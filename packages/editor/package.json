@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.tsx",
     "./catalog": "./src/components/ui/item-catalog/catalog-items.tsx",
-    "./i18n": "./src/lib/i18n-core.ts"
+    "./i18n": "./src/lib/i18n-core.ts",
+    "./quantities": "./src/lib/quantities.ts"
   },
   "scripts": {
     "check-types": "tsgo --noEmit",

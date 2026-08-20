@@ -10,6 +10,7 @@ import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
 import { formatShareLevelStats, readShareLevels } from '@/lib/share-scene-levels'
 import type { ShareSummary } from '@/lib/share-summary'
 import { ShareFloorplan } from './share-floorplan'
+import { ShareQuantitiesPanel } from './share-quantities-panel'
 import { ShareSummaryPanel } from './share-summary-panel'
 
 export type ShareViewState = {
@@ -44,11 +45,13 @@ export function SharePresentation({
   meta,
   summary,
   allowComments = true,
+  showCost = true,
 }: {
   initialScene: SceneGraph
   meta: SharePresentationMeta
   summary: ShareSummary
   allowComments?: boolean
+  showCost?: boolean
 }) {
   const t = useTranslation()
   const [viewState, setViewState] = useState<ShareViewState>({
@@ -241,7 +244,9 @@ export function SharePresentation({
             allowComments={allowComments}
             commentCount={commentCount}
             selectedLevelId={selectedLevel?.id ?? null}
+            selectedLevelArea={selectedLevel?.area ?? null}
             selectedLevelName={selectedLevel?.name ?? null}
+            showCost={showCost}
             summary={summary}
             tab={viewState.tab}
           />
@@ -303,6 +308,8 @@ function ShareTabPanel({
   tab,
   selectedLevelName,
   selectedLevelId,
+  selectedLevelArea,
+  showCost,
   summary,
   commentCount,
   allowComments,
@@ -310,6 +317,8 @@ function ShareTabPanel({
   tab: ShareTab
   selectedLevelName: string | null
   selectedLevelId: string | null
+  selectedLevelArea: number | null
+  showCost: boolean
   summary: ShareSummary
   commentCount: number
   allowComments: boolean
@@ -327,28 +336,12 @@ function ShareTabPanel({
       {tab === 'ozet' && <ShareSummaryPanel summary={summary} />}
 
       {tab === 'metraj' && (
-        <div className="max-w-full overflow-x-auto">
-          <table className="min-w-[520px] w-full border-collapse text-sm tabular-nums">
-            <thead>
-              <tr className="border-border border-b">
-                <th className="px-4 py-3 text-left font-extrabold text-xs uppercase tracking-[0.06em]">
-                  {t('Item')}
-                </th>
-                <th className="px-4 py-3 text-right font-extrabold text-xs uppercase tracking-[0.06em]">
-                  {t('Quantity')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-border border-b">
-                <td className="px-4 py-4 text-muted-foreground">
-                  {selectedLevelName ?? t('All levels')}
-                </td>
-                <td className="px-4 py-4 text-right text-muted-foreground">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <ShareQuantitiesPanel
+          selectedLevelArea={selectedLevelArea}
+          selectedLevelId={selectedLevelId}
+          selectedLevelName={selectedLevelName}
+          showCost={showCost}
+        />
       )}
 
       {tab === 'konum' && (

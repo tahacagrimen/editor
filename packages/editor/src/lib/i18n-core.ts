@@ -1967,15 +1967,23 @@ const tr: Record<string, string> = {
   'Map tiles unavailable — enter the coordinates below instead.':
     'Harita görüntüleri yüklenemedi — bunun yerine aşağıdaki koordinatları girin.',
   Quantities: 'Metraj',
+  Quantity: 'Miktar',
+  'Takeoff item': 'Kalem',
+  Amount: 'Tutar',
   'Export CSV': 'CSV dışa aktar',
   'Export quantities as CSV': 'Metrajı CSV olarak dışa aktar',
   'Export quantities as XLSX': 'Metrajı XLSX olarak dışa aktar',
   'Export XLSX': 'XLSX dışa aktar',
   Total: 'Toplam',
+  total: 'toplamı',
+  'live quantities': 'canlı metraj',
+  'Ground level': 'Zemin Kat',
   'Select a level to measure it.': 'Ölçmek için bir kat seçin.',
   'Nothing to measure on this level yet.': 'Bu katta henüz ölçülecek bir şey yok.',
   'Totals cover the active level and exclude hidden nodes. Wall face area is gross, before openings.':
     'Toplamlar etkin katı kapsar; gizlenen düğümler dahil değildir. Duvar yüzey alanı brüttür, boşluklar düşülmemiştir.',
+  'Quantities belong to the selected level and exclude hidden items. Wall face area is gross — openings are not subtracted. Unit prices are estimates, not quotations.':
+    'Miktarlar seçili kata aittir, gizli öğeler hariçtir. Duvar yüzey alanı brüttür — boşluklar düşülmemiştir. Birim fiyatlar tahminidir, teklif değildir.',
   'Surface area': 'Yüzey alanı',
   'Edge perimeter': 'Kenar çevresi',
   'Centreline length': 'Merkez çizgisi uzunluğu',

@@ -25,6 +25,22 @@ describe('translate', () => {
     expect(translate('Suitable', 'tr')).toBe('Uygun')
   })
 
+  test('uses the binding read-only quantity copy on share links', () => {
+    expect(translate('Quantity', 'tr')).toBe('Miktar')
+    expect(translate('Takeoff item', 'tr')).toBe('Kalem')
+    expect(translate('Amount', 'tr')).toBe('Tutar')
+    expect(translate('live quantities', 'tr')).toBe('canlı metraj')
+    expect(translate('Ground level', 'tr')).toBe('Zemin Kat')
+    expect(
+      translate(
+        'Quantities belong to the selected level and exclude hidden items. Wall face area is gross — openings are not subtracted. Unit prices are estimates, not quotations.',
+        'tr',
+      ),
+    ).toBe(
+      'Miktarlar seçili kata aittir, gizli öğeler hariçtir. Duvar yüzey alanı brüttür — boşluklar düşülmemiştir. Birim fiyatlar tahminidir, teklif değildir.',
+    )
+  })
+
   test('translates dynamic editor labels', () => {
     expect(translate('Level 3', 'tr')).toBe('Kat 3')
     expect(translate('Measure: Distance', 'tr')).toBe('Ölç: Mesafe')
