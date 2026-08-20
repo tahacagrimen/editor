@@ -37,6 +37,7 @@ and `packages/mcp` import and that nothing in `core`, `viewer`, `editor` or
 - **Architecture rules** — `wiki/architecture/` (read on demand; index in `wiki/architecture/README.md`).
 - **Skills (ready workflows)** — `.agents/skills/<name>/SKILL.md`. Same content is reachable as `.claude/skills/`, `.cursor/skills/`, `.codex/skills/` (symlinks to `.agents/skills/`).
 - **Repo orientation for humans** — `README.md`, `SETUP.md`, `CONTRIBUTING.md`.
+- **Design sources** — `wiki/design/<feature>/`. Claude Design canvases (`.dc.html`) copied into the repo, each with a `README.md` that says what is binding, what is placeholder data, and how the canvas's tokens map onto `globals.css`. The originals live behind a claude.ai login no agent or CI job can reach, so the copy here is the only readable version. `wiki/design/paylasim-sayfasi/` is the worked example.
 
 `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` are symlinks to this file. Codex reads this file directly. Edit `AGENTS.md`; never replace a symlink with a copy.
 

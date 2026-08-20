@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="_ds/modernist-4ef20401-f7e5-4ab7-bda8-4c2945550e54/styles.css">
+<script src="_ds/modernist-4ef20401-f7e5-4ab7-bda8-4c2945550e54/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--color-bg);color:var(--color-text);-webkit-font-smoothing:antialiased}
+a{color:var(--color-accent-700);text-decoration:none}
+a:hover{color:var(--color-accent);text-decoration:underline}
+*{-webkit-tap-highlight-color:transparent}
+</style>
+</helmet>
+<div style="position:relative;background:var(--color-bg);font-family:var(--font-body);font-size:15px">
+
+<div style="{{ safeTopStyle }}"></div>
+<header style="position:sticky;top:0;z-index:12;background:var(--color-bg);border-bottom:2px solid var(--color-divider)">
+  <div style="max-width:1440px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px">
+    <div style="display:flex;align-items:baseline;gap:6px;flex:none">
+      <span style="font-family:var(--font-heading);font-weight:800;font-size:15px;letter-spacing:-0.02em">MENART</span>
+      <span style="font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--color-accent)">3D</span>
+    </div>
+    <div style="flex:1 1 auto"></div>
+    <span class="tag tag-outline" style="flex:none;font-size:11px;padding:3px 7px;display:inline-flex;align-items:center;gap:5px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      SALT OKUNUR
+    </span>
+    <button class="btn btn-secondary" onClick="{{ onDownload }}" style="flex:none;min-height:36px" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+      <span>PDF</span>
+    </button>
+  </div>
+  <div style="max-width:1440px;margin:0 auto;padding:0 16px 4px">
+    <div style="font-family:var(--font-heading);font-weight:800;font-size:21px;line-height:1.15;letter-spacing:-0.015em;text-wrap:pretty">{{ projectName }}</div>
+  </div>
+  <div style="max-width:1440px;margin:0 auto;padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent);font-variant-numeric:tabular-nums">
+    <span>{{ parcelLine }}</span>
+    <span>{{ revLine }}</span>
+    <span>{{ sharedByLine }}</span>
+    <span>{{ expiryLine }}</span>
+  </div>
+</header>
+
+<div style="max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:flex-start">
+
+  <section style="flex:1 1 460px;min-width:min(100%,460px);border-right:2px solid var(--color-divider)">
+    <div style="display:flex;align-items:stretch;border-bottom:2px solid var(--color-divider)">
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+        <button onClick="{{ m.on }}" style="{{ m.style }}" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)" type="button">
+          <span>{{ m.label }}</span>
+        </button>
+      </sc-for>
+      <div style="flex:1 1 auto"></div>
+      <sc-if value="{{ canComment }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ onTogglePin }}" style="{{ pinBtnStyle }}" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 0 1-8 8H7l-4 3v-11a8 8 0 0 1 8-8h1a8 8 0 0 1 8 8Z"></path></svg>
+          <span>{{ pinBtnLabel }}</span>
+        </button>
+      </sc-if>
+    </div>
+
+    <div onClick="{{ onStageClick }}" style="{{ stageStyle }}">
+      <sc-if value="{{ is3d }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--color-neutral-500)">
+          <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"></path><path d="m3 8 9 5 9-5"></path><path d="M12 13v8"></path></svg>
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase">3B model alanı</div>
+          <div style="font-size:12px;max-width:260px;text-align:center;line-height:1.4">Model bu alanda gömülü viewer ile açılır — döndürmek için sürükle, yakınlaştırmak için iki parmak.</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ is2d }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:32px 24px 40px">
+          <sc-for list="{{ rooms }}" as="room" hint-placeholder-count="4">
+            <div style="{{ room.style }}">
+              <div style="position:absolute;left:6px;bottom:5px;line-height:1.25">
+                <div style="font-family:var(--font-heading);font-weight:800;font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase">{{ room.label }}</div>
+                <div style="font-size:10.5px;color:color-mix(in srgb, var(--color-text) 60%, transparent);font-variant-numeric:tabular-nums">{{ room.area }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ visiblePins }}" as="pin" hint-placeholder-count="0">
+        <button onClick="{{ pin.on }}" style="{{ pin.style }}" type="button">{{ pin.no }}</button>
+      </sc-for>
+
+      <sc-if value="{{ hasDraftPin }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ draftPinStyle }}">+</div>
+      </sc-if>
+
+      <div style="position:absolute;left:12px;bottom:10px;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;font-family:var(--font-heading);font-weight:800;color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ stageBadge }}</div>
+      <div style="position:absolute;right:12px;bottom:10px;font-size:10.5px;color:color-mix(in srgb, var(--color-text) 45%, transparent);font-variant-numeric:tabular-nums">{{ scaleBadge }}</div>
+    </div>
+
+    <div style="display:flex;overflow-x:auto;border-bottom:2px solid var(--color-divider)">
+      <sc-for list="{{ levelChips }}" as="lv" hint-placeholder-count="3">
+        <button onClick="{{ lv.on }}" style="{{ lv.style }}" type="button">
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.02em">{{ lv.name }}</div>
+          <div style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent);font-variant-numeric:tabular-nums">{{ lv.meta }}</div>
+        </button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ hasDraftPin }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:16px;border-bottom:2px solid var(--color-divider);background:var(--color-surface)">
+        <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Yeni yorum · {{ draftLevelName }}</div>
+        <sc-if value="{{ needsName }}" hint-placeholder-val="{{ false }}">
+          <div class="field" style="margin-bottom:10px">
+            <label for="mn-name">Adın (yorumda görünür)</label>
+            <input class="input" id="mn-name" onChange="{{ onNameChange }}" placeholder="ör. Ahmet Yılmaz" type="text" value="{{ nameDraft }}">
+          </div>
+        </sc-if>
+        <div class="field">
+          <label for="mn-body">Yorum</label>
+          <textarea class="input" id="mn-body" onChange="{{ onBodyChange }}" placeholder="Bu noktayla ilgili görüşün…" value="{{ body }}"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-primary" onClick="{{ onSubmitComment }}" style="min-height:44px" type="button">Yorumu gönder</button>
+          <button class="btn btn-secondary" onClick="{{ onCancelDraft }}" style="min-height:44px" type="button">Vazgeç</button>
+        </div>
+      </div>
+    </sc-if>
+  </section>
+
+  <section style="flex:1 1 400px;min-width:min(100%,360px)">
+    <div style="display:flex;border-bottom:2px solid var(--color-divider);overflow-x:auto">
+      <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+        <button onClick="{{ tab.on }}" style="{{ tab.style }}" type="button">{{ tab.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isOzet }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr">
+          <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+            <div style="{{ s.style }}">
+              <div style="font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;font-family:var(--font-heading);font-weight:800;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ s.label }}</div>
+              <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;line-height:1.05;margin-top:6px;font-variant-numeric:tabular-nums">{{ s.value }}</div>
+              <div style="font-size:11.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-top:2px">{{ s.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Katlar</div>
+          <sc-for list="{{ levelRows }}" as="lv" hint-placeholder-count="3">
+            <div style="display:flex;align-items:baseline;gap:10px;padding:7px 0;border-top:1px solid var(--color-divider)">
+              <span style="flex:1 1 auto;font-size:14px">{{ lv.name }}</span>
+              <span style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent);font-variant-numeric:tabular-nums">{{ lv.height }}</span>
+              <span style="font-size:14px;font-variant-numeric:tabular-nums;min-width:86px;text-align:right">{{ lv.area }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Arsa ve imar</div>
+          <sc-for list="{{ parcelRows }}" as="row" hint-placeholder-count="6">
+            <div style="display:flex;align-items:baseline;gap:12px;padding:7px 0;border-top:1px solid var(--color-divider)">
+              <span style="flex:1 1 auto;font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ row.label }}</span>
+              <span style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums">{{ row.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">İmar kontrolü</div>
+          <sc-for list="{{ zoningRows }}" as="row" hint-placeholder-count="4">
+            <div style="display:flex;align-items:baseline;gap:10px;padding:8px 0;border-top:1px solid var(--color-divider)">
+              <span style="flex:1 1 auto;font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ row.label }}</span>
+              <span style="font-size:14px;font-variant-numeric:tabular-nums">{{ row.value }}</span>
+              <span style="{{ row.tagStyle }}">{{ row.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMetraj }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:2px solid var(--color-divider)">
+          <div style="flex:1 1 auto;font-size:12.5px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ takeoffScope }}</div>
+          <button class="btn btn-secondary" onClick="{{ onDownloadCsv }}" style="min-height:36px;flex:none" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+            <span>CSV</span>
+          </button>
+        </div>
+        <table class="table" style="width:100%;font-variant-numeric:tabular-nums">
+          <thead>
+            <tr>
+              <th style="text-align:left">Kalem</th>
+              <th style="text-align:right">Miktar</th>
+              <th style="{{ priceHeadStyle }}">Birim fiyat</th>
+              <th style="{{ priceHeadStyle }}">Tutar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ takeoffRows }}" as="row" hint-placeholder-count="8">
+              <tr>
+                <td style="{{ row.labelStyle }}">{{ row.label }}</td>
+                <td style="text-align:right;white-space:nowrap">{{ row.qty }}</td>
+                <td style="{{ row.priceStyle }}">{{ row.price }}</td>
+                <td style="{{ row.priceStyle }}">{{ row.cost }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <div style="display:flex;align-items:baseline;gap:10px;padding:14px 16px;border-bottom:2px solid var(--color-divider);background:var(--color-surface)">
+          <span style="flex:1 1 auto;font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase">{{ totalLabel }}</span>
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:19px;font-variant-numeric:tabular-nums">{{ totalCost }}</span>
+        </div>
+        <p style="padding:12px 16px;margin:0;font-size:11.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent);border-bottom:2px solid var(--color-divider)">Miktarlar seçili kata aittir, gizli öğeler hariçtir. Duvar yüzey alanı brüttür — boşluklar düşülmemiştir. Birim fiyatlar tahminidir, teklif değildir.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isKonum }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="{{ mapStyle }}">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--color-neutral-500)">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <div style="font-size:11.5px">Parsel sınırı haritada gösterilir</div>
+          </div>
+          <div style="position:absolute;left:12px;bottom:10px;font-size:10.5px;font-family:var(--font-heading);font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 45%, transparent)">TKGM · Ada 214 / Parsel 7</div>
+        </div>
+        <div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+          <sc-for list="{{ locationRows }}" as="row" hint-placeholder-count="5">
+            <div style="display:flex;align-items:baseline;gap:12px;padding:7px 0;border-top:1px solid var(--color-divider)">
+              <span style="flex:1 1 auto;font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ row.label }}</span>
+              <span style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums">{{ row.value }}</span>
+            </div>
+          </sc-for>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-secondary" onClick="{{ onOpenMap }}" style="min-height:44px" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>
+              <span>Haritada aç</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isYorum }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <sc-if value="{{ canComment }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:14px 16px;border-bottom:2px solid var(--color-divider);display:flex;align-items:center;gap:10px">
+            <div style="flex:1 1 auto;font-size:12.5px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ commentSummary }}</div>
+            <button class="btn btn-primary" onClick="{{ onTogglePin }}" style="min-height:40px;flex:none" type="button">{{ pinBtnLabel }}</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ commentsClosed }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0;padding:16px;font-size:13px;border-bottom:2px solid var(--color-divider);color:color-mix(in srgb, var(--color-text) 60%, transparent)">Bu bağlantı yorum eklemeye kapalı. Sadece görüntüleyebilirsin.</p>
+        </sc-if>
+        <sc-for list="{{ threadRows }}" as="th" hint-placeholder-count="2">
+          <div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <button onClick="{{ th.onFocus }}" style="{{ th.pinStyle }}" type="button">{{ th.no }}</button>
+              <div style="flex:1 1 auto;min-width:0">
+                <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                  <span style="font-family:var(--font-heading);font-weight:800;font-size:13.5px">{{ th.author }}</span>
+                  <span style="font-size:11.5px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ th.meta }}</span>
+                  <span style="{{ th.stateStyle }}">{{ th.state }}</span>
+                </div>
+                <p style="margin:6px 0 0;font-size:14px;line-height:1.5;text-wrap:pretty">{{ th.body }}</p>
+                <sc-for list="{{ th.replies }}" as="rep" hint-placeholder-count="0">
+                  <div style="margin-top:10px;padding-left:12px;border-left:2px solid var(--color-divider)">
+                    <div style="display:flex;align-items:baseline;gap:8px">
+                      <span style="font-family:var(--font-heading);font-weight:800;font-size:12.5px">{{ rep.author }}</span>
+                      <span style="font-size:11px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ rep.meta }}</span>
+                    </div>
+                    <p style="margin:3px 0 0;font-size:13.5px;line-height:1.5">{{ rep.body }}</p>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ th.canReply }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:10px">
+                    <button class="btn btn-ghost" onClick="{{ th.onReply }}" style="min-height:36px;padding-inline:0" type="button">{{ th.replyLabel }}</button>
+                    <sc-if value="{{ th.replyOpen }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:8px">
+                        <textarea class="input" onChange="{{ th.onReplyChange }}" placeholder="Yanıtın…" style="min-height:64px" value="{{ th.replyBody }}"></textarea>
+                        <button class="btn btn-primary" onClick="{{ th.onSendReply }}" style="min-height:40px;margin-top:8px" type="button">Yanıtla</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noThreads }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0;padding:16px;font-size:13px;border-bottom:2px solid var(--color-divider);color:color-mix(in srgb, var(--color-text) 60%, transparent)">Henüz yorum yok. Modele dokunarak ilk notu bırakabilirsin.</p>
+        </sc-if>
+      </div>
+    </sc-if>
+  </section>
+</div>
+
+<footer style="max-width:1440px;margin:0 auto;padding:16px;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11.5px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">
+  <span>Salt okunur paylaşım bağlantısı · düzenleme yapılamaz</span>
+  <span>{{ expiryLine }}</span>
+  <a href="https://draw.menartmimarlik.com/">Menart 3D ile hazırlandı</a>
+</footer>
+
+<sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:15;min-height:100%;background:var(--color-bg);display:flex;align-items:flex-start;justify-content:center;padding:80px 24px 24px">
+    <div style="width:100%;max-width:380px;border:2px solid var(--color-divider);background:var(--color-surface);padding:24px">
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:18px">
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:14px">MENART</span>
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;color:var(--color-accent)">3D</span>
+      </div>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect height="11" rx="0" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <h4 style="margin:12px 0 4px">Bu paylaşım şifreli</h4>
+      <p style="font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Projeyi görüntülemek için sana iletilen şifreyi gir.</p>
+      <div class="field" style="margin-top:14px">
+        <label for="mn-pwd">Şifre</label>
+        <input class="input" id="mn-pwd" onChange="{{ onPwdChange }}" onKeyDown="{{ onPwdKey }}" placeholder="••••••" type="password" value="{{ pwd }}">
+      </div>
+      <sc-if value="{{ pwdError }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:8px 0 0;font-size:12.5px;color:var(--color-accent-700)">Şifre hatalı. Paylaşan kişiden tekrar isteyebilirsin.</p>
+      </sc-if>
+      <button class="btn btn-primary btn-block" onClick="{{ onUnlock }}" style="min-height:44px;margin-top:14px" type="button">Görüntüle</button>
+      <p style="margin:14px 0 0;font-size:11.5px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">Demo şifre: 1234</p>
+    </div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;allowComments&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Paylaşım izinleri&quot;},&quot;passwordProtected&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Paylaşım izinleri&quot;},&quot;password&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;1234&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Paylaşım izinleri&quot;},&quot;showCost&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;İçerik&quot;},&quot;projectName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Menart Villa · B Blok&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İçerik&quot;},&quot;initialTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ozet&quot;,&quot;metraj&quot;,&quot;konum&quot;,&quot;yorum&quot;],&quot;default&quot;:&quot;ozet&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İçerik&quot;},&quot;initialMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;3d&quot;,&quot;2d&quot;],&quot;default&quot;:&quot;3d&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İçerik&quot;},&quot;stageHeight&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:420,&quot;min&quot;:220,&quot;max&quot;:620,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;İçerik&quot;},&quot;safeTopPad&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:80,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;İçerik&quot;}}">
+class Component extends DCLogic {
+  state = {
+    locked: true, pwd: '', pwdError: false,
+    name: '', nameDraft: '',
+    mode: (this.props && this.props.initialMode) || '3d',
+    levelIdx: 0,
+    tab: (this.props && this.props.initialTab) || 'ozet',
+    pinMode: false, draft: null, body: '',
+    replyFor: null, replyBody: '',
+    threads: [
+      { id: 't1', no: 1, level: 0, x: 38, y: 44, author: 'Selim Aydın', meta: 'Dün 14:20', body: 'Salon ile mutfak arasındaki duvar kaldırılabilir mi? Açık plan tercih ederiz.', resolved: false, replies: [{ author: 'Menart Mimarlık', meta: 'Dün 16:05', body: 'Taşıyıcı değil, kaldırılabilir. Bir sonraki revizyonda göstereceğiz.' }] },
+      { id: 't2', no: 2, level: 1, x: 64, y: 30, author: 'Hakan Demir', meta: '2 gün önce', body: 'Bu cephedeki pencere ölçüsü ruhsat paftasıyla uyuşmuyor gibi.', resolved: true, replies: [] },
+    ],
+  };
+
+  levels = [
+    { name: 'Zemin Kat', height: '2.50 m', area: '162.40 m²',
+      rooms: [
+        { label: 'Salon', area: '38.20 m²', left: 0, top: 0, w: 54, h: 58 },
+        { label: 'Mutfak', area: '18.40 m²', left: 54, top: 0, w: 46, h: 34 },
+        { label: 'Hol', area: '11.10 m²', left: 54, top: 34, w: 46, h: 24 },
+        { label: 'Yatak odası', area: '21.60 m²', left: 0, top: 58, w: 40, h: 42 },
+        { label: 'Banyo', area: '7.80 m²', left: 40, top: 58, w: 24, h: 42 },
+        { label: 'Teras', area: '16.20 m²', left: 64, top: 58, w: 36, h: 42 },
+      ],
+      lines: [
+        { section: 'Duvar', label: 'Tuğla duvar · yüzey', qty: '248.60 m²', price: 480, base: 248.6 },
+        { section: 'Duvar', label: 'Duvar uzunluğu', qty: '96.40 m', price: null, base: 0 },
+        { section: 'Döşeme', label: 'Betonarme döşeme', qty: '162.40 m²', price: 950, base: 162.4 },
+        { section: 'Kapı', label: 'Tek kanat kapı', qty: '8 ad', price: 3200, base: 8 },
+        { section: 'Pencere', label: 'PVC pencere', qty: '11 ad', price: 5400, base: 11 },
+        { section: 'Kolon', label: 'Betonarme kolon', qty: '6 ad', price: 2800, base: 6 },
+        { section: 'Merdiven', label: 'Betonarme merdiven', qty: '1 ad', price: 18500, base: 1 },
+      ] },
+    { name: '1. Kat', height: '2.90 m', area: '158.20 m²',
+      rooms: [
+        { label: 'Ebeveyn', area: '26.40 m²', left: 0, top: 0, w: 48, h: 52 },
+        { label: 'Giyinme', area: '9.20 m²', left: 48, top: 0, w: 26, h: 28 },
+        { label: 'Banyo', area: '8.60 m²', left: 74, top: 0, w: 26, h: 28 },
+        { label: 'Hol', area: '12.80 m²', left: 48, top: 28, w: 52, h: 24 },
+        { label: 'Çocuk odası', area: '19.40 m²', left: 0, top: 52, w: 44, h: 48 },
+        { label: 'Çalışma', area: '15.10 m²', left: 44, top: 52, w: 56, h: 48 },
+      ],
+      lines: [
+        { section: 'Duvar', label: 'Tuğla duvar · yüzey', qty: '231.80 m²', price: 480, base: 231.8 },
+        { section: 'Duvar', label: 'Duvar uzunluğu', qty: '88.60 m', price: null, base: 0 },
+        { section: 'Döşeme', label: 'Betonarme döşeme', qty: '158.20 m²', price: 950, base: 158.2 },
+        { section: 'Kapı', label: 'Tek kanat kapı', qty: '7 ad', price: 3200, base: 7 },
+        { section: 'Pencere', label: 'PVC pencere', qty: '9 ad', price: 5400, base: 9 },
+        { section: 'Kolon', label: 'Betonarme kolon', qty: '6 ad', price: 2800, base: 6 },
+      ] },
+    { name: 'Çatı Katı', height: '2.40 m', area: '148.00 m²',
+      rooms: [
+        { label: 'Çatı katı', area: '96.40 m²', left: 0, top: 0, w: 68, h: 100 },
+        { label: 'Depo', area: '14.20 m²', left: 68, top: 0, w: 32, h: 38 },
+        { label: 'Tesisat', area: '9.60 m²', left: 68, top: 38, w: 32, h: 62 },
+      ],
+      lines: [
+        { section: 'Duvar', label: 'Tuğla duvar · yüzey', qty: '142.20 m²', price: 480, base: 142.2 },
+        { section: 'Çatı', label: 'Kiremit örtü', qty: '186.40 m²', price: 640, base: 186.4 },
+        { section: 'Döşeme', label: 'Betonarme döşeme', qty: '148.00 m²', price: 950, base: 148 },
+        { section: 'Pencere', label: 'Çatı penceresi', qty: '4 ad', price: 7200, base: 4 },
+      ] },
+  ];
+
+  money(v) { return v.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' ₺'; }
+
+  set(patch) { this.setState(patch); }
+
+  renderVals() {
+    const s = this.state;
+    const showCost = this.props.showCost ?? true;
+    const canComment = (this.props.allowComments ?? true) && !s.locked;
+    const level = this.levels[s.levelIdx];
+    const is3d = s.mode === '3d';
+
+    const tabDefs = [
+      ['ozet', 'Özet'], ['metraj', 'Metraj'], ['konum', 'Konum'],
+      ['yorum', 'Yorum ' + s.threads.length],
+    ];
+    const tabStyle = (on) => ({
+      flex: '1 0 auto', padding: '14px 16px', minHeight: 48, cursor: 'pointer',
+      border: 0, borderBottom: on ? '2px solid var(--color-accent)' : '2px solid transparent',
+      marginBottom: -2, background: 'transparent', textAlign: 'left',
+      fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 12.5,
+      letterSpacing: '0.04em', textTransform: 'uppercase',
+      color: on ? 'var(--color-text)' : 'color-mix(in srgb, var(--color-text) 50%, transparent)',
+    });
+
+    const modeStyle = (on) => ({
+      padding: '13px 18px', minHeight: 48, cursor: 'pointer', border: 0,
+      background: on ? 'var(--color-text)' : 'transparent',
+      color: on ? 'var(--color-bg)' : 'color-mix(in srgb, var(--color-text) 60%, transparent)',
+      fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 12.5,
+      letterSpacing: '0.04em', textTransform: 'uppercase', textAlign: 'left',
+    });
+
+    const pinStyle = (t, active) => ({
+      position: 'absolute', left: t.x + '%', top: t.y + '%', transform: 'translate(-50%,-100%)',
+      minWidth: 26, height: 26, padding: '0 6px', cursor: 'pointer',
+      border: '2px solid ' + (t.resolved ? 'var(--color-neutral-600)' : 'var(--color-accent-700)'),
+      background: t.resolved ? 'var(--color-bg)' : 'var(--color-accent)',
+      color: t.resolved ? 'var(--color-neutral-700)' : 'var(--color-bg)',
+      fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 12,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: 'var(--shadow-sm)',
+    });
+
+    const lines = level.lines;
+    const rows = [];
+    let seen = null, total = 0;
+    lines.forEach((l) => {
+      if (l.section !== seen) {
+        seen = l.section;
+        rows.push({
+          label: l.section, qty: '', price: '', cost: '',
+          labelStyle: { fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' },
+          priceStyle: { display: showCost ? 'table-cell' : 'none' },
+        });
+      }
+      const cost = l.price ? l.price * l.base : 0;
+      total += cost;
+      rows.push({
+        label: l.label, qty: l.qty,
+        price: l.price ? this.money(l.price) : '—',
+        cost: l.price ? this.money(cost) : '—',
+        labelStyle: { color: 'color-mix(in srgb, var(--color-text) 75%, transparent)' },
+        priceStyle: { textAlign: 'right', whiteSpace: 'nowrap', display: showCost ? 'table-cell' : 'none' },
+      });
+    });
+
+    const zoning = [
+      { label: 'Taban alanı (TAKS 0.30)', value: '184.20 / 240.00 m²', ok: true },
+      { label: 'Toplam inşaat (KAKS 0.75)', value: '468.60 / 600.00 m²', ok: true },
+      { label: 'Yükseklik (Hmax)', value: '9.20 / 12.50 m', ok: true },
+      { label: 'Kat sayısı', value: '3 / 4', ok: true },
+    ].map((r) => ({
+      ...r,
+      status: r.ok ? 'Uygun' : 'Aşıldı',
+      tagStyle: {
+        fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 10, letterSpacing: '0.06em',
+        textTransform: 'uppercase', padding: '2px 6px', minWidth: 58, textAlign: 'center',
+        background: r.ok ? 'var(--color-neutral-200)' : 'var(--color-accent-200)',
+        color: r.ok ? 'var(--color-neutral-800)' : 'var(--color-accent-800)',
+      },
+    }));
+
+    return {
+      safeTopStyle: { height: this.props.safeTopPad ?? 0 },
+      projectName: this.props.projectName ?? 'Menart Villa · B Blok',
+      parcelLine: 'Kadıköy / Fikirtepe · Ada 214 / Parsel 7',
+      revLine: 'Rev. 12 · 18 Ağu 2026',
+      sharedByLine: 'Paylaşan: Menart Mimarlık',
+      expiryLine: '12 Eyl 2026’ya kadar geçerli',
+
+      locked: s.locked, pwd: s.pwd, pwdError: s.pwdError,
+      onPwdChange: (e) => this.set({ pwd: e.target.value, pwdError: false }),
+      onPwdKey: (e) => { if (e.key === 'Enter') this.unlock(); },
+      onUnlock: () => this.unlock(),
+
+      is3d, is2d: !is3d, rooms: level.rooms.map((r) => ({
+        label: r.label, area: r.area,
+        style: {
+          position: 'absolute', left: r.left + '%', top: r.top + '%',
+          width: r.w + '%', height: r.h + '%',
+          border: '2px solid var(--color-text)', margin: '-1px 0 0 -1px',
+          background: 'color-mix(in srgb, var(--color-text) 3%, transparent)',
+        },
+      })),
+      modes: [
+        { label: '3B model', style: modeStyle(is3d), on: () => this.set({ mode: '3d' }) },
+        { label: 'Kat planı', style: modeStyle(!is3d), on: () => this.set({ mode: '2d' }) },
+      ],
+      stageStyle: {
+        position: 'relative', height: this.props.stageHeight ?? 420,
+        background: 'var(--color-neutral-100)',
+        backgroundImage: 'linear-gradient(color-mix(in srgb, var(--color-text) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-text) 7%, transparent) 1px, transparent 1px)',
+        backgroundSize: '32px 32px',
+        borderBottom: '2px solid var(--color-divider)',
+        cursor: s.pinMode ? 'crosshair' : 'default', overflow: 'hidden',
+      },
+      onStageClick: (e) => {
+        if (!s.pinMode) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        this.set({
+          draft: { x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100, level: s.levelIdx },
+          pinMode: false, tab: 'yorum',
+        });
+      },
+      stageBadge: is3d ? 'Görünüm · 3B' : 'Görünüm · ' + level.name,
+      scaleBadge: is3d ? 'Kuzey ↑' : '1:100',
+
+      canComment, commentsClosed: !(this.props.allowComments ?? true),
+      pinBtnLabel: s.pinMode ? 'Bir nokta seç' : 'Yorum ekle',
+      pinBtnStyle: {
+        padding: '13px 16px', minHeight: 48, cursor: 'pointer', border: 0,
+        display: 'flex', alignItems: 'center', gap: 6,
+        background: s.pinMode ? 'var(--color-accent)' : 'transparent',
+        color: s.pinMode ? 'var(--color-bg)' : 'var(--color-accent-700)',
+        fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 12.5,
+        letterSpacing: '0.04em', textTransform: 'uppercase',
+      },
+      onTogglePin: () => this.set({ pinMode: !s.pinMode, draft: null, tab: s.pinMode ? s.tab : s.tab }),
+
+      visiblePins: s.threads.filter((t) => t.level === s.levelIdx).map((t) => ({
+        no: t.no, style: pinStyle(t, t.resolved), on: () => this.set({ tab: 'yorum' }),
+      })),
+      hasDraftPin: !!s.draft,
+      draftPinStyle: s.draft ? {
+        position: 'absolute', left: s.draft.x + '%', top: s.draft.y + '%',
+        transform: 'translate(-50%,-100%)', width: 26, height: 26,
+        border: '2px dashed var(--color-accent-700)', color: 'var(--color-accent-700)',
+        background: 'var(--color-bg)', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 800,
+      } : {},
+      draftLevelName: s.draft ? this.levels[s.draft.level].name : '',
+      needsName: !s.name,
+      nameDraft: s.nameDraft, body: s.body,
+      onNameChange: (e) => this.set({ nameDraft: e.target.value }),
+      onBodyChange: (e) => this.set({ body: e.target.value }),
+      onCancelDraft: () => this.set({ draft: null, body: '' }),
+      onSubmitComment: () => {
+        const name = (s.name || s.nameDraft || '').trim();
+        if (!s.draft || !s.body.trim() || !name) return;
+        this.setState((p) => ({
+          name, nameDraft: '', body: '', draft: null,
+          threads: p.threads.concat([{
+            id: 't' + (p.threads.length + 1), no: p.threads.length + 1,
+            level: p.draft.level, x: p.draft.x, y: p.draft.y,
+            author: name, meta: 'Şimdi', body: p.body.trim(), resolved: false, replies: [],
+          }]),
+        }));
+      },
+
+      levelChips: this.levels.map((l, i) => ({
+        name: l.name, meta: l.area + ' · ' + l.height,
+        style: {
+          flex: '1 0 auto', padding: '12px 16px', minHeight: 56, cursor: 'pointer',
+          border: 0, borderRight: '1px solid var(--color-divider)', textAlign: 'left',
+          background: i === s.levelIdx ? 'var(--color-surface)' : 'transparent',
+          boxShadow: i === s.levelIdx ? 'inset 0 -3px 0 var(--color-accent)' : 'none',
+        },
+        on: () => this.set({ levelIdx: i }),
+      })),
+      levelRows: this.levels.map((l) => ({ name: l.name, height: l.height, area: l.area })),
+
+      tabs: tabDefs.map(([id, label]) => ({
+        label, style: tabStyle(s.tab === id), on: () => this.set({ tab: id }),
+      })),
+      isOzet: s.tab === 'ozet', isMetraj: s.tab === 'metraj',
+      isKonum: s.tab === 'konum', isYorum: s.tab === 'yorum',
+
+      stats: [
+        { label: 'Toplam inşaat', value: '468.60', note: 'm² brüt · 3 kat' },
+        { label: 'Taban alanı', value: '184.20', note: 'm² · TAKS 0.30' },
+        { label: 'Arsa alanı', value: '800.00', note: 'm² tapu yüzölçümü' },
+        { label: 'Yükseklik', value: '9.20', note: 'm · Hmax 12.50' },
+      ].map((st, i) => ({
+        ...st,
+        style: {
+          padding: 16, borderBottom: '2px solid var(--color-divider)',
+          borderRight: i % 2 === 0 ? '2px solid var(--color-divider)' : 'none',
+        },
+      })),
+      parcelRows: [
+        { label: 'İl / İlçe', value: 'İstanbul / Kadıköy' },
+        { label: 'Mahalle', value: 'Fikirtepe' },
+        { label: 'Ada / Parsel', value: '214 / 7' },
+        { label: 'Pafta', value: 'G22-B-04-C' },
+        { label: 'Nitelik', value: 'Arsa' },
+        { label: 'Yüzölçümü', value: '800.00 m²' },
+      ],
+      zoningRows: zoning,
+
+      takeoffScope: level.name + ' · canlı metraj',
+      takeoffRows: rows,
+      priceHeadStyle: { textAlign: 'right', display: showCost ? 'table-cell' : 'none' },
+      totalLabel: showCost ? level.name + ' toplamı' : level.name,
+      totalCost: showCost ? this.money(total) : level.area,
+      onDownloadCsv: () => {},
+      onDownload: () => {},
+      onOpenMap: () => {},
+
+      mapStyle: {
+        position: 'relative', height: 260, background: 'var(--color-neutral-100)',
+        backgroundImage: 'linear-gradient(color-mix(in srgb, var(--color-text) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-text) 7%, transparent) 1px, transparent 1px)',
+        backgroundSize: '40px 40px', borderBottom: '2px solid var(--color-divider)',
+      },
+      locationRows: [
+        { label: 'Adres', value: 'Fikirtepe Mah. 214 Ada 7 Parsel' },
+        { label: 'İlçe', value: 'Kadıköy / İstanbul' },
+        { label: 'Koordinat', value: '40.9944, 29.0472' },
+        { label: 'Kuzey açısı', value: '18°' },
+        { label: 'Kaynak', value: 'TKGM parsel sorgu' },
+      ],
+
+      commentSummary: s.threads.length + ' yorum · ' + s.threads.filter((t) => !t.resolved).length + ' açık',
+      noThreads: s.threads.length === 0,
+      threadRows: s.threads.map((t) => ({
+        no: t.no, author: t.author,
+        meta: this.levels[t.level].name + ' · ' + t.meta,
+        body: t.body,
+        state: t.resolved ? 'Çözüldü' : '',
+        stateStyle: {
+          display: t.resolved ? 'inline-block' : 'none',
+          fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 10,
+          letterSpacing: '0.06em', textTransform: 'uppercase', padding: '2px 6px',
+          background: 'var(--color-neutral-200)', color: 'var(--color-neutral-800)',
+        },
+        pinStyle: {
+          position: 'relative', flex: 'none', width: 26, height: 26, cursor: 'pointer',
+          border: '2px solid ' + (t.resolved ? 'var(--color-neutral-600)' : 'var(--color-accent-700)'),
+          background: t.resolved ? 'var(--color-bg)' : 'var(--color-accent)',
+          color: t.resolved ? 'var(--color-neutral-700)' : 'var(--color-bg)',
+          fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 12,
+        },
+        onFocus: () => this.set({ levelIdx: t.level, mode: s.mode }),
+        replies: t.replies.map((r) => ({ author: r.author, meta: r.meta, body: r.body })),
+        canReply: canComment && !t.resolved,
+        replyOpen: s.replyFor === t.id,
+        replyLabel: s.replyFor === t.id ? 'Kapat' : 'Yanıtla',
+        replyBody: s.replyFor === t.id ? s.replyBody : '',
+        onReply: () => this.set({ replyFor: s.replyFor === t.id ? null : t.id, replyBody: '' }),
+        onReplyChange: (e) => this.set({ replyBody: e.target.value }),
+        onSendReply: () => {
+          const name = (s.name || 'Ziyaretçi').trim();
+          if (!s.replyBody.trim()) return;
+          this.setState((p) => ({
+            replyFor: null, replyBody: '',
+            threads: p.threads.map((x) => x.id === t.id
+              ? { ...x, replies: x.replies.concat([{ author: name, meta: 'Şimdi', body: p.replyBody.trim() }]) }
+              : x),
+          }));
+        },
+      })),
+    };
+  }
+
+  unlock() {
+    if (!(this.props.passwordProtected ?? true)) return this.setState({ locked: false });
+    if (this.state.pwd.trim() === (this.props.password ?? '1234')) this.setState({ locked: false, pwdError: false });
+    else this.setState({ pwdError: true });
+  }
+
+  componentDidMount() {
+    if (!(this.props.passwordProtected ?? true)) this.setState({ locked: false });
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.passwordProtected !== this.props.passwordProtected) {
+      this.setState({ locked: this.props.passwordProtected ?? true, pwd: '', pwdError: false });
+    }
+  }
+}
+</script>
+</body>
+</html>

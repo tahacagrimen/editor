@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-4ef20401-f7e5-4ab7-bda8-4c2945550e54/styles.css">
+<script src="_ds/modernist-4ef20401-f7e5-4ab7-bda8-4c2945550e54/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--color-bg);color:var(--color-text)}
+a{color:var(--color-accent-700);text-decoration:none}
+a:hover{color:var(--color-accent);text-decoration:underline}
+</style>
+</helmet>
+<div style="padding:48px 44px 64px;font-family:var(--font-body)">
+  <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px">
+    <span style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;background:var(--color-text);color:var(--color-bg);padding:4px 8px">iPhone 17 Pro Max</span>
+    <span style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent);font-variant-numeric:tabular-nums">440 × 956 pt · 3× · Dynamic Island</span>
+  </div>
+  <h3 style="margin:0 0 4px">Paylaşım bağlantısı — mobil akış</h3>
+  <p style="margin:0 0 8px;max-width:640px;font-size:13.5px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Aynı sayfanın dört durumu: şifreli açılış, model görünümü, kat planı üstünde metraj ve pin'e bağlı yorum. Çerçevelerin içi canlı — dokunup gezinebilirsin.</p>
+  <hr class="hr">
+
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;background:var(--color-accent);color:var(--color-bg);padding:3px 7px">01</span>
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:13px">Şifreli açılış</span>
+      </div>
+      <p style="margin:0;max-width:440px;font-size:12.5px;line-height:1.5;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Link şifreyle paylaşıldıysa ilk ekran budur. Tek alan, tek buton — 44 pt dokunma hedefi. Demo şifre: 1234.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 440 }}" height="{{ 956 }}" hint-size="440px,956px">
+        <dc-import name="Paylasim Sayfasi" safe-top-pad="{{ 54 }}" stage-height="{{ 250 }}" hint-size="100%,956px"></dc-import>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;background:var(--color-accent);color:var(--color-bg);padding:3px 7px">02</span>
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:13px">Model ve özet</span>
+      </div>
+      <p style="margin:0;max-width:440px;font-size:12.5px;line-height:1.5;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Açılışta gelen ekran: 3B alan, kat şeridi ve dört ana sayı. Paylaşılan kişi kaydırmadan alan, TAKS ve yüksekliği görüyor.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 440 }}" height="{{ 956 }}" hint-size="440px,956px">
+        <dc-import name="Paylasim Sayfasi" password-protected="{{ false }}" safe-top-pad="{{ 54 }}" stage-height="{{ 250 }}" hint-size="100%,956px"></dc-import>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;background:var(--color-accent);color:var(--color-bg);padding:3px 7px">03</span>
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:13px">Kat planı ve metraj</span>
+      </div>
+      <p style="margin:0;max-width:440px;font-size:12.5px;line-height:1.5;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Kat planına geçince metraj seçili kata bağlı kalıyor. Tablo 440 pt'a sığıyor; fiyat sütunları paylaşımda kapatılabilir.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 440 }}" height="{{ 956 }}" hint-size="440px,956px">
+        <dc-import name="Paylasim Sayfasi" password-protected="{{ false }}" initial-mode="2d" initial-tab="metraj" safe-top-pad="{{ 54 }}" stage-height="{{ 250 }}" hint-size="100%,956px"></dc-import>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;background:var(--color-accent);color:var(--color-bg);padding:3px 7px">04</span>
+        <span style="font-family:var(--font-heading);font-weight:800;font-size:13px">Yorum akışı</span>
+      </div>
+      <p style="margin:0;max-width:440px;font-size:12.5px;line-height:1.5;color:color-mix(in srgb, var(--color-text) 60%, transparent)">“Yorum ekle” → model üstünde noktaya dokun → ad ve not. Pin numarası hem model hem listede aynı; çözülen konular gri kalıyor.</p>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ 440 }}" height="{{ 956 }}" hint-size="440px,956px">
+        <dc-import name="Paylasim Sayfasi" password-protected="{{ false }}" initial-tab="yorum" safe-top-pad="{{ 54 }}" stage-height="{{ 250 }}" hint-size="100%,956px"></dc-import>
+      </x-import>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
