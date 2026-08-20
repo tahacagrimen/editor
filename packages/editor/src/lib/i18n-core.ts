@@ -2090,6 +2090,7 @@ const tr: Record<string, string> = {
   'Download PDF summary': 'PDF özetini indir',
   'The PDF could not be prepared. Please try again.': 'PDF hazırlanamadı. Lütfen tekrar deneyin.',
   'Share links': 'Paylaşım bağlantıları',
+  'Share link': 'Paylaşım bağlantısı',
   'Link expires': 'Bağlantı süresi',
   day: 'gün',
   days: 'gün',
@@ -2105,6 +2106,20 @@ const tr: Record<string, string> = {
   'Revoke link': 'Bağlantıyı iptal et',
   'Share links could not be loaded.': 'Paylaşım bağlantıları yüklenemedi.',
   'The share link could not be created.': 'Paylaşım bağlantısı oluşturulamadı.',
+  'The share link could not be created. Please try again.':
+    'Paylaşım bağlantısı oluşturulamadı. Lütfen tekrar deneyin.',
+  'Sharing is not configured on this server. Ask an administrator to set it up.':
+    'Bu sunucuda paylaşım yapılandırılmamış. Bir yöneticiden kurulum yapmasını isteyin.',
+  'Ready to copy': 'Kopyalamaya hazır',
+  'This link is valid until': 'Bu bağlantı şu tarihe kadar geçerli:',
+  'This link never expires.': 'Bu bağlantı süresiz olarak geçerli.',
+  'The recipient can view the project and write comments;':
+    'Bağlantıyı alan kişi projeyi görebilir ve yorum yazabilir;',
+  'The recipient can view the project;': 'Bağlantıyı alan kişi projeyi görebilir;',
+  'prices are visible.': 'fiyatları görebilir.',
+  'prices are hidden.': 'fiyatları göremez.',
+  'It is password protected.': 'Bağlantı şifreyle korunuyor.',
+  'It has no password.': 'Bağlantı şifresiz.',
   'The share link could not be revoked.': 'Paylaşım bağlantısı iptal edilemedi.',
   'Link revoked': 'Bağlantı iptal edildi',
   'This link was revoked. Ask whoever shared it for a new one.':

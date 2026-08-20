@@ -106,6 +106,19 @@ describe('share presentation shell', () => {
     expect(repliesApi).toContain('appendShareCommentReply')
   })
 
+  test('the owner share dialog sends four safe defaults and explains the issued capability', () => {
+    const shareButton = readFileSync(shareLinkButtonPath, 'utf8')
+
+    expect(shareButton).toContain('const DEFAULT_TTL_SECONDS = 7 * 24 * 60 * 60')
+    expect(shareButton).toContain('const [allowComments, setAllowComments] = useState(true)')
+    expect(shareButton).toContain('const [showCost, setShowCost] = useState(false)')
+    expect(shareButton).toContain("const [password, setPassword] = useState('')")
+    expect(shareButton).toContain("<option value={0}>{t('Never expires')}</option>")
+    expect(shareButton).toContain('ShareSettingsSummary')
+    expect(shareButton).toContain("failure?.error === 'share_secret_required'")
+    expect(shareButton).toContain("copied ? t('Copied') : t('Copy')")
+  })
+
   test('the location tab is omitted without a parcel and never calls a cadastral provider', () => {
     const presentation = readFileSync(presentationPath, 'utf8')
     const location = readFileSync(locationPath, 'utf8')

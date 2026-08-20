@@ -40,6 +40,26 @@ describe('createShareToken', () => {
     expect(shareCostsVisible(verified.payload)).toBe(false)
   })
 
+  test('round-trips every share-dialog setting together', () => {
+    const minted = createShareToken('scene_1', {
+      env,
+      now: NOW,
+      ttlSeconds: 7 * 24 * 60 * 60,
+      allowComments: true,
+      showCost: false,
+      password: 'kapı',
+    })
+    if (!minted) throw new Error('token expected')
+    const verified = verifyShareToken(minted.token, { env, now: NOW })
+    expect(verified.ok).toBe(true)
+    if (!verified.ok) return
+    expect(verified.payload.exp).toBe(Math.floor(NOW / 1000) + 7 * 24 * 60 * 60)
+    expect(verified.payload.allowComments).toBe(true)
+    expect(verified.payload.showCost).toBe(false)
+    expect(verified.payload.pwd).toBeTruthy()
+    expect(verified.payload.pwd).not.toBe('kapı')
+  })
+
   test('keeps costs visible for tokens minted before the permission existed', () => {
     const minted = createShareToken('scene_1', { env, now: NOW })
     if (!minted) throw new Error('expected a token')

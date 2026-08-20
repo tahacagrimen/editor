@@ -58,7 +58,7 @@ export function SceneShareLinksPanel({ active, sceneId }: { active: boolean; sce
       const response = await fetch(`/api/scenes/${encodeURIComponent(sceneId)}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ttlSeconds, allowComments: true, showCost: true }),
+        body: JSON.stringify({ ttlSeconds, allowComments: true, showCost: false }),
       })
       if (!response.ok) throw new Error(`share_create_${response.status}`)
       const data = (await response.json()) as { url: string }
