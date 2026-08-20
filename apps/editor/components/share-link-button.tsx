@@ -1,6 +1,12 @@
 'use client'
 
-import { Popover, PopoverContent, PopoverTrigger, ToggleControl, useTranslation } from '@pascal-app/editor'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  ToggleControl,
+  useTranslation,
+} from '@pascal-app/editor'
 import { useCallback, useState } from 'react'
 import { authClient } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
@@ -12,6 +18,7 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
   const t = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [allowComments, setAllowComments] = useState(true)
+  const [showCost, setShowCost] = useState(true)
   const [password, setPassword] = useState('')
   const [state, setState] = useState<ShareState>('idle')
   const [url, setUrl] = useState<string | null>(null)
@@ -27,7 +34,7 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
       const response = await fetch(`/api/scenes/${encodeURIComponent(sceneId)}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ allowComments, password: password || undefined }),
+        body: JSON.stringify({ allowComments, showCost, password: password || undefined }),
       })
       if (!response.ok) {
         setState('error')
@@ -44,19 +51,22 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
     } catch {
       setState('error')
     }
-  }, [sceneId, isAnonymous, allowComments, password])
+  }, [sceneId, isAnonymous, allowComments, showCost, password])
 
   return (
-    <Popover open={isOpen} onOpenChange={(open) => {
-      setIsOpen(open)
-      if (!open) {
-        // Reset when closed
-        setState('idle')
-        setUrl(null)
-        setCopied(false)
-        setPassword('')
-      }
-    }}>
+    <Popover
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open)
+        if (!open) {
+          // Reset when closed
+          setState('idle')
+          setUrl(null)
+          setCopied(false)
+          setPassword('')
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           className={cn(TOP_BAR_ACTION, isOpen && 'bg-accent text-foreground')}
@@ -71,28 +81,35 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
           {t('Share')}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 p-4 rounded-xl border-border/45 bg-popover/95 backdrop-blur-xl shadow-xl">
+      <PopoverContent
+        align="end"
+        className="w-72 p-4 rounded-xl border-border/45 bg-popover/95 backdrop-blur-xl shadow-xl"
+      >
         <div className="flex flex-col gap-4">
           <h3 className="font-semibold text-sm text-foreground">{t('Share options')}</h3>
-          
+
           <ToggleControl
             label="Allow comments"
             checked={allowComments}
             onChange={setAllowComments}
           />
-          
+
+          <ToggleControl label="Show costs" checked={showCost} onChange={setShowCost} />
+
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">{t('Password')} ({t('optional')})</label>
-            <input 
-              type="text" 
-              className="rounded-md border border-border/50 bg-background/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50" 
+            <label className="text-xs font-medium text-muted-foreground">
+              {t('Password')} ({t('optional')})
+            </label>
+            <input
+              type="text"
+              className="rounded-md border border-border/50 bg-background/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50"
               placeholder={t('Leave empty for public')}
               value={password}
-              onChange={e => setPassword(e.target.value)} 
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <button 
+          <button
             className="w-full rounded-md bg-primary py-2 text-primary-foreground font-medium text-sm transition-opacity hover:opacity-90 disabled:opacity-50"
             onClick={share}
             disabled={state === 'minting'}
@@ -104,10 +121,12 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
                 ? t('Link failed')
                 : t('Create Link')}
           </button>
-          
+
           {url && state === 'ready' && (
             <div className="mt-2 flex flex-col gap-1.5">
-              <span className="text-xs font-medium text-primary">{copied ? t('Link copied!') : t('Ready')}</span>
+              <span className="text-xs font-medium text-primary">
+                {copied ? t('Link copied!') : t('Ready')}
+              </span>
               <input
                 className="w-full rounded border border-border bg-background/40 px-2 py-1.5 font-mono text-[11px] text-foreground outline-none cursor-text"
                 onFocus={(event) => event.currentTarget.select()}

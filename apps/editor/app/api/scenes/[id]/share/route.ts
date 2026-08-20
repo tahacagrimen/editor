@@ -14,6 +14,7 @@ const createShareSchema = z.object({
   /** Seconds until the link stops working. Omit or 0 for a link that never expires. */
   ttlSeconds: z.number().int().nonnegative().max(MAX_TTL_SECONDS).optional(),
   allowComments: z.boolean().optional(),
+  showCost: z.boolean().optional(),
   password: z.string().min(1).optional(),
 })
 
@@ -61,9 +62,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const scene = await operations.loadStoredScene(id)
   if (!scene) return sceneApiJson(request, { error: 'not_found' }, { status: 404 })
 
-  const minted = createShareToken(id, { 
+  const minted = createShareToken(id, {
     ttlSeconds: parsed.data.ttlSeconds,
     allowComments: parsed.data.allowComments,
+    showCost: parsed.data.showCost,
     password: parsed.data.password,
   })
   if (!minted) {
@@ -73,9 +75,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 
   const requestUrl = new URL(request.url)
-  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host
+  const host =
+    request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host
   const proto = request.headers.get('x-forwarded-proto') || requestUrl.protocol.replace(':', '')
-  
+
   const url = new URL(`/share/${minted.token}`, `${proto}://${host}`)
   return sceneApiJson(request, {
     token: minted.token,

@@ -31,6 +31,7 @@ describe('translate', () => {
     expect(translate('Amount', 'tr')).toBe('Tutar')
     expect(translate('live quantities', 'tr')).toBe('canlı metraj')
     expect(translate('Ground level', 'tr')).toBe('Zemin Kat')
+    expect(translate('Show costs', 'tr')).toBe('Maliyetleri göster')
     expect(
       translate(
         'Quantities belong to the selected level and exclude hidden items. Wall face area is gross — openings are not subtracted. Unit prices are estimates, not quotations.',

@@ -20,6 +20,8 @@ export type ShareTokenPayload = {
   exp?: number
   /** Whether visitors can add and view comments. */
   allowComments?: boolean
+  /** Whether unit prices and costs may leave the server. Defaults to true. */
+  showCost?: boolean
   /** HMAC-SHA256 hash of the link password, signed by the server secret. */
   pwd?: string
 }
@@ -44,7 +46,10 @@ function sign(body: string, secret: string): string {
   return createHmac('sha256', secret).update(body).digest('base64url')
 }
 
-export function hashSharePassword(password: string, env: NodeJS.ProcessEnv = process.env): string | null {
+export function hashSharePassword(
+  password: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
   const secret = shareSecret(env)
   if (!secret) return null
   return sign(password, secret)
@@ -62,6 +67,7 @@ export function createShareToken(
     now?: number
     env?: NodeJS.ProcessEnv
     allowComments?: boolean
+    showCost?: boolean
     password?: string
   } = {},
 ): { token: string; payload: ShareTokenPayload } | null {
@@ -75,6 +81,9 @@ export function createShareToken(
   }
   if (options.allowComments !== undefined) {
     payload.allowComments = options.allowComments
+  }
+  if (options.showCost !== undefined) {
+    payload.showCost = options.showCost
   }
   if (options.password) {
     const hash = hashSharePassword(options.password, options.env)
@@ -124,12 +133,19 @@ export function verifyShareToken(
   }
 
   if (typeof parsed !== 'object' || parsed === null) return { ok: false, error: 'malformed' }
-  const { sid, iat, exp, allowComments, pwd } = parsed as Record<string, unknown>
+  const { sid, iat, exp, allowComments, showCost, pwd } = parsed as Record<string, unknown>
   if (typeof sid !== 'string' || !sid) return { ok: false, error: 'malformed' }
   if (typeof iat !== 'number' || !Number.isFinite(iat)) return { ok: false, error: 'malformed' }
   if (exp !== undefined && (typeof exp !== 'number' || !Number.isFinite(exp))) {
     return { ok: false, error: 'malformed' }
   }
+  if (allowComments !== undefined && typeof allowComments !== 'boolean') {
+    return { ok: false, error: 'malformed' }
+  }
+  if (showCost !== undefined && typeof showCost !== 'boolean') {
+    return { ok: false, error: 'malformed' }
+  }
+  if (pwd !== undefined && typeof pwd !== 'string') return { ok: false, error: 'malformed' }
 
   const nowSeconds = Math.floor((options.now ?? Date.now()) / 1000)
   if (typeof exp === 'number' && nowSeconds >= exp) return { ok: false, error: 'expired' }
@@ -137,6 +153,12 @@ export function verifyShareToken(
   const payload: ShareTokenPayload = { sid, iat }
   if (typeof exp === 'number') payload.exp = exp
   if (typeof allowComments === 'boolean') payload.allowComments = allowComments
+  if (typeof showCost === 'boolean') payload.showCost = showCost
   if (typeof pwd === 'string') payload.pwd = pwd
   return { ok: true, payload }
+}
+
+/** Old links predate the permission and deliberately retain their old behaviour. */
+export function shareCostsVisible(payload: Pick<ShareTokenPayload, 'showCost'>): boolean {
+  return payload.showCost ?? true
 }

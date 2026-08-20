@@ -7,6 +7,9 @@ const routePath = join(appRoot, 'app/share/[token]/page.tsx')
 const presentationPath = join(appRoot, 'components/share/share-presentation.tsx')
 const floorplanPath = join(appRoot, 'components/share/share-floorplan.tsx')
 const quantitiesPath = join(appRoot, 'components/share/share-quantities-panel.tsx')
+const shareLinkButtonPath = join(appRoot, 'components/share-link-button.tsx')
+const shareApiPath = join(appRoot, 'app/api/scenes/[id]/share/route.ts')
+const shareCommentsApiPath = join(appRoot, 'app/api/share/[token]/comments/route.ts')
 
 describe('share presentation shell', () => {
   test('the share route mounts its purpose-built presentation, not the editor', () => {
@@ -76,5 +79,19 @@ describe('share presentation shell', () => {
     expect(quantities).not.toContain('<input')
     expect(quantities).not.toContain('setUnitPrice')
     expect(quantities).not.toContain('removeUnitPrice')
+  })
+
+  test('cost visibility travels from the owner control to the server-redacted presentation', () => {
+    const route = readFileSync(routePath, 'utf8')
+    const shareApi = readFileSync(shareApiPath, 'utf8')
+    const commentsApi = readFileSync(shareCommentsApiPath, 'utf8')
+    const shareButton = readFileSync(shareLinkButtonPath, 'utf8')
+
+    expect(shareButton).toContain('JSON.stringify({ allowComments, showCost')
+    expect(shareApi).toContain('showCost: z.boolean().optional()')
+    expect(shareApi).toContain('showCost: parsed.data.showCost')
+    expect(route).toContain('prepareShareGraph(graph, { allowComments, showCost })')
+    expect(route).toContain('showCost={showCost}')
+    expect(commentsApi).toContain('replaceShareComments(scene.graph')
   })
 })

@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { sceneApiJson, sceneApiPreflight } from '@/lib/scene-api-security'
 import { getSceneOperations } from '@/lib/scene-store-server'
+import { replaceShareComments } from '@/lib/share-graph'
 import { verifyShareToken } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
@@ -88,7 +89,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       name: scene.name,
       projectId: scene.projectId,
       ownerId: scene.ownerId,
-      graph: { ...(scene.graph as object), comments } as never,
+      graph: replaceShareComments(scene.graph as Record<string, unknown>, comments) as never,
       thumbnailUrl: scene.thumbnailUrl,
       expectedVersion: scene.version,
     })

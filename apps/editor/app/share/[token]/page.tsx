@@ -4,9 +4,10 @@ import Link from 'next/link'
 import { LocalizedContent } from '@/components/localized-content'
 import { SharePresentation } from '@/components/share/share-presentation'
 import { getSceneOperations } from '@/lib/scene-store-server'
+import { prepareShareGraph } from '@/lib/share-graph'
 import { buildSharePresentationMeta } from '@/lib/share-presentation-meta'
 import { buildShareSummary } from '@/lib/share-summary'
-import { hashSharePassword, verifyShareToken } from '@/lib/share-token'
+import { hashSharePassword, shareCostsVisible, verifyShareToken } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
 
@@ -98,7 +99,8 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
 
   const allowComments = payload.allowComments ?? true
   const graph = scene.graph as SceneGraph
-  const initialScene = allowComments ? graph : { ...graph, comments: {} }
+  const showCost = shareCostsVisible(payload)
+  const initialScene = prepareShareGraph(graph, { allowComments, showCost }) as SceneGraph
   const ownerName = await resolveOwnerName(scene.ownerId)
   const meta = buildSharePresentationMeta({
     name: scene.name,
@@ -115,6 +117,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
       allowComments={allowComments}
       initialScene={initialScene}
       meta={meta}
+      showCost={showCost}
       summary={summary}
     />
   )

@@ -1571,6 +1571,7 @@ const tr: Record<string, string> = {
   floors: 'kat',
   'land registry area': 'tapu yüzölçümü',
   'measured area': 'ölçülen yüzölçümü',
+  'Show costs': 'Maliyetleri göster',
   'Land registry reference data — not a surveyed site plan.':
     'TKGM referans verisi — aplikasyon krokisi değildir.',
   'Edited by hand — no longer the registry outline.':

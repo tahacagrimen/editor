@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { createShareToken, shareSecret, verifyShareToken } from './share-token'
+import { createShareToken, shareCostsVisible, shareSecret, verifyShareToken } from './share-token'
 
 const env = { PASCAL_SHARE_LINK_SECRET: 'test-secret' } as unknown as NodeJS.ProcessEnv
 const otherEnv = { PASCAL_SHARE_LINK_SECRET: 'other-secret' } as unknown as NodeJS.ProcessEnv
@@ -27,6 +27,28 @@ describe('createShareToken', () => {
   test('sets exp from the ttl', () => {
     const minted = createShareToken('scene_1', { env, now: NOW, ttlSeconds: 3600 })
     expect(minted?.payload.exp).toBe(Math.floor(NOW / 1000) + 3600)
+  })
+
+  test('round-trips an explicit hidden-cost permission', () => {
+    const minted = createShareToken('scene_1', { env, now: NOW, showCost: false })
+    if (!minted) throw new Error('expected a token')
+
+    const verified = verifyShareToken(minted.token, { env, now: NOW })
+    expect(verified.ok).toBe(true)
+    if (!verified.ok) return
+    expect(verified.payload.showCost).toBe(false)
+    expect(shareCostsVisible(verified.payload)).toBe(false)
+  })
+
+  test('keeps costs visible for tokens minted before the permission existed', () => {
+    const minted = createShareToken('scene_1', { env, now: NOW })
+    if (!minted) throw new Error('expected a token')
+
+    const verified = verifyShareToken(minted.token, { env, now: NOW })
+    expect(verified.ok).toBe(true)
+    if (!verified.ok) return
+    expect(verified.payload.showCost).toBeUndefined()
+    expect(shareCostsVisible(verified.payload)).toBe(true)
   })
 })
 
