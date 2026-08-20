@@ -12,10 +12,11 @@ import {
   DropdownMenuTrigger,
   useTranslation,
 } from '@pascal-app/editor'
-import { Loader2, MoreVertical, Pencil, Share2, Trash2 } from 'lucide-react'
+import { Link2, Loader2, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { authClient } from '@/lib/auth-client'
+import { SceneShareLinksPanel } from './scene-share-links-panel'
 
 export function SceneCardMenu({ sceneId, sceneName }: { sceneId: string; sceneName: string }) {
   const t = useTranslation()
@@ -32,10 +33,6 @@ export function SceneCardMenu({ sceneId, sceneName }: { sceneId: string; sceneNa
   const [isRenaming, setIsRenaming] = useState(false)
 
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const [isSharing, setIsSharing] = useState(false)
-  const [shareUrl, setShareUrl] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
 
   const handleRename = async () => {
     if (!newName.trim() || newName === sceneName) {
@@ -73,33 +70,6 @@ export function SceneCardMenu({ sceneId, sceneName }: { sceneId: string; sceneNa
     }
   }
 
-  const handleShare = async () => {
-    if (shareUrl) {
-      navigator.clipboard?.writeText(shareUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-      return
-    }
-    setIsSharing(true)
-    setCopied(false)
-    try {
-      const response = await fetch(`/api/scenes/${encodeURIComponent(sceneId)}/share`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ allowComments: true }),
-      })
-      if (response.ok) {
-        const { url } = (await response.json()) as { url: string }
-        setShareUrl(url)
-        navigator.clipboard?.writeText(url)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      }
-    } finally {
-      setIsSharing(false)
-    }
-  }
-
   return (
     <div onClick={(e) => e.preventDefault()}>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -113,8 +83,8 @@ export function SceneCardMenu({ sceneId, sceneName }: { sceneId: string; sceneNa
           </DropdownMenuItem>
           {!isAnonymous && (
             <DropdownMenuItem onClick={() => setShareOpen(true)}>
-              <Share2 className="mr-2 h-4 w-4" />
-              <span>{t('Share')}</span>
+              <Link2 className="mr-2 h-4 w-4" />
+              <span>{t('Share links')}</span>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
@@ -192,49 +162,12 @@ export function SceneCardMenu({ sceneId, sceneName }: { sceneId: string; sceneNa
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={shareOpen}
-        onOpenChange={(open) => {
-          setShareOpen(open)
-          if (!open) setShareUrl(null)
-        }}
-      >
-        <DialogContent>
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>{t('Share')}</DialogTitle>
+            <DialogTitle>{t('Share links')}</DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            {shareUrl ? (
-              <div className="flex gap-2">
-                <input
-                  readOnly
-                  className="w-full rounded border border-border bg-background/50 px-3 py-2 text-sm text-foreground outline-none"
-                  value={shareUrl}
-                />
-                <button
-                  type="button"
-                  className="shrink-0 rounded bg-accent px-4 py-2 text-sm font-medium text-foreground hover:bg-accent/80"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(shareUrl)
-                    setCopied(true)
-                    setTimeout(() => setCopied(false), 2000)
-                  }}
-                >
-                  {copied ? t('Copied') : t('Copy')}
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="flex w-full items-center justify-center gap-2 rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                disabled={isSharing}
-                onClick={handleShare}
-              >
-                {isSharing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {t('Copy Share Link')}
-              </button>
-            )}
-          </div>
+          <SceneShareLinksPanel active={shareOpen} sceneId={sceneId} />
         </DialogContent>
       </Dialog>
     </div>

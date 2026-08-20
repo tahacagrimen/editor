@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { LocalizedContent } from '@/components/localized-content'
 import { SharePresentation } from '@/components/share/share-presentation'
 import { getSceneOperations } from '@/lib/scene-store-server'
+import { verifyShareAccess } from '@/lib/share-access'
 import { prepareShareGraph } from '@/lib/share-graph'
 import { buildShareLocation } from '@/lib/share-location'
 import { buildSharePresentationMeta } from '@/lib/share-presentation-meta'
 import { buildShareSummary } from '@/lib/share-summary'
-import { hashSharePassword, shareCostsVisible, verifyShareToken } from '@/lib/share-token'
+import { hashSharePassword, shareCostsVisible } from '@/lib/share-token'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,19 +32,29 @@ async function submitPassword(sid: string, formData: FormData) {
 
 export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const verified = verifyShareToken(token)
+  const verified = await verifyShareAccess(token)
 
   if (!verified.ok) {
     return (
       <ShareProblem
         body={
-          verified.error === 'expired'
-            ? 'This share link has expired. Ask whoever sent it for a new one.'
-            : verified.error === 'secret_missing'
-              ? 'Sharing is not configured on this server.'
-              : 'This share link is not valid.'
+          verified.error === 'revoked'
+            ? 'This link was revoked. Ask whoever shared it for a new one.'
+            : verified.error === 'expired'
+              ? 'This share link has expired. Ask whoever sent it for a new one.'
+              : verified.error === 'secret_missing'
+                ? 'Sharing is not configured on this server.'
+                : verified.error === 'revocation_unavailable'
+                  ? 'Sharing is temporarily unavailable. Please try again later.'
+                  : 'This share link is not valid.'
         }
-        heading={verified.error === 'expired' ? 'Link expired' : 'Link not valid'}
+        heading={
+          verified.error === 'revoked'
+            ? 'Link revoked'
+            : verified.error === 'expired'
+              ? 'Link expired'
+              : 'Link not valid'
+        }
       />
     )
   }

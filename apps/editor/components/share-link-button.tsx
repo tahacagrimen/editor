@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { TOP_BAR_ACTION } from './editor-top-bar'
 
 type ShareState = 'idle' | 'minting' | 'ready' | 'error'
+const DEFAULT_TTL_SECONDS = 7 * 24 * 60 * 60
 
 export function ShareLinkButton({ sceneId }: { sceneId: string }) {
   const t = useTranslation()
@@ -20,6 +21,7 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
   const [allowComments, setAllowComments] = useState(true)
   const [showCost, setShowCost] = useState(true)
   const [password, setPassword] = useState('')
+  const [ttlSeconds, setTtlSeconds] = useState(DEFAULT_TTL_SECONDS)
   const [state, setState] = useState<ShareState>('idle')
   const [url, setUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -34,7 +36,12 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
       const response = await fetch(`/api/scenes/${encodeURIComponent(sceneId)}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ allowComments, showCost, password: password || undefined }),
+        body: JSON.stringify({
+          ttlSeconds,
+          allowComments,
+          showCost,
+          password: password || undefined,
+        }),
       })
       if (!response.ok) {
         setState('error')
@@ -51,7 +58,7 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
     } catch {
       setState('error')
     }
-  }, [sceneId, isAnonymous, allowComments, showCost, password])
+  }, [sceneId, isAnonymous, ttlSeconds, allowComments, showCost, password])
 
   return (
     <Popover
@@ -95,6 +102,20 @@ export function ShareLinkButton({ sceneId }: { sceneId: string }) {
           />
 
           <ToggleControl label="Show costs" checked={showCost} onChange={setShowCost} />
+
+          <label className="flex flex-col gap-1.5 text-muted-foreground text-xs">
+            <span className="font-medium">{t('Link expires')}</span>
+            <select
+              className="min-h-11 rounded-md border border-border/50 bg-background/50 px-3 text-foreground text-sm outline-none focus:border-primary/50"
+              onChange={(event) => setTtlSeconds(Number(event.target.value))}
+              value={ttlSeconds}
+            >
+              <option value={86_400}>1 {t('day')}</option>
+              <option value={604_800}>7 {t('days')}</option>
+              <option value={2_592_000}>30 {t('days')}</option>
+              <option value={7_776_000}>90 {t('days')}</option>
+            </select>
+          </label>
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">

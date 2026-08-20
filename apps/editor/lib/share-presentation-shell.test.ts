@@ -90,7 +90,10 @@ describe('share presentation shell', () => {
     const repliesApi = readFileSync(shareRepliesApiPath, 'utf8')
     const shareButton = readFileSync(shareLinkButtonPath, 'utf8')
 
-    expect(shareButton).toContain('JSON.stringify({ allowComments, showCost')
+    expect(shareButton).toContain('body: JSON.stringify({')
+    expect(shareButton).toContain('ttlSeconds,')
+    expect(shareButton).toContain('allowComments,')
+    expect(shareButton).toContain('showCost,')
     expect(shareApi).toContain('showCost: z.boolean().optional()')
     expect(shareApi).toContain('showCost: parsed.data.showCost')
     expect(route).toContain('prepareShareGraph(graph, { allowComments, showCost })')

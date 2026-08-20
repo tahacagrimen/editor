@@ -1,6 +1,7 @@
 import type { NextRequest, NextResponse } from 'next/server'
 import { guardSceneApiRequest, sceneApiJson } from './scene-api-security'
-import { hashSharePassword, type ShareTokenPayload, verifyShareToken } from './share-token'
+import { verifyShareAccess } from './share-access'
+import { hashSharePassword, type ShareTokenPayload } from './share-token'
 
 export async function authorizeSharePdf(
   request: NextRequest,
@@ -12,14 +13,19 @@ export async function authorizeSharePdf(
   })
   if (guard) return { ok: false, response: guard }
 
-  const verified = verifyShareToken(token)
+  const verified = await verifyShareAccess(token)
   if (!verified.ok) {
     return {
       ok: false,
       response: sceneApiJson(
         request,
         { error: verified.error },
-        { status: verified.error === 'secret_missing' ? 503 : 403 },
+        {
+          status:
+            verified.error === 'secret_missing' || verified.error === 'revocation_unavailable'
+              ? 503
+              : 403,
+        },
       ),
     }
   }

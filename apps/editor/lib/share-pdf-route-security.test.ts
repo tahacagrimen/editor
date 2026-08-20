@@ -6,10 +6,12 @@ import { createShareToken } from './share-token'
 
 const oldSecret = process.env.PASCAL_SHARE_LINK_SECRET
 const oldRedis = process.env.REDIS_URL
+const oldPostgres = process.env.POSTGRES_URL
 
 beforeEach(() => {
   process.env.PASCAL_SHARE_LINK_SECRET = 'share-pdf-test-secret'
   delete process.env.REDIS_URL
+  delete process.env.POSTGRES_URL
   __resetRedisForTests()
 })
 
@@ -18,6 +20,8 @@ afterEach(() => {
   else process.env.PASCAL_SHARE_LINK_SECRET = oldSecret
   if (oldRedis === undefined) delete process.env.REDIS_URL
   else process.env.REDIS_URL = oldRedis
+  if (oldPostgres === undefined) delete process.env.POSTGRES_URL
+  else process.env.POSTGRES_URL = oldPostgres
   __resetRedisForTests()
 })
 

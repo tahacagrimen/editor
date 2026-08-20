@@ -4,7 +4,8 @@ import {
   type RequestRateLimitOptions,
   sceneApiJson,
 } from '@/lib/scene-api-security'
-import { hashSharePassword, type ShareTokenPayload, verifyShareToken } from '@/lib/share-token'
+import { verifyShareAccess } from '@/lib/share-access'
+import { hashSharePassword, type ShareTokenPayload } from '@/lib/share-token'
 import { SHARE_COMMENT_LIMITS } from './share-comment-write'
 
 type ShareCommentAction = 'new-thread' | 'reply'
@@ -31,14 +32,19 @@ export async function authorizeShareCommentWrite(
   })
   if (guard) return { ok: false, response: guard }
 
-  const verified = verifyShareToken(token)
+  const verified = await verifyShareAccess(token)
   if (!verified.ok) {
     return {
       ok: false,
       response: sceneApiJson(
         request,
         { error: verified.error },
-        { status: verified.error === 'secret_missing' ? 503 : 403 },
+        {
+          status:
+            verified.error === 'secret_missing' || verified.error === 'revocation_unavailable'
+              ? 503
+              : 403,
+        },
       ),
     }
   }
