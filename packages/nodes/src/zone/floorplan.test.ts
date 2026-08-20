@@ -33,7 +33,7 @@ describe('buildZoneFloorplan room documentation', () => {
     ])
   })
 
-  test('centers room name, number, finish, and height information as room annotations', () => {
+  test('centers room name, number, area, finish, and height information as room annotations', () => {
     const room = ZoneNode.parse({
       id: 'zone_office',
       name: 'Office',
@@ -56,6 +56,7 @@ describe('buildZoneFloorplan room documentation', () => {
     expect(labels.map((label) => ('text' in label ? label.text : ''))).toEqual([
       'Office',
       '101',
+      '12,00 m²',
       'FL: Timber · WL: Paint · CL: ACT',
       'CH: 2.7m · Business',
     ])

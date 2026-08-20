@@ -2,10 +2,15 @@ import {
   type FloorplanGeometry,
   type FloorplanPoint,
   type GeometryContext,
+  polygonArea,
   resolveAutoZonePolygon,
   type ZoneNode,
 } from '@pascal-app/core'
-import { floorplanGeometryMetadata, readFloorplanContext } from '@pascal-app/editor'
+import {
+  floorplanGeometryMetadata,
+  formatAreaLabel,
+  readFloorplanContext,
+} from '@pascal-app/editor'
 import {
   type ConstructionLengthProfile,
   formatConstructionLength,
@@ -105,6 +110,7 @@ export function buildZoneFloorplan(node: ZoneNode, ctx: GeometryContext): Floorp
     children.push(
       ...buildRoomLabels(
         node,
+        ring,
         cx,
         cy,
         view?.unit ?? 'metric',
@@ -149,6 +155,7 @@ const ROOM_LABEL_LINE_SPACING = 0.18
 
 function buildRoomLabels(
   node: ZoneNode,
+  ring: ReadonlyArray<[number, number]>,
   x: number,
   y: number,
   unit: 'metric' | 'imperial',
@@ -162,6 +169,11 @@ function buildRoomLabels(
   if (node.roomNumber) {
     lines.push({ text: node.roomNumber, fontSize: ROOM_NUMBER_FONT_SIZE, fontWeight: 600 })
   }
+  lines.push({
+    text: formatAreaLabel(polygonArea(ring), unit, 2),
+    fontSize: ROOM_DETAIL_FONT_SIZE,
+    fontWeight: 600,
+  })
 
   const finishes = [
     node.floorFinish ? `FL: ${node.floorFinish}` : '',

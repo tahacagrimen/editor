@@ -1,22 +1,19 @@
 'use client'
 
+import type { BuildingNode, LevelNode } from '@pascal-app/core'
 import { applySceneGraphToEditor, type SceneGraph, useTranslation } from '@pascal-app/editor'
-import { SceneEnvironment, Viewer } from '@pascal-app/viewer'
+import { SceneEnvironment, useViewer, Viewer } from '@pascal-app/viewer'
 import { CameraControls } from '@react-three/drei'
-import { Eye, Layers3, MapPin } from 'lucide-react'
+import { Eye, MapPin } from 'lucide-react'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import type { SharePresentationMeta } from '@/lib/share-presentation-meta'
+import { formatShareLevelStats, readShareLevels } from '@/lib/share-scene-levels'
+import { ShareFloorplan } from './share-floorplan'
 
 export type ShareViewState = {
   mode: '3d' | '2d'
   levelIdx: number
   tab: 'ozet' | 'metraj' | 'konum' | 'yorum'
-}
-
-type ShareLevel = {
-  id: string
-  name: string
-  order: number
 }
 
 type ShareTab = ShareViewState['tab']
@@ -27,39 +24,6 @@ const TABS: { id: ShareTab; label: string }[] = [
   { id: 'konum', label: 'Location' },
   { id: 'yorum', label: 'Comments' },
 ]
-
-function readShareLevels(scene: SceneGraph): ShareLevel[] {
-  const levels: ShareLevel[] = []
-  const visited = new Set<string>()
-
-  const visit = (nodeId: string) => {
-    if (visited.has(nodeId)) return
-    visited.add(nodeId)
-
-    const value = scene.nodes[nodeId]
-    if (!(value && typeof value === 'object')) return
-
-    const node = value as Record<string, unknown>
-    if (node.type === 'level' && typeof node.id === 'string') {
-      const order = typeof node.level === 'number' && Number.isFinite(node.level) ? node.level : 0
-      const name =
-        typeof node.name === 'string' && node.name.trim().length > 0
-          ? node.name
-          : order === 0
-            ? 'Ground level'
-            : `Level ${order}`
-      levels.push({ id: node.id, name, order })
-    }
-
-    if (!Array.isArray(node.children)) return
-    for (const childId of node.children) {
-      if (typeof childId === 'string') visit(childId)
-    }
-  }
-
-  for (const rootNodeId of scene.rootNodeIds) visit(rootNodeId)
-  return levels.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
-}
 
 function ShareCameraControls() {
   return (
@@ -103,6 +67,17 @@ export function SharePresentation({
   useLayoutEffect(() => {
     applySceneGraphToEditor(initialScene)
   }, [initialScene])
+
+  useLayoutEffect(() => {
+    useViewer.getState().setSelection({
+      buildingId: selectedLevel?.buildingId
+        ? (selectedLevel.buildingId as BuildingNode['id'])
+        : null,
+      levelId: selectedLevel ? (selectedLevel.id as LevelNode['id']) : null,
+      selectedIds: [],
+      zoneId: null,
+    })
+  }, [selectedLevel])
 
   const selectTab = (tab: ShareTab) => {
     setViewState((current) => ({ ...current, tab }))
@@ -177,28 +152,32 @@ export function SharePresentation({
 
             <div
               aria-hidden={viewState.mode !== '2d'}
-              className={`absolute inset-0 items-center justify-center ${
-                viewState.mode === '2d' ? 'flex' : 'hidden'
-              }`}
+              className={`absolute inset-0 ${viewState.mode === '2d' ? 'block' : 'hidden'}`}
             >
-              <div className="flex max-w-xs flex-col items-center gap-3 px-6 text-center text-muted-foreground">
-                <Layers3 aria-hidden="true" className="size-14" strokeWidth={1.25} />
-                <p className="font-extrabold text-xs uppercase tracking-[0.08em]">
-                  {t('Floor plan')}
-                </p>
-                <p className="text-xs">{selectedLevel?.name ?? t('No levels in this scene')}</p>
-              </div>
+              <ShareFloorplan
+                active={viewState.mode === '2d'}
+                graph={initialScene}
+                levelId={selectedLevel?.id ?? null}
+              />
             </div>
 
-            <div className="pointer-events-none absolute bottom-3 left-3 border border-border bg-background/90 px-2 py-1 font-extrabold text-[10px] uppercase tracking-[0.08em] shadow-sm">
-              {viewState.mode === '3d' ? t('3D view') : selectedLevel?.name}
+            <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-3">
+              <span className="border border-border bg-background/90 px-2 py-1 font-extrabold text-[10px] uppercase tracking-[0.08em] shadow-sm">
+                {viewState.mode === '3d'
+                  ? `${t('View')} · ${t('3D')}`
+                  : `${t('View')} · ${selectedLevel?.name ?? t('Floor plan')}`}
+              </span>
+              <span className="border border-border bg-background/90 px-2 py-1 font-extrabold text-[10px] uppercase tracking-[0.08em] shadow-sm">
+                {viewState.mode === '3d' ? t('North ↑') : '1:100'}
+              </span>
             </div>
           </div>
 
-          {levels.length > 0 && (
+          {levels.length > 1 && (
             <div className="flex max-w-full overflow-x-auto border-border border-t-2">
               {levels.map((level, index) => {
                 const selected = index === levelIdx
+                const stats = formatShareLevelStats(level)
                 return (
                   <button
                     aria-pressed={selected}
@@ -211,7 +190,12 @@ export function SharePresentation({
                     onClick={() => setViewState((current) => ({ ...current, levelIdx: index }))}
                     type="button"
                   >
-                    {level.name}
+                    <span className="block">{level.name}</span>
+                    {stats && (
+                      <span className="mt-0.5 block whitespace-nowrap font-normal text-[11px] text-muted-foreground tabular-nums">
+                        {stats}
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -252,6 +236,7 @@ export function SharePresentation({
           <ShareTabPanel
             allowComments={allowComments}
             commentCount={commentCount}
+            selectedLevelId={selectedLevel?.id ?? null}
             selectedLevelName={selectedLevel?.name ?? null}
             tab={viewState.tab}
           />
@@ -312,11 +297,13 @@ function ShareMetadataLines({
 function ShareTabPanel({
   tab,
   selectedLevelName,
+  selectedLevelId,
   commentCount,
   allowComments,
 }: {
   tab: ShareTab
   selectedLevelName: string | null
+  selectedLevelId: string | null
   commentCount: number
   allowComments: boolean
 }) {
@@ -326,6 +313,7 @@ function ShareTabPanel({
     <div
       aria-labelledby={`share-tab-${tab}`}
       className="min-h-72 min-w-0"
+      data-level-id={selectedLevelId ?? undefined}
       id={`share-tab-panel-${tab}`}
       role="tabpanel"
     >

@@ -5,6 +5,7 @@ import { join } from 'node:path'
 const appRoot = join(import.meta.dir, '..')
 const routePath = join(appRoot, 'app/share/[token]/page.tsx')
 const presentationPath = join(appRoot, 'components/share/share-presentation.tsx')
+const floorplanPath = join(appRoot, 'components/share/share-floorplan.tsx')
 
 describe('share presentation shell', () => {
   test('the share route mounts its purpose-built presentation, not the editor', () => {
@@ -20,6 +21,18 @@ describe('share presentation shell', () => {
     expect(presentation).toContain('useState<ShareViewState>')
     expect(presentation).not.toContain('useScene')
     expect(presentation).not.toContain('acquireSceneReadOnlyLease')
+  })
+
+  test('the scene surfaces stay read-only while sharing one selected level', () => {
+    const presentation = readFileSync(presentationPath, 'utf8')
+    const floorplan = readFileSync(floorplanPath, 'utf8')
+
+    expect(presentation).toContain('selectionManager="custom"')
+    expect(presentation).toContain('levels.length > 1')
+    expect(presentation).toContain('data-level-id={selectedLevelId ?? undefined}')
+    expect(floorplan).toContain('pointerEventsOverride="none"')
+    expect(floorplan).not.toContain('useScene')
+    expect(floorplan).not.toContain('useEditor')
   })
 
   test('mobile overflow is contained and theme-unsafe chrome is absent', () => {
