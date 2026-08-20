@@ -1012,7 +1012,7 @@ function SystemSummaryPill({
           <span aria-hidden className="text-muted-foreground">
             ·
           </span>
-          <span className="font-medium text-amber-500">⚠ no equipment</span>
+          <span className="font-medium text-warn-foreground">⚠ no equipment</span>
         </>
       )}
     </div>

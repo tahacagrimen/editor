@@ -261,7 +261,7 @@ export const TreeNodeWrapper = forwardRef<HTMLDivElement, TreeNodeWrapperProps>(
             isSelected
               ? 'border-r-3 border-r-white bg-accent/50 text-foreground'
               : isDropTarget
-                ? 'bg-blue-500/15 text-foreground ring-1 ring-blue-500/40 ring-inset'
+                ? 'bg-selected/15 text-foreground ring-1 ring-selected/40 ring-inset'
                 : isHovered
                   ? 'bg-accent/30 text-foreground'
                   : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',

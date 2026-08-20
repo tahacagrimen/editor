@@ -38,7 +38,7 @@ export function AgentActivitySection() {
             className={cn(
               'ml-auto shrink-0 rounded-full px-1.5 py-0.5 text-[10px]',
               connected
-                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                ? 'bg-ok text-muted-foreground'
                 : 'bg-foreground/10 text-muted-foreground',
             )}
             title={connected ? t('Live scene stream connected') : t('No live scene stream')}
@@ -72,7 +72,7 @@ export function AgentActivitySection() {
                   key={entry.id}
                 >
                   {entry.status === 'applied' ? (
-                    <Check className="h-3 w-3 shrink-0 translate-y-0.5 text-emerald-600 dark:text-emerald-400" />
+                    <Check className="h-3 w-3 shrink-0 translate-y-0.5 text-muted-foreground" />
                   ) : entry.status === 'rejected' ? (
                     <X className="h-3 w-3 shrink-0 translate-y-0.5 text-muted-foreground/60" />
                   ) : (

@@ -286,7 +286,7 @@ export function ParcelImporter({ siteNode }: { siteNode: SiteNode }) {
                 : '-'}
             </span>
           </div>
-          <div className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">
+          <div className="mt-1 text-[10px] text-warn-foreground">
             {t('Land registry reference data — not a surveyed site plan.')}
           </div>
           <ActionGroup>

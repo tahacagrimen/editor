@@ -248,7 +248,7 @@ export function ReferencePanel() {
             )}
 
             {isAssetMissing && (
-              <div className="rounded-md border border-amber-500/35 bg-amber-500/10 px-2 py-1.5 text-amber-700 text-xs dark:text-amber-300">
+              <div className="rounded-md border border-warn-foreground/30 bg-warn px-2 py-1.5 text-warn-foreground text-xs">
                 Overlay image unavailable. Replace the image to restore it.
               </div>
             )}
@@ -259,7 +259,7 @@ export function ReferencePanel() {
               <Ruler
                 className={cn(
                   'h-4 w-4 shrink-0',
-                  node.scaleReference ? 'text-primary' : 'text-amber-600 dark:text-amber-400',
+                  node.scaleReference ? 'text-primary' : 'text-warn-foreground',
                 )}
               />
               <span className="truncate text-muted-foreground">{scaleStatus}</span>

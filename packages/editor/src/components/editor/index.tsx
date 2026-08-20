@@ -365,7 +365,7 @@ function SidebarSlot({ children }: { children: ReactNode }) {
           className="group absolute inset-y-0 -right-3.5 z-10 flex w-4 cursor-col-resize items-stretch justify-center py-4"
           onPointerDown={handleResizerDown}
         >
-          <div className="w-px self-stretch rounded-full bg-transparent transition-colors group-hover:bg-neutral-300" />
+          <div className="w-px self-stretch rounded-full bg-transparent transition-colors group-hover:bg-muted" />
         </div>
       )}
     </div>
@@ -603,7 +603,7 @@ function DeleteCursorBadge({ position }: { position: { x: number; y: number } })
       }}
     >
       <div
-        className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-zinc-900/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
+        className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-[#201e1d]/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
         style={{
           boxShadow: `0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.2), 0 0 18px ${DELETE_CURSOR_BADGE_COLOR}22`,
         }}
@@ -706,7 +706,7 @@ function PaintCursorBadge({
         }}
       />
       <div
-        className="absolute top-0 left-1/2 flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-zinc-900/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
+        className="absolute top-0 left-1/2 flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-[#201e1d]/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
         style={{
           boxShadow: `0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.2), 0 0 18px ${accentColor}22`,
           transform: `translate(-50%, calc(-100% - ${lineHeight}px))`,
@@ -725,7 +725,7 @@ function PaintCursorBadge({
         />
         {state === 'ready' ? (
           isEraser ? (
-            <span className="-right-1 -bottom-1 absolute flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/35 bg-zinc-950 text-white shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
+            <span className="-right-1 -bottom-1 absolute flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/35 bg-[#201e1d] text-white shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
               <Icon
                 aria-hidden="true"
                 color="currentColor"
@@ -746,7 +746,7 @@ function PaintCursorBadge({
             />
           )
         ) : state === 'blocked' ? (
-          <span className="-right-1 -bottom-1 absolute flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/30 bg-zinc-950 text-rose-700 dark:text-rose-300 shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
+          <span className="-right-1 -bottom-1 absolute flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/30 bg-[#201e1d] text-destructive shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
             <Icon
               aria-hidden="true"
               color="currentColor"
@@ -756,7 +756,7 @@ function PaintCursorBadge({
             />
           </span>
         ) : (
-          <span className="-right-1 -bottom-1 absolute flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/30 bg-zinc-950 font-semibold text-[9px] text-slate-300 shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
+          <span className="-right-1 -bottom-1 absolute flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/30 bg-[#201e1d] font-semibold text-[9px] text-muted-foreground shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
             ?
           </span>
         )}
@@ -1136,7 +1136,7 @@ const ViewerCanvas = memo(function ViewerCanvas({
               className="absolute inset-y-0 -right-3 z-10 flex w-6 cursor-col-resize items-center justify-center"
               onPointerDown={handleFloorplanDividerDown}
             >
-              <div className="h-8 w-1 rounded-full bg-neutral-400" />
+              <div className="h-8 w-1 rounded-full bg-muted" />
             </div>
           )}
         </div>

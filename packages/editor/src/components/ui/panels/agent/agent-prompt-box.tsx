@@ -79,9 +79,9 @@ export function AgentPromptBox() {
                     className={cn(
                       'text-[10px]',
                       isStalled(entry)
-                        ? 'text-red-700 dark:text-red-400'
+                        ? 'text-destructive'
                         : entry.status === 'claimed'
-                          ? 'text-emerald-700 dark:text-emerald-400'
+                          ? 'text-foreground'
                           : 'text-muted-foreground',
                     )}
                   >
@@ -128,7 +128,7 @@ export function AgentPromptBox() {
           </button>
         </div>
 
-        {error && <span className="text-[11px] text-red-700 dark:text-red-400">{error}</span>}
+        {error && <span className="text-[11px] text-destructive">{error}</span>}
       </div>
     </LocalizedContent>
   )

@@ -106,14 +106,14 @@ export function ZoningSection() {
               Footprint (TAKS)
             </span>
             <div className="flex items-center gap-2">
-              <span className={cn(taksExceeded ? "text-red-500 font-medium" : "text-foreground")}>
+              <span className={cn(taksExceeded ? "text-warn-foreground font-medium" : "text-foreground")}>
                 {formatAreaLabel(reading.footprintArea, unit, 2)}
               </span>
               {zoning?.taks !== undefined && (
                 <>
                   <span className="text-muted-foreground">/</span>
                   <span className="text-muted-foreground">{formatAreaLabel(taksLimit ?? 0, unit, 2)}</span>
-                  {taksExceeded ? <AlertCircle className="h-3.5 w-3.5 text-red-500" /> : <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
+                  {taksExceeded ? <AlertCircle className="h-3.5 w-3.5 text-warn-foreground" /> : <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />}
                 </>
               )}
             </div>
@@ -124,14 +124,14 @@ export function ZoningSection() {
               Total Area (KAKS)
             </span>
             <div className="flex items-center gap-2">
-              <span className={cn(kaksExceeded ? "text-red-500 font-medium" : "text-foreground")}>
+              <span className={cn(kaksExceeded ? "text-warn-foreground font-medium" : "text-foreground")}>
                 {formatAreaLabel(reading.totalFloorArea, unit, 2)}
               </span>
               {zoning?.kaks !== undefined && (
                 <>
                   <span className="text-muted-foreground">/</span>
                   <span className="text-muted-foreground">{formatAreaLabel(kaksLimit ?? 0, unit, 2)}</span>
-                  {kaksExceeded ? <AlertCircle className="h-3.5 w-3.5 text-red-500" /> : <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
+                  {kaksExceeded ? <AlertCircle className="h-3.5 w-3.5 text-warn-foreground" /> : <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />}
                 </>
               )}
             </div>
@@ -142,14 +142,14 @@ export function ZoningSection() {
               Height
             </span>
             <div className="flex items-center gap-2">
-              <span className={cn(heightExceeded ? "text-red-500 font-medium" : "text-foreground")}>
+              <span className={cn(heightExceeded ? "text-warn-foreground font-medium" : "text-foreground")}>
                 {formatLinearMeasurement(reading.maxHeight, unit, metricNotation)}
               </span>
               {zoning?.maxHeight !== undefined && (
                 <>
                   <span className="text-muted-foreground">/</span>
                   <span className="text-muted-foreground">{formatLinearMeasurement(zoning.maxHeight, unit, metricNotation)}</span>
-                  {heightExceeded ? <AlertCircle className="h-3.5 w-3.5 text-red-500" /> : <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
+                  {heightExceeded ? <AlertCircle className="h-3.5 w-3.5 text-warn-foreground" /> : <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />}
                 </>
               )}
             </div>
@@ -160,14 +160,14 @@ export function ZoningSection() {
               Floors
             </span>
             <div className="flex items-center gap-2">
-              <span className={cn(floorsExceeded ? "text-red-500 font-medium" : "text-foreground")}>
+              <span className={cn(floorsExceeded ? "text-warn-foreground font-medium" : "text-foreground")}>
                 {reading.maxFloors}
               </span>
               {zoning?.maxFloors !== undefined && (
                 <>
                   <span className="text-muted-foreground">/</span>
                   <span className="text-muted-foreground">{zoning.maxFloors}</span>
-                  {floorsExceeded ? <AlertCircle className="h-3.5 w-3.5 text-red-500" /> : <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
+                  {floorsExceeded ? <AlertCircle className="h-3.5 w-3.5 text-warn-foreground" /> : <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />}
                 </>
               )}
             </div>
@@ -175,7 +175,7 @@ export function ZoningSection() {
         </div>
 
         {(taksExceeded || kaksExceeded || heightExceeded || floorsExceeded) && (
-          <div className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-700 dark:text-red-300">
+          <div className="rounded-md border border-warn-foreground/30 bg-warn px-2 py-1.5 text-[11px] text-warn-foreground">
             Current design exceeds zoning limits.
           </div>
         )}

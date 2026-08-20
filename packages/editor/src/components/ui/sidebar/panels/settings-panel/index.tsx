@@ -529,8 +529,8 @@ export function SettingsPanel({
               className={cn(
                 'mt-2 text-[10px]',
                 importedParcel.edited
-                  ? 'text-sky-700 dark:text-sky-300'
-                  : 'text-amber-600 dark:text-amber-400',
+                  ? 'text-selected'
+                  : 'text-warn-foreground',
               )}
             >
               {importedParcel.edited

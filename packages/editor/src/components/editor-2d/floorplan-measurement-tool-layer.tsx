@@ -704,7 +704,7 @@ function FloorplanExtrusionControl({
             </span>
             <input
               aria-label="Extrusion height"
-              className="h-8 w-full rounded-md border border-border bg-background pr-7 pl-6 text-sm outline-none focus:border-cyan-400"
+              className="h-8 w-full rounded-md border border-border bg-background pr-7 pl-6 text-sm outline-none focus:border-selected"
               id="measurement-extrusion-height"
               inputMode="decimal"
               onChange={(event) => {
@@ -739,7 +739,7 @@ function FloorplanExtrusionControl({
             V {volumeLabel}
           </span>
           <button
-            className="h-8 shrink-0 rounded-full bg-cyan-500 px-3 font-medium text-black text-xs disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-8 shrink-0 rounded-full bg-selected px-3 font-medium text-black text-xs disabled:cursor-not-allowed disabled:opacity-40"
             disabled={Math.abs(extrusionHeight) < 0.001}
             onClick={commit}
             type="button"

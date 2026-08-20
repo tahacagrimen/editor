@@ -118,9 +118,9 @@ export function LoadBuildDialog({ pending, onCancel, onConfirm }: Props) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {ok ? (
-              <CheckCircle2 className="size-5 text-emerald-600" />
+              <CheckCircle2 className="size-5 text-muted-foreground" />
             ) : (
-              <XCircle className="size-5 text-red-600" />
+              <XCircle className="size-5 text-destructive" />
             )}
             {ok ? 'Ready to import' : 'Cannot import this file'}
           </DialogTitle>
@@ -132,12 +132,12 @@ export function LoadBuildDialog({ pending, onCancel, onConfirm }: Props) {
 
         <div className="max-h-[60vh] space-y-4 overflow-y-auto py-2">
           {errors.length > 0 && (
-            <div className="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
-              <div className="flex items-center gap-2 font-medium text-red-800 text-sm">
+            <div className="space-y-2 rounded-md border border-destructive/40 bg-destructive p-3">
+              <div className="flex items-center gap-2 font-medium text-destructive text-sm">
                 <XCircle className="size-4" />
                 {errors.length} error{errors.length === 1 ? '' : 's'}
               </div>
-              <ul className="space-y-1 text-red-700 text-xs">
+              <ul className="space-y-1 text-destructive text-xs">
                 {errors.map((e) => (
                   <li key={`${e.code}-${e.nodeId ?? ''}`}>· {e.message}</li>
                 ))}
@@ -187,19 +187,19 @@ export function LoadBuildDialog({ pending, onCancel, onConfirm }: Props) {
           )}
 
           {warnings.length > 0 && (
-            <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3">
-              <div className="flex items-center gap-2 font-medium text-amber-800 text-sm">
+            <div className="space-y-2 rounded-md border border-warn-foreground/30 bg-warn p-3">
+              <div className="flex items-center gap-2 font-medium text-warn-foreground text-sm">
                 <AlertTriangle className="size-4" />
                 {warnings.length} warning{warnings.length === 1 ? '' : 's'}
               </div>
-              <ul className="space-y-1 text-amber-700 text-xs">
+              <ul className="space-y-1 text-warn-foreground text-xs">
                 {visibleWarnings.map((w, i) => (
                   <li key={`${w.code}-${w.nodeId ?? ''}-${i}`}>· {w.message}</li>
                 ))}
               </ul>
               {hiddenWarningCount > 0 && (
                 <button
-                  className="text-amber-800 text-xs underline hover:no-underline"
+                  className="text-warn-foreground text-xs underline hover:no-underline"
                   onClick={() => setShowAllWarnings(true)}
                   type="button"
                 >

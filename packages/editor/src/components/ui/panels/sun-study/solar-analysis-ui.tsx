@@ -59,7 +59,7 @@ export function SolarAnalysisUI() {
             Surfaces are colored by annual sun exposure.
           </p>
           <div className="flex flex-col gap-1">
-            <div className="flex h-2 w-full rounded-sm bg-gradient-to-r from-blue-900 via-orange-400 to-yellow-200" />
+            <div className="flex h-2 w-full rounded-sm bg-gradient-to-r from-selected from-selected from-selected" />
             <div className="flex justify-between text-[9px] text-muted-foreground tabular-nums">
               <span>Shadowed</span>
               <span>Full Sun</span>

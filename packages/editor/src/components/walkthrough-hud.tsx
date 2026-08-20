@@ -59,7 +59,7 @@ export function WalkthroughHud({
             className={cn(
               'rounded-full transition-all duration-150',
               interact
-                ? 'h-4 w-4 border-2 border-emerald-400 bg-emerald-400/10'
+                ? 'h-4 w-4 border-2 border-ok-foreground/30 bg-ok'
                 : 'h-1.5 w-1.5 bg-foreground/80 shadow-[0_0_2px_rgba(0,0,0,0.6)]',
             )}
           />

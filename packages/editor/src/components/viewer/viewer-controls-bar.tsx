@@ -357,8 +357,8 @@ export const ViewerControlsBar = ({
           <ActionButton
             className={
               levelMode === 'stacked'
-                ? 'hover:bg-foreground/5 hover:text-amber-600 dark:hover:text-amber-400'
-                : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                ? 'hover:bg-foreground/5 hover:text-warn-foreground'
+                : 'bg-warn text-warn-foreground'
             }
             label={`Levels: ${levelMode === 'manual' ? 'Manual' : levelModeLabels[levelMode as keyof typeof levelModeLabels]}`}
             onClick={() => {
@@ -408,8 +408,8 @@ export const ViewerControlsBar = ({
           <ActionButton
             className={
               walkthroughActive
-                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
-                : 'hover:bg-foreground/5 hover:text-emerald-700 dark:hover:text-emerald-400'
+                ? 'bg-ok text-muted-foreground'
+                : 'hover:bg-foreground/5 hover:text-muted-foreground'
             }
             label={`Walkthrough: ${walkthroughActive ? 'On' : 'Off'}`}
             onClick={onWalkthroughToggle}

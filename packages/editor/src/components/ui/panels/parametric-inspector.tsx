@@ -204,20 +204,20 @@ export function ParametricInspector({
                 <>
                   <ActionButton
                     className="w-full flex-none"
-                    icon={<Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />}
+                    icon={<Trash2 className="h-4 w-4 text-destructive" />}
                     label="Delete"
                     onClick={() => handleDelete(false)}
                   />
                   <ActionButton
                     className="w-full flex-none"
-                    icon={<Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />}
+                    icon={<Trash2 className="h-4 w-4 text-destructive" />}
                     label="Delete with contents"
                     onClick={() => handleDelete(true)}
                   />
                 </>
               ) : (
                 <ActionButton
-                  className="border-red-500/40 text-red-700 dark:text-red-200 hover:bg-red-500/15"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/15"
                   icon={<Trash2 className="h-4 w-4" />}
                   label="Delete"
                   onClick={() => handleDelete()}

@@ -213,7 +213,7 @@ export function FunctionTreePanel({
               className={cn(
                 'cursor-pointer rounded-md px-2 py-0.5 font-medium text-xs transition-colors',
                 activeChildSlug === null
-                  ? 'bg-violet-500 text-white'
+                  ? 'bg-selected text-selected-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
               )}
               onClick={() => setActiveChildSlug(null)}
@@ -228,7 +228,7 @@ export function FunctionTreePanel({
                   className={cn(
                     'cursor-pointer rounded-md px-2 py-0.5 font-medium text-xs capitalize transition-colors',
                     isActive
-                      ? 'bg-violet-500 text-white'
+                      ? 'bg-selected text-selected-foreground'
                       : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
                   )}
                   key={child.slug}

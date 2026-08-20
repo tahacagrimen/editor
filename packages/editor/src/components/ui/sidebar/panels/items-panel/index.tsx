@@ -280,8 +280,8 @@ function LegacyItemsPanel({
                   className={cn(
                     'cursor-pointer rounded-md px-2 py-0.5 font-medium text-xs transition-colors',
                     activePlacementTag === null
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-900/60 hover:text-blue-200',
+                      ? 'bg-selected text-selected-foreground'
+                      : 'bg-accent text-foreground hover:bg-selected/15 hover:text-selected',
                   )}
                   onClick={() => setActivePlacementTag(null)}
                   type="button"
@@ -297,10 +297,10 @@ function LegacyItemsPanel({
                       className={cn(
                         'inline-flex cursor-pointer items-center gap-1 rounded-md py-0.5 pr-1.5 pl-2 font-medium text-xs capitalize transition-colors',
                         isActive
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-selected text-selected-foreground'
                           : isEmpty
                             ? 'cursor-not-allowed bg-muted text-muted-foreground/50'
-                            : 'bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-900/60 hover:text-blue-200',
+                            : 'bg-accent text-foreground hover:bg-selected/15 hover:text-selected',
                       )}
                       disabled={isEmpty}
                       key={tag}
@@ -312,10 +312,10 @@ function LegacyItemsPanel({
                         className={cn(
                           'text-[10px]',
                           isActive
-                            ? 'text-blue-200'
+                            ? 'text-selected-foreground/80'
                             : isEmpty
                               ? 'text-muted-foreground/50'
-                              : 'text-blue-500/70',
+                              : 'text-muted-foreground',
                         )}
                       >
                         {count}
@@ -337,7 +337,7 @@ function LegacyItemsPanel({
                       className={cn(
                         'inline-flex cursor-pointer items-center gap-1 rounded-md py-0.5 pr-1.5 pl-2 font-medium text-xs capitalize transition-colors',
                         isActive
-                          ? 'bg-violet-500 text-white'
+                          ? 'bg-selected text-selected-foreground'
                           : isEmpty
                             ? 'cursor-not-allowed bg-muted text-muted-foreground/50'
                             : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
@@ -352,7 +352,7 @@ function LegacyItemsPanel({
                         className={cn(
                           'text-[10px]',
                           isActive
-                            ? 'text-violet-200'
+                            ? 'text-selected'
                             : isEmpty
                               ? 'text-muted-foreground/50'
                               : 'text-muted-foreground/70',

@@ -66,7 +66,7 @@ function DefinitionCard({
             src={definition.thumbnail}
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-indigo-950 to-violet-700 text-white/70">
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-selected from-selected text-white/70">
             <Boxes className="h-10 w-10" />
           </div>
         )}
@@ -241,7 +241,7 @@ export function ComponentsPanel() {
       )}
 
       {!canPlace && sortedDefinitions.length > 0 ? (
-        <p className="mt-4 text-center text-amber-700 dark:text-amber-300/80 text-xs">
+        <p className="mt-4 text-center text-warn-foreground text-xs">
           Select a level before placing a component.
         </p>
       ) : null}

@@ -209,7 +209,7 @@ const PropertyLineSection = memo(function PropertyLineSection() {
             className={cn(
               'flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors',
               isEditing
-                ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                ? 'bg-warn text-warn-foreground'
                 : 'text-muted-foreground hover:bg-accent',
             )}
             onClick={handleToggleEdit}
@@ -267,7 +267,7 @@ const PropertyLineSection = memo(function PropertyLineSection() {
                   className={cn(
                     'flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded',
                     points.length > 3
-                      ? 'text-muted-foreground hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400'
+                      ? 'text-muted-foreground hover:bg-destructive/15 hover:text-destructive'
                       : 'cursor-not-allowed text-muted-foreground/30',
                   )}
                   disabled={points.length <= 3}
@@ -440,7 +440,7 @@ const ReferenceItem = memo(function ReferenceItem({
       </div>
 
       <button
-        className="z-20 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/ref:opacity-100 dark:hover:bg-white/10"
+        className="z-20 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-accent hover:text-foreground group-hover/ref:opacity-100"
         onClick={(e) => handleDelete(refNode.id, e)}
         title={t('Delete')}
       >
@@ -863,7 +863,7 @@ const LevelItem = memo(function LevelItem({
               className={cn(
                 'relative mr-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-0 transition-colors group-hover/level:opacity-100',
                 selectedLevelId === level.id
-                  ? 'hover:bg-black/5 dark:hover:bg-white/10'
+                  ? 'hover:bg-accent'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground',
               )}
               onClick={(e) => e.stopPropagation()}
@@ -928,7 +928,7 @@ const LevelItem = memo(function LevelItem({
               className={cn(
                 'mr-1 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-0 transition-colors group-hover/level:opacity-100',
                 selectedLevelId === level.id
-                  ? 'hover:bg-black/5 dark:hover:bg-white/10'
+                  ? 'hover:bg-accent'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground',
               )}
               onClick={(e) => e.stopPropagation()}
@@ -954,7 +954,7 @@ const LevelItem = memo(function LevelItem({
               Duplicate with options...
             </button>
             <button
-              className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm transition-colors enabled:cursor-pointer enabled:hover:bg-accent enabled:hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm transition-colors enabled:cursor-pointer enabled:hover:bg-accent enabled:hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
               disabled={!canDeleteLevel}
               onClick={() => deleteLevelWithFallbackSelection(level.id)}
               title={canDeleteLevel ? 'Delete level' : 'The ground level cannot be deleted'}
@@ -1322,7 +1322,7 @@ const ZoneItem = memo(function ZoneItem({ zone, isLast }: { zone: ZoneNode; isLa
         <Popover onOpenChange={setCameraPopoverOpen} open={cameraPopoverOpen}>
           <PopoverTrigger asChild>
             <button
-              className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/row:opacity-100 dark:hover:bg-white/10"
+              className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-accent hover:text-foreground group-hover/row:opacity-100"
               onClick={(e) => e.stopPropagation()}
               title="Camera snapshot"
             >
@@ -1380,7 +1380,7 @@ const ZoneItem = memo(function ZoneItem({ zone, isLast }: { zone: ZoneNode; isLa
           </PopoverContent>
         </Popover>
         <button
-          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/row:opacity-100 dark:hover:bg-white/10"
+          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-accent hover:text-foreground group-hover/row:opacity-100"
           onClick={handleDelete}
         >
           <Trash2 className="h-3 w-3" />
@@ -1580,7 +1580,7 @@ const BuildingItem = memo(function BuildingItem({
               className={cn(
                 'relative mr-1.5 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-0 transition-colors group-hover/building:opacity-100',
                 isBuildingActive
-                  ? 'text-muted-foreground hover:bg-black/5 hover:text-foreground dark:hover:bg-white/10'
+                  ? 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground',
               )}
               onClick={(e) => e.stopPropagation()}
@@ -1711,7 +1711,7 @@ export function SitePanel({ projectId, onUploadAsset, onDeleteAsset }: SitePanel
           </div>
           <div className="flex items-center gap-1">
             <button
-              className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors hover:bg-accent"
               onClick={() => updateNode(siteNode.id, { locked: !siteNode.locked })}
               title={siteNode.locked ? t('Unlock') : t('Lock')}
               type="button"
@@ -1719,7 +1719,7 @@ export function SitePanel({ projectId, onUploadAsset, onDeleteAsset }: SitePanel
               {siteNode.locked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
             </button>
             <CameraPopover
-              buttonClassName="transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              buttonClassName="transition-colors hover:bg-accent"
               hasCamera={!!siteNode.camera}
               nodeId={siteNode.id as AnyNodeId}
               onOpenChange={setSiteCameraOpen}

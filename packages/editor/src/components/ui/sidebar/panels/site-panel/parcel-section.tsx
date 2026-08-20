@@ -129,8 +129,8 @@ export function ParcelSetbackSection() {
             className={cn(
               'rounded-md border px-2 py-1.5 text-[10px] leading-relaxed',
               site.parcel.edited
-                ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
-                : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+                ? 'border-selected/40 bg-selected/10 text-selected'
+                : 'border-warn-foreground/30 bg-warn text-warn-foreground',
             )}
           >
             {site.parcel.edited
@@ -149,7 +149,7 @@ export function ParcelSetbackSection() {
               <div
                 className={cn(
                   'rounded-md border px-2 py-1.5 transition-colors',
-                  isFocused ? 'border-cyan-500/60 bg-cyan-500/10' : 'border-border/50',
+                  isFocused ? 'border-selected/60 bg-selected/10' : 'border-border/50',
                 )}
                 key={edgeIndex}
                 onPointerEnter={() => setHoveredEdge(edgeIndex)}
@@ -206,7 +206,7 @@ export function ParcelSetbackSection() {
             <span className="ml-auto font-medium text-foreground">{measuredArea}</span>
           </div>
           {noBuildableGround ? (
-            <div className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-700 dark:text-red-300">
+            <div className="rounded-md border border-destructive/40 bg-destructive/15 px-2 py-1.5 text-[11px] text-destructive">
               No buildable ground is left after these setbacks.
             </div>
           ) : (

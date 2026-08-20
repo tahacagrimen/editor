@@ -49,8 +49,8 @@ export function XLineControl() {
       className={cn(
         'text-muted-foreground',
         isActive
-          ? 'bg-sky-500/20 text-sky-700 dark:text-sky-400 hover:bg-sky-500/20'
-          : 'hover:bg-sky-500/15 hover:text-sky-700 dark:hover:text-sky-400',
+          ? 'bg-selected/20 text-selected hover:bg-selected/20'
+          : 'hover:bg-selected/15 hover:text-selected',
       )}
       label="XLine"
       onClick={handleClick}

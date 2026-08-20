@@ -128,7 +128,7 @@ export const FloorplanCursorIndicatorOverlay = memo(function FloorplanCursorIndi
     >
       {mode === 'delete' ? (
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-zinc-900/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-[#201e1d]/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
           style={{
             boxShadow: `0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.2), 0 0 18px ${cursorColor}22`,
             transform: `translate(${indicatorBadgeOffsetX}px, ${indicatorBadgeOffsetY}px)`,
@@ -163,7 +163,7 @@ export const FloorplanCursorIndicatorOverlay = memo(function FloorplanCursorIndi
             }}
           />
           <div
-            className="absolute top-0 left-1/2 flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-zinc-900/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
+            className="absolute top-0 left-1/2 flex h-8 w-8 items-center justify-center rounded-xl border border-white/5 bg-[#201e1d]/95 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.3),0_4px_8px_-4px_rgba(0,0,0,0.2)]"
             style={{
               transform: `translate(-50%, calc(-100% - ${indicatorLineHeight}px))`,
             }}

@@ -73,7 +73,7 @@ export function CollaborationPresenceOverlay() {
         ))}
       </div>
       {conflict ? (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 rounded-md border border-amber-500/40 bg-background/95 px-3 py-2 text-foreground text-xs shadow-lg">
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 rounded-md border border-warn-foreground/30 bg-background/95 px-3 py-2 text-foreground text-xs shadow-lg">
           {conflict}
         </div>
       ) : null}

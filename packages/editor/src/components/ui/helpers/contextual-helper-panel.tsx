@@ -68,14 +68,14 @@ function ShortcutSequence({
                   <span className="text-[9px] text-muted-foreground/70">/</span>
                 ) : null}
                 <ShortcutToken
-                  className={cn(TOKEN_CLASS, active && 'border-white bg-white text-black shadow-sm')}
+                  className={cn(TOKEN_CLASS, active && 'border-foreground bg-foreground text-background shadow-sm')}
                   value={alternative}
                 />
               </Fragment>
             ))
           ) : (
             <ShortcutToken
-              className={cn(TOKEN_CLASS, active && 'border-white bg-white text-black shadow-sm')}
+              className={cn(TOKEN_CLASS, active && 'border-foreground bg-foreground text-background shadow-sm')}
               value={entry}
             />
           )}

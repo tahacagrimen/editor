@@ -307,7 +307,7 @@ function LevelRow({
                 </button>
               )}
               <button
-                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-muted-foreground text-xs transition-colors hover:bg-foreground/10 hover:text-red-600 dark:hover:text-red-400"
+                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-muted-foreground text-xs transition-colors hover:bg-foreground/10 hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation()
                   onRequestDelete()
@@ -566,7 +566,7 @@ export function FloatingLevelSelector() {
   const sortableLevelIds = reversedLevels.map((level) => level.id)
 
   const addButtonClass =
-    'absolute left-1/2 z-10 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border border-border/80 bg-neutral-800 text-muted-foreground/60 shadow-md transition-colors hover:bg-neutral-700 hover:text-foreground'
+    'absolute left-1/2 z-10 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border border-border/80 bg-[#201e1d] text-muted-foreground/60 shadow-md transition-colors hover:bg-[#201e1d] hover:text-foreground'
 
   return (
     <LocalizedContent>
@@ -668,7 +668,7 @@ export function FloatingLevelSelector() {
               Cancel
             </button>
             <button
-              className="rounded-full bg-red-600 px-4 py-2 text-sm text-white transition-colors hover:bg-red-700"
+              className="rounded-full bg-destructive px-4 py-2 text-sm text-destructive-foreground transition-colors hover:bg-destructive"
               onClick={handleConfirmDelete}
               type="button"
             >

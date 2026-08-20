@@ -144,7 +144,7 @@ function LeftColumn({
             className="absolute inset-y-0 -right-3 z-[100] flex w-6 cursor-col-resize items-center justify-center"
             onPointerDown={handleResizerDown}
           >
-            <div className="h-8 w-1 rounded-full bg-neutral-500" />
+            <div className="h-8 w-1 rounded-full bg-muted" />
           </div>
         </div>
       )}

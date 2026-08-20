@@ -65,6 +65,15 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-ok: var(--ok);
+  --color-ok-foreground: var(--ok-foreground);
+  --color-warn: var(--warn);
+  --color-warn-foreground: var(--warn-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-selected: var(--selected);
+  --color-selected-foreground: var(--selected-foreground);
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-foreground: var(--accent-2-foreground);
 }
 
 /* Modernist palette — the design system behind `Menart 3D.dc.html`. The chrome
@@ -105,6 +114,21 @@
   --sidebar-accent-foreground: #201e1d;
   --sidebar-border: color-mix(in srgb, #201e1d 22%, transparent);
   --sidebar-ring: #ec3013;
+
+  /* State — the system has exactly one accent, so hue cannot carry four
+     meanings. "Fine" is the absence of alarm and reads neutral; everything that
+     wants attention is a step of the red. The label always says which, so a
+     reader who cannot separate the two still gets the answer. Steps come from
+     the Modernist ramps in `wiki/design/paylasim-sayfasi/modernist-tokens.css`. */
+  --ok: #eae7e7; /* neutral-200 */
+  --ok-foreground: #444141; /* neutral-800 */
+  --warn: #ffe0d9; /* accent-200 */
+  --warn-foreground: #7c1405; /* accent-800 */
+  --destructive-foreground: #f3f2f2;
+  --selected: #ec3013;
+  --selected-foreground: #f3f2f2;
+  --accent-2: #e15b47;
+  --accent-2-foreground: #f3f2f2;
 }
 
 .dark {
@@ -139,6 +163,20 @@
   --sidebar-accent-foreground: #f3f2f2;
   --sidebar-border: color-mix(in srgb, #f3f2f2 22%, transparent);
   --sidebar-ring: #ec3013;
+
+  /* The ramps invert: a step keeps its *role* across themes, not its lightness.
+     `bg-ok` is the faintest surface in both, `text-warn-foreground` the loudest
+     ink in both. Defining these only here would leave light mode undefined, so
+     every token above has a value on bare `:root` too. */
+  --ok: #2d2b2b; /* neutral-900 */
+  --ok-foreground: #bab6b6; /* neutral-400 */
+  --warn: #4d170e; /* accent-900 */
+  --warn-foreground: #ffc4b8; /* accent-300 */
+  --destructive-foreground: #201e1d;
+  --selected: #ec3013;
+  --selected-foreground: #f3f2f2;
+  --accent-2: #ef6853;
+  --accent-2-foreground: #201e1d;
 }
 
 @layer base {

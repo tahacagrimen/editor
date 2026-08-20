@@ -118,7 +118,7 @@ export function CadUnderlayPanel({ node, onClose }: Props) {
             origin.
           </p>
         ) : (
-          <p className="px-0.5 text-amber-700 text-xs leading-snug dark:text-amber-400">
+          <p className="px-0.5 text-warn-foreground text-xs leading-snug">
             Unlocked. Lock it again once positioned so it stops interfering with drawing.
           </p>
         )}
@@ -211,7 +211,7 @@ export function CadUnderlayPanel({ node, onClose }: Props) {
         />
 
         {calibrationProblem && measured > 0 && actual > 0 && (
-          <div className="rounded-md border border-amber-500/35 bg-amber-500/10 px-2 py-1.5 text-amber-700 text-xs dark:text-amber-300">
+          <div className="rounded-md border border-warn-foreground/30 bg-warn px-2 py-1.5 text-warn-foreground text-xs">
             {calibrationProblemMessage(calibrationProblem)}
           </div>
         )}

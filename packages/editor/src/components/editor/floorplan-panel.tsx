@@ -530,7 +530,7 @@ function FloorplanCompassButton({
       <TooltipTrigger asChild>
         <button
           aria-label="Align view to north"
-          className="group absolute bottom-3 left-3 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-white/85 shadow-sm backdrop-blur-md transition hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-neutral-900/85 dark:hover:bg-neutral-900"
+          className="group absolute bottom-3 left-3 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-white/85 shadow-sm backdrop-blur-md transition hover:bg-white hover:shadow-md dark:border-white/10 dark:hover:bg-[#201e1d]"
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
@@ -541,7 +541,7 @@ function FloorplanCompassButton({
           }}
           type="button"
         >
-          <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-[#b8b8b8] shadow-inner dark:bg-neutral-700">
+          <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-foreground/25 shadow-inner">
             <svg
               aria-hidden="true"
               className="h-6 w-6"
@@ -3782,7 +3782,7 @@ function FloorplanGuideHandleHint({
 
   const primaryToneClass = isDarkMode
     ? 'text-white drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.5)]'
-    : 'text-[#09090b] drop-shadow-[0_1px_1.5px_rgba(255,255,255,0.8)]'
+    : 'text-foreground drop-shadow-[0_1px_1.5px_rgba(255,255,255,0.8)]'
 
   return (
     <LocalizedContent>
@@ -11303,7 +11303,7 @@ export function FloorplanPanel({
       ref={containerRef}
     >
       <FloorplanSiteKeyHandler onRestoreGroundLevel={restoreGroundLevelStructureSelection} />
-      <div className="relative min-h-0 flex-1 bg-white" ref={viewportHostRef}>
+      <div className="relative min-h-0 flex-1 bg-background" ref={viewportHostRef}>
         <FloorplanCursorIndicator
           cursorColor={floorplanCursorColor}
           floorplanSelectionTool={floorplanSelectionTool}

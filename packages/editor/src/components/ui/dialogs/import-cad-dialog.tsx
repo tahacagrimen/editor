@@ -81,9 +81,9 @@ export function ImportCadDialog({ analysis, error, busy, onCancel, onConfirm }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {error ? (
-              <XCircle className="size-5 text-red-600" />
+              <XCircle className="size-5 text-destructive" />
             ) : (
-              <CheckCircle2 className="size-5 text-emerald-600" />
+              <CheckCircle2 className="size-5 text-muted-foreground" />
             )}
             {error ? 'Cannot import this drawing' : 'Import CAD drawing'}
           </DialogTitle>
@@ -97,14 +97,14 @@ export function ImportCadDialog({ analysis, error, busy, onCancel, onConfirm }: 
 
         <div className="max-h-[60vh] space-y-4 overflow-y-auto py-2">
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-red-700 text-xs">
+            <div className="rounded-md border border-destructive/40 bg-destructive p-3 text-destructive text-xs">
               {error}
             </div>
           )}
 
           {analysis?.warnings.map((warning) => (
             <div
-              className="flex gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-800 text-xs"
+              className="flex gap-2 rounded-md border border-warn-foreground/30 bg-warn p-3 text-warn-foreground text-xs"
               key={warning.code}
             >
               <AlertTriangle className="mt-px size-4 shrink-0" />
@@ -145,7 +145,7 @@ export function ImportCadDialog({ analysis, error, busy, onCancel, onConfirm }: 
                           </span>
                         )}
                         {suggestion.likely && !suggestion.declared && (
-                          <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-medium text-[10px] text-emerald-700">
+                          <span className="rounded bg-ok px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground">
                             likely
                           </span>
                         )}
